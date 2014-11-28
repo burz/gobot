@@ -7,7 +7,7 @@ typedef enum {
     WHITE
 } SpaceState;
 
-const char* const spaceStateString(const SpaceState state);
+const char* const spaceStateString(const SpaceState state, const bool shorter = true);
 
 class Space
 {

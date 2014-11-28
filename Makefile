@@ -5,6 +5,7 @@ INCL = -I.
 
 FILES = \
     space.o \
+    block.o \
     board.o
 
 main: main.o $(FILES)
