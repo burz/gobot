@@ -4,6 +4,7 @@ CFLAGS = -c -g
 INCL = -I.
 
 FILES = \
+    space.o \
     board.o
 
 main: main.o $(FILES)
