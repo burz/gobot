@@ -11,11 +11,19 @@ typedef struct {
 class Block
 {
   private:
+    int liberties;
     std::vector<BoardLocation> locations;
   public:
-    Block(const BoardLocation location);
+    Block(const BoardLocation location, const int _liberties);
+
+    int getLiberties(void) const;
+    void setLiberties(const int liberties);
 
     bool touches(const BoardLocation location);
+
+    void absorb(Block* block);
+
+    void print(void) const;
 };
 
 #endif
