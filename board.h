@@ -2,12 +2,16 @@
 #define _BOARD_H_
 
 #include "space.h"
+#include "block.h"
+
+#include <vector>
 
 class Board
 {
   private:
     const int size;
     Space** spaces;
+    std::vector<Block*> blocks;
   public:
     Board(const int size);
     ~Board(void);

@@ -2,7 +2,12 @@
 
 #include <math.h>
 
-Block::Block(const BoardLocation location, const int _liberties)
+Block::Block(void)
+{
+    liberties = 0;
+}
+
+Block::Block(const SpaceState state, const BoardLocation location, const int _liberties)
 {
     liberties = _liberties;
 
@@ -17,6 +22,13 @@ int Block::getLiberties(void) const
 void Block::setLiberties(const int _liberties)
 {
     liberties = _liberties;
+}
+
+void Block::add(const BoardLocation location, int changeInLiberties)
+{
+    locations.push_back(location);
+
+    liberties += changeInLiberties;
 }
 
 bool Block::touches(const BoardLocation location)

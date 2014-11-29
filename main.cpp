@@ -17,8 +17,10 @@ int main(int argc, char *argv[])
     l1.x = 0;
     l1.y = 0;
 
-    Block b0(l0, 3);
-    Block b1(l1, 2);
+    SpaceState ss = BLACK;
+
+    Block b0(ss, l0, 3);
+    Block b1(ss, l1, 2);
 
     b0.absorb(&b1);
 

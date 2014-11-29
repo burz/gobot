@@ -37,8 +37,10 @@ const char* const spaceStateString(const SpaceState state, const bool shorter)
     }   
 }
 
-Space::Space(void)
+Space::Space(Block* _block)
 {
+    block = _block;
+
     state = EMPTY;
 }
 
@@ -50,4 +52,9 @@ SpaceState Space::getState(void) const
 void Space::changeState(const SpaceState _state)
 {
     state = _state;
+}
+
+Block* Space::getBlock(void) const
+{
+    return block;
 }
