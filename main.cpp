@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[])
 {
-    Board board(19);
+    Board board(19, 6.5);
 
     board.print();
 

@@ -31,6 +31,11 @@ bool Block::isMember(const SpaceState _state, const BoardLocation location)
     }
 }
 
+int Block::getSize(void) const
+{
+    return locations.size();
+}
+
 int Block::getLiberties(void) const
 {
     return liberties;

@@ -17,6 +17,8 @@ class Block
 
     bool isMember(const SpaceState state, const BoardLocation location);
 
+    int getSize(void) const;
+
     int getLiberties(void) const;
     void setLiberties(const int liberties);
 

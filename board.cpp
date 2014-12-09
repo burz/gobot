@@ -5,9 +5,11 @@
 #include <assert.h>
 #include <set>
 
-Board::Board(const int _size)
+Board::Board(const int _size, const float komi)
     : size(_size)
 {
+    score = komi;
+
     spaces = new Space*[size]();
 
     Block* block = new Block();
@@ -62,6 +64,11 @@ Board::~Board(void)
 int Board::getSize(void) const
 {
     return size;
+}
+
+float Board::getScore(void) const
+{
+    return score;
 }
 
 SpaceState Board::getState(const int x, const int y) const

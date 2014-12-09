@@ -8,12 +8,15 @@ class Board
 {
   private:
     const int size;
+    float score;
     Space** spaces;
   public:
-    Board(const int size);
+    Board(const int size, const float komi);
     ~Board(void);
 
     int getSize(void) const;
+
+    float getScore(void) const;
 
     SpaceState getState(const int x, const int y) const;
 
