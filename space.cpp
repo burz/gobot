@@ -40,21 +40,22 @@ const char* const spaceStateString(const SpaceState state, const bool shorter)
 Space::Space(Block* _block)
 {
     block = _block;
-
-    state = EMPTY;
 }
 
 SpaceState Space::getState(void) const
 {
-    return state;
-}
-
-void Space::changeState(const SpaceState _state)
-{
-    state = _state;
+    return block->getState();
 }
 
 Block* Space::getBlock(void) const
 {
     return block;
+}
+
+void Space::changeBlock(Block* from, Block* to)
+{
+    if(block == from)
+    {
+        block = to;
+    }
 }

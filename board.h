@@ -4,21 +4,24 @@
 #include "space.h"
 #include "block.h"
 
-#include <vector>
-
 class Board
 {
   private:
     const int size;
     Space** spaces;
-    std::vector<Block*> blocks;
   public:
     Board(const int size);
     ~Board(void);
 
     int getSize(void) const;
+
     SpaceState getState(const int x, const int y) const;
-    void changeState(const int x, const int y, const SpaceState state);
+
+    void playMove(const int x, const int y, const SpaceState state);
+
+    Block* getBlock(const int x, const int y) const;
+    void changeBlocks(Block* from, Block* to);
+
     void print(void) const;
 };
 

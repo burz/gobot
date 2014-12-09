@@ -5,11 +5,6 @@
 
 #include <vector>
 
-typedef struct {
-  int x;
-  int y;
-} BoardLocation;
-
 class Block
 {
   private:
@@ -20,12 +15,19 @@ class Block
     Block(void);
     Block(const SpaceState state, const BoardLocation location, const int _liberties);
 
+    bool isMember(const SpaceState state, const BoardLocation location);
+
     int getLiberties(void) const;
     void setLiberties(const int liberties);
+
+    SpaceState getState(void) const;
 
     void add(const BoardLocation location, int changeInLiberties);
 
     bool touches(const BoardLocation location);
+    bool contains(const BoardLocation location);
+
+    void removeLocation(const BoardLocation location);
 
     void absorb(Block* block);
 

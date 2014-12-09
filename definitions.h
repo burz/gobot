@@ -7,4 +7,9 @@ typedef enum {
     WHITE
 } SpaceState;
 
+typedef struct {
+  int x;
+  int y;
+} BoardLocation;
+
 #endif

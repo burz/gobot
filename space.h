@@ -9,15 +9,14 @@ const char* const spaceStateString(const SpaceState state, const bool shorter = 
 class Space
 {
   private:
-    SpaceState state;
     Block* block;
   public:
     Space(Block* block);
 
     SpaceState getState(void) const;
-    void changeState(const SpaceState state);
 
     Block* getBlock(void) const;
+    void changeBlock(Block* from, Block* to);
 };
 
 #endif

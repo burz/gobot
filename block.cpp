@@ -5,6 +5,7 @@
 Block::Block(void)
 {
     liberties = 0;
+    state = EMPTY;
 }
 
 Block::Block(const SpaceState state, const BoardLocation location, const int _liberties)
@@ -12,6 +13,22 @@ Block::Block(const SpaceState state, const BoardLocation location, const int _li
     liberties = _liberties;
 
     locations.push_back(location);
+}
+
+bool Block::isMember(const SpaceState _state, const BoardLocation location)
+{
+    if(state == _state)
+    {
+        return touches(location);
+    }
+    else if(state == EMPTY)
+    {
+        return contains(location);
+    }
+    else
+    {
+        return false;
+    }
 }
 
 int Block::getLiberties(void) const
@@ -22,6 +39,11 @@ int Block::getLiberties(void) const
 void Block::setLiberties(const int _liberties)
 {
     liberties = _liberties;
+}
+
+SpaceState Block::getState(void) const
+{
+    return state;
 }
 
 void Block::add(const BoardLocation location, int changeInLiberties)
@@ -49,6 +71,38 @@ bool Block::touches(const BoardLocation location)
     return false;
 }
 
+bool Block::contains(const BoardLocation location)
+{
+    std::vector<BoardLocation>::iterator itt = locations.begin();
+
+    for( ; itt != locations.end(); ++itt)
+    {
+        BoardLocation blockMember = *itt;
+
+        if(location.x == blockMember.x && location.y == blockMember.y)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void Block::removeLocation(const BoardLocation location)
+{
+    std::vector<BoardLocation>::iterator itt = locations.begin();
+
+    for( ; itt != locations.end(); ++itt)
+    {
+        if(location.x == itt->x && location.y == itt->y)
+        {
+            locations.erase(itt);
+
+            break;
+        }
+    }
+}
+
 void Block::absorb(Block* block)
 {
     std::vector<BoardLocation>::iterator itt = block->locations.begin();
@@ -56,7 +110,7 @@ void Block::absorb(Block* block)
 
     locations.insert(locations.end(), itt, end);
 
-    --liberties;
+    liberties += block->getLiberties() - 1;
 }
 
 void Block::print(void) const
