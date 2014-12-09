@@ -23,6 +23,12 @@ int main(int argc, char *argv[])
 
     board.print();
 
+    block = board.getBlock(0, 0);
+    block->print();
+    printf("size: %d, liberties: %d\n", block->getSize(), block->getLiberties());
+
+    printf("+++++++++++++++++++++++++++\n");
+
     block = board.getBlock(0, 2);
     block->print();
     printf("size: %d, liberties: %d\n", block->getSize(), block->getLiberties());

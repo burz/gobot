@@ -5,42 +5,39 @@
 #include <assert.h>
 #include <set>
 
-int Board::updateAdjacentBlock(Block** currentBlock, Block* targetBlock)
+void Board::updateAdjacentBlock(Block** currentBlock, Block* targetBlock)
 {
-    if(targetBlock->getState() == EMPTY)
+    if(targetBlock->getState() != EMPTY)
     {
-        return 1;
-    }
-    else if(targetBlock->getState() != (*currentBlock)->getState())
-    {
-        targetBlock->changeLiberties(-1);
-
-        if(targetBlock->getLiberties() == 0)
+        if(targetBlock->getState() != (*currentBlock)->getState())
         {
-            if(targetBlock->getState() == BLACK)
-            {
-                score -= targetBlock->getSize();
-            }
-            else
-            {
-                score += targetBlock->getSize();
-            }
+            targetBlock->changeLiberties(-1);
 
-            targetBlock->setState(EMPTY);
+            if(targetBlock->getLiberties() == 0)
+            {
+                if(targetBlock->getState() == BLACK)
+                {
+                    score -= targetBlock->getSize();
+                }
+                else
+                {
+                    score += targetBlock->getSize();
+                }
+
+                targetBlock->setState(EMPTY);
+            }
+        }
+        else if(targetBlock != *currentBlock)
+        {
+            targetBlock->absorb(*currentBlock);
+
+            changeBlocks(*currentBlock, targetBlock);
+
+            delete *currentBlock;
+
+            *currentBlock = targetBlock;
         }
     }
-    else if(targetBlock != *currentBlock)
-    {
-        targetBlock->absorb(*currentBlock);
-
-        changeBlocks(*currentBlock, targetBlock);
-
-        delete *currentBlock;
-
-        *currentBlock = targetBlock;
-    }
-
-    return 0;
 }
 
 Board::Board(const int _size, const float komi)
@@ -133,26 +130,43 @@ void Board::playMove(const int x, const int y, const SpaceState state)
 
     block0->removeLocation(location);
 
-    Block* currentBlock = new Block(state, location, 0);
+    Block* currentBlock = new Block(state);
 
     if(block1)
     {
-        libertiesGained += updateAdjacentBlock(&currentBlock, block1);
+        updateAdjacentBlock(&currentBlock, block1);
     }
     if(block2)
     {
-        libertiesGained += updateAdjacentBlock(&currentBlock, block2);
+        updateAdjacentBlock(&currentBlock, block2);
     }
     if(block3)
     {
-        libertiesGained += updateAdjacentBlock(&currentBlock, block3);
+        updateAdjacentBlock(&currentBlock, block3);
     }
     if(block4)
     {
-        libertiesGained += updateAdjacentBlock(&currentBlock, block4);
+        updateAdjacentBlock(&currentBlock, block4);
     }
 
-    currentBlock->changeLiberties(libertiesGained);
+    if(block1 && block1->getState() == EMPTY && !currentBlock->touches(x - 1, y))
+    {
+        libertiesGained += 1;
+    }
+    if(block2 && block2->getState() == EMPTY && !currentBlock->touches(x, y - 1))
+    {
+        libertiesGained += 1;
+    }
+    if(block3 && block3->getState() == EMPTY && !currentBlock->touches(x + 1, y))
+    {
+        libertiesGained += 1;
+    }
+    if(block4 && block4->getState() == EMPTY && !currentBlock->touches(x, y + 1))
+    {
+        libertiesGained += 1;
+    }
+
+    currentBlock->add(location, libertiesGained);
 
     setBlock(x, y, currentBlock);
 }

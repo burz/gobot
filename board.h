@@ -11,7 +11,7 @@ class Board
     float score;
     Space** spaces;
 
-    int updateAdjacentBlock(Block** currentBlock, Block* targetBlock);
+    void updateAdjacentBlock(Block** currentBlock, Block* targetBlock);
   public:
     Board(const int size, const float komi);
     ~Board(void);

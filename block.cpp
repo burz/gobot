@@ -4,8 +4,14 @@
 
 Block::Block(void)
 {
-    liberties = 0;
     state = EMPTY;
+    liberties = 0;
+}
+
+Block::Block(const SpaceState _state)
+{
+    state = _state;
+    liberties = 0;
 }
 
 Block::Block(const SpaceState _state, const BoardLocation location, const int _liberties)
@@ -70,9 +76,27 @@ void Block::add(const BoardLocation location, int changeInLiberties)
     liberties += changeInLiberties;
 }
 
-bool Block::touches(const BoardLocation location)
+bool Block::touches(const int x, const int y) const
 {
-    std::vector<BoardLocation>::iterator itt = locations.begin();
+    std::vector<BoardLocation>::const_iterator itt = locations.begin();
+
+    for( ; itt != locations.end(); ++itt)
+    {
+        BoardLocation blockMember = *itt;
+
+        if(abs(blockMember.x - x) +
+           abs(blockMember.y - y) == 1)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Block::touches(const BoardLocation location) const
+{
+    std::vector<BoardLocation>::const_iterator itt = locations.begin();
 
     for( ; itt != locations.end(); ++itt)
     {
@@ -88,9 +112,9 @@ bool Block::touches(const BoardLocation location)
     return false;
 }
 
-bool Block::contains(const BoardLocation location)
+bool Block::contains(const BoardLocation location) const
 {
-    std::vector<BoardLocation>::iterator itt = locations.begin();
+    std::vector<BoardLocation>::const_iterator itt = locations.begin();
 
     for( ; itt != locations.end(); ++itt)
     {
