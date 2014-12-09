@@ -71,7 +71,7 @@ instance Show Game where
     show (Game komi score moves) =
         let h = show komi ++ " " ++ show score
         in foldr runMoves h moves
-        where runMoves (x, y) r = r ++ "\n" ++ show x ++ "," ++ show y
+        where runMoves (x, y) r = r ++ "\n" ++ show x ++ " " ++ show y
 
 main = do
     a <- getArgs

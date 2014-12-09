@@ -6,7 +6,8 @@ INCL = -I.
 FILES = \
     space.o \
     block.o \
-    board.o
+    board.o \
+    parser.o
 
 main: main.o $(FILES)
 	$(CC) -o main $^

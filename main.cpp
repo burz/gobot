@@ -1,5 +1,6 @@
 #include "board.h"
 #include "block.h"
+#include "parser.h"
 
 #include <stdio.h>
 
@@ -92,6 +93,11 @@ int main(int argc, char *argv[])
     block = board.getBlock(0, 2);
     block->print();
     printf("size: %d, liberties: %d\n", block->getSize(), block->getLiberties());
+
+    Game game;
+    bool result = parseFile(&game, "output.sgfo");
+
+    printf("%d\n", result);
 
     return 0;
 }
