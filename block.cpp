@@ -46,9 +46,19 @@ void Block::setLiberties(const int _liberties)
     liberties = _liberties;
 }
 
+void Block::changeLiberties(const int value)
+{
+    liberties += value;
+}
+
 SpaceState Block::getState(void) const
 {
     return state;
+}
+
+void Block::setState(const SpaceState _state)
+{
+    state = _state;
 }
 
 void Block::add(const BoardLocation location, int changeInLiberties)

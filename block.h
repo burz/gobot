@@ -21,8 +21,10 @@ class Block
 
     int getLiberties(void) const;
     void setLiberties(const int liberties);
+    void changeLiberties(const int value);
 
     SpaceState getState(void) const;
+    void setState(const SpaceState state);
 
     void add(const BoardLocation location, int changeInLiberties);
 
