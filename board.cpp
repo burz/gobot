@@ -5,13 +5,13 @@
 #include <assert.h>
 #include <set>
 
-int Board::updateAdjacentBlock(Block* currentBlock, Block* targetBlock)
+int Board::updateAdjacentBlock(Block** currentBlock, Block* targetBlock)
 {
     if(targetBlock->getState() == EMPTY)
     {
         return 1;
     }
-    else if(targetBlock->getState() != currentBlock->getState())
+    else if(targetBlock->getState() != (*currentBlock)->getState())
     {
         targetBlock->changeLiberties(-1);
 
@@ -29,13 +29,15 @@ int Board::updateAdjacentBlock(Block* currentBlock, Block* targetBlock)
             targetBlock->setState(EMPTY);
         }
     }
-    else if(targetBlock != currentBlock)
+    else if(targetBlock != *currentBlock)
     {
-        targetBlock->absorb(currentBlock);
+        targetBlock->absorb(*currentBlock);
 
-        delete currentBlock;
+        changeBlocks(*currentBlock, targetBlock);
 
-        currentBlock = targetBlock;
+        delete *currentBlock;
+
+        *currentBlock = targetBlock;
     }
 
     return 0;
@@ -135,22 +137,24 @@ void Board::playMove(const int x, const int y, const SpaceState state)
 
     if(block1)
     {
-        libertiesGained += updateAdjacentBlock(currentBlock, block1);
+        libertiesGained += updateAdjacentBlock(&currentBlock, block1);
     }
     else if(block2)
     {
-        libertiesGained += updateAdjacentBlock(currentBlock, block2);
+        libertiesGained += updateAdjacentBlock(&currentBlock, block2);
     }
     else if(block3)
     {
-        libertiesGained += updateAdjacentBlock(currentBlock, block3);
+        libertiesGained += updateAdjacentBlock(&currentBlock, block3);
     }
     else if(block4)
     {
-        libertiesGained += updateAdjacentBlock(currentBlock, block4);
+        libertiesGained += updateAdjacentBlock(&currentBlock, block4);
     }
 
     currentBlock->changeLiberties(libertiesGained);
+
+    setBlock(x, y, currentBlock);
 }
 
 Block* Board::getBlock(const int x, const int y) const
@@ -161,6 +165,11 @@ Block* Board::getBlock(const int x, const int y) const
     }
 
     return spaces[x][y].getBlock();
+}
+
+void Board::setBlock(const int x, const int y, Block* block)
+{
+    spaces[x][y].setBlock(block);
 }
 
 void Board::changeBlocks(Block* from, Block* to)

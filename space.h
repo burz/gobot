@@ -16,6 +16,7 @@ class Space
     SpaceState getState(void) const;
 
     Block* getBlock(void) const;
+    void setBlock(Block* block);
     void changeBlock(Block* from, Block* to);
 };
 

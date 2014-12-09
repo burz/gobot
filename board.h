@@ -11,7 +11,7 @@ class Board
     float score;
     Space** spaces;
 
-    int updateAdjacentBlock(Block* currentBlock, Block* targetBlock);
+    int updateAdjacentBlock(Block** currentBlock, Block* targetBlock);
   public:
     Board(const int size, const float komi);
     ~Board(void);
@@ -25,6 +25,7 @@ class Board
     void playMove(const int x, const int y, const SpaceState state);
 
     Block* getBlock(const int x, const int y) const;
+    void setBlock(const int x, const int y, Block* block);
     void changeBlocks(Block* from, Block* to);
 
     void print(void) const;

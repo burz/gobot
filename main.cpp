@@ -8,25 +8,21 @@ int main(int argc, char *argv[])
     Board board(19, 6.5);
 
     board.print();
+    printf("\n========================\n\n");
 
-    BoardLocation l0;
-    BoardLocation l1;
+    board.playMove(0, 0, BLACK);
 
-    l0.x = 0;
-    l0.y = 1;
-    l1.x = 0;
-    l1.y = 0;
+    board.print();
+    printf("\n========================\n\n");
 
-    SpaceState ss = BLACK;
+    board.playMove(0, 2, WHITE);
 
-    Block b0(ss, l0, 3);
-    Block b1(ss, l1, 2);
+    board.print();
+    printf("\n========================\n\n");
 
-    b0.absorb(&b1);
+    board.playMove(0, 1, BLACK);
 
-    printf("%d\n", b0.getLiberties());
-
-    b0.print();
+    board.print();
 
     return 0;
 }

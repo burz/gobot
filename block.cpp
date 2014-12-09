@@ -8,8 +8,10 @@ Block::Block(void)
     state = EMPTY;
 }
 
-Block::Block(const SpaceState state, const BoardLocation location, const int _liberties)
+Block::Block(const SpaceState _state, const BoardLocation location, const int _liberties)
 {
+    state = _state;
+
     liberties = _liberties;
 
     locations.push_back(location);
