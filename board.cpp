@@ -58,6 +58,8 @@ Board::Board(const int _size, const float komi)
     {
         spaces[i] = (Space*) malloc(sizeof(Space) * size);
 
+        assert(spaces[i] != 0);
+
         for(int j = 0; j < size; ++j)
         {
             spaces[i][j] = space;
@@ -69,18 +71,11 @@ Board::Board(const int _size, const float komi)
 
             block->add(location, 0);
         }
-
-        assert(spaces[i] != 0);
     }
 }
 
 Board::~Board(void)
 {
-    for(int i = 0; i < size; ++i)
-    {
-        free(spaces[i]);
-    }
-
     std::set<Block*> blocks;
 
     for(int x = 0; x < size; ++x) {
@@ -94,6 +89,11 @@ Board::~Board(void)
     for( ; itt != blocks.end(); ++itt)
     {
         delete *itt;
+    }
+
+    for(int i = 0; i < size; ++i)
+    {
+        free(spaces[i]);
     }
 
     delete[] spaces;
@@ -124,10 +124,10 @@ void Board::playMove(const int x, const int y, const SpaceState state)
     int libertiesGained = 0;
 
     Block* block0 = getBlock(x, y);
-    Block* block1 = getBlock(x - 1, y - 1);
-    Block* block2 = getBlock(x - 1, y + 1);
-    Block* block3 = getBlock(x + 1, y - 1);
-    Block* block4 = getBlock(x + 1, y + 1);
+    Block* block1 = getBlock(x - 1, y);
+    Block* block2 = getBlock(x, y - 1);
+    Block* block3 = getBlock(x + 1, y);
+    Block* block4 = getBlock(x, y + 1);
 
     assert(block0);
 
@@ -139,15 +139,15 @@ void Board::playMove(const int x, const int y, const SpaceState state)
     {
         libertiesGained += updateAdjacentBlock(&currentBlock, block1);
     }
-    else if(block2)
+    if(block2)
     {
         libertiesGained += updateAdjacentBlock(&currentBlock, block2);
     }
-    else if(block3)
+    if(block3)
     {
         libertiesGained += updateAdjacentBlock(&currentBlock, block3);
     }
-    else if(block4)
+    if(block4)
     {
         libertiesGained += updateAdjacentBlock(&currentBlock, block4);
     }

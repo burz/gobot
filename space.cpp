@@ -9,7 +9,7 @@ const char black[] = "BLACK";
 const char white[] = "WHITE";
 } // close anonymous namespace
 
-const char* const spaceStateString(const SpaceState state, const bool shorter)
+const char* spaceStateString(const SpaceState state, const bool shorter)
 {
     if(shorter)
     {
