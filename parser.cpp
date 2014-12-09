@@ -2,19 +2,7 @@
 
 #include <stdio.h>
 
-Game::Game(void)
-{
-    komi = 0.0;
-    finalScore = 0.0;
-}
-
-Game::Game(const float _komi, const float _finalScore)
-{
-    komi = _komi;
-    finalScore = _finalScore;
-}
-
-bool parseFile(Game* game, const char *filename)
+bool parseFile(Game* game, const char *filename, const int size)
 {
     FILE *file = fopen(filename, "r");
 
@@ -33,7 +21,7 @@ bool parseFile(Game* game, const char *filename)
         return false;
     }
 
-    Game result(komi, finalScore);
+    Game result(size, komi, finalScore);
 
     int x;
     int y;
@@ -45,7 +33,7 @@ bool parseFile(Game* game, const char *filename)
         location.x = x;
         location.y = y;
 
-        result.moves.push_back(location);
+        result.addMove(location);
     }
 
     *game = result;

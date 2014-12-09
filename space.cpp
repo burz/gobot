@@ -7,11 +7,28 @@ const char whiteShorter[] = "W";
 const char empty[] = "EMPTY";
 const char black[] = "BLACK";
 const char white[] = "WHITE";
+const char blackShorterColored[] = "\e[34mB\e[0m";
+const char whiteShorterColored[] = "\e[93mW\e[0m";
 } // close anonymous namespace
 
-const char* spaceStateString(const SpaceState state, const bool shorter)
+const char* spaceStateString(
+        const SpaceState state,
+        const bool shorter,
+        const bool colored)
 {
-    if(shorter)
+    if(colored)
+    {
+        if(state == EMPTY) {
+            return emptyShorter;
+        }
+        else if(state == BLACK) {
+            return blackShorterColored;
+        }
+        else {
+            return whiteShorterColored;
+        }
+    }
+    else if(shorter)
     {
         if(state == EMPTY) {
             return emptyShorter;

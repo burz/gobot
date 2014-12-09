@@ -4,7 +4,10 @@
 #include "definitions.h"
 #include "block.h"
 
-const char* spaceStateString(const SpaceState state, const bool shorter = true);
+const char* spaceStateString(
+        const SpaceState state,
+        const bool shorter = false,
+        const bool colored = true);
 
 class Space
 {

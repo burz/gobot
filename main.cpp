@@ -1,5 +1,6 @@
-#include "board.h"
 #include "block.h"
+#include "board.h"
+#include "game.h"
 #include "parser.h"
 
 #include <stdio.h>
@@ -98,6 +99,8 @@ int main(int argc, char *argv[])
     bool result = parseFile(&game, "output.sgfo");
 
     printf("%d\n", result);
+
+    game.playGame();
 
     return 0;
 }

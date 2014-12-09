@@ -7,6 +7,7 @@ FILES = \
     space.o \
     block.o \
     board.o \
+    game.o \
     parser.o
 
 main: main.o $(FILES)
