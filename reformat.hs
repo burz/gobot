@@ -70,8 +70,8 @@ parseFile f = parseFromFile (game <* eof) f
 instance Show Game where
     show (Game komi score moves) =
         let h = show komi ++ " " ++ show score
-        in foldr runMoves h moves
-        where runMoves (x, y) r = r ++ "\n" ++ show x ++ " " ++ show y
+        in h ++ foldr runMoves "" moves
+        where runMoves (x, y) r = "\n" ++ show x ++ " " ++ show y ++ r
 
 main = do
     a <- getArgs

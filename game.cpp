@@ -30,7 +30,11 @@ void Game::playGame(void) const
 
     for( ; itt != moves.end(); ++itt)
     {
-        printf("\n========Move: %4d========\n\nScore: %f\n\n", i, board.getScore());
+        printf("\n========Move: %4d========\n\nScore: %f\nMove: (%d, %d)\n\n",
+           i,
+           board.getScore(),
+           itt->x,
+           itt->y);
 
         SpaceState state = i % 2 == 1 ? BLACK : WHITE;
 
