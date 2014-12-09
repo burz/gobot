@@ -1,4 +1,10 @@
 *.o
+*.hi
+
 *.sgf
+*.sgfo
+
+games/*
 
 main
+reformat

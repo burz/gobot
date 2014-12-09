@@ -11,8 +11,11 @@ FILES = \
 main: main.o $(FILES)
 	$(CC) -o main $^
 
+reformat: reformat.hs
+	ghc $^
+
 clean:
-	rm -f *.o
+	rm -f *.o *.hi
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) $^ $(INCL)
