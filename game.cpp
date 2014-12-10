@@ -56,4 +56,9 @@ void Game::playGame(bool printTurns) const
 
     Block* block = board.getBlock(0, 1);
     board.generateFeatures(block).print();
+
+    printf("\n##########################\n\n");
+
+    block = board.getBlock(18, 13);
+    board.generateFeatures(block).print();
 }

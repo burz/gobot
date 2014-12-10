@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <math.h>
 #include <set>
+#include <vector>
 
 Board::Board(const int _size, const float komi)
     : size(_size)
@@ -372,6 +374,7 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
     int maxX = itt->x;
     int minY = itt->y;
     int maxY = itt->y;
+    int sum = 0;
 
     for( ; itt != end; ++itt)
     {
@@ -433,12 +436,50 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
 
             calculatePerimeterFeaturesForBlock(&state, block, block4, location);
         }
+
+        int distances[2];
+
+        int dx0 = itt->x;
+        int dx1 = size - itt->x;
+        int dy0 = itt->y;
+        int dy1 = size - itt->y;
+
+        if(dx0 < dx1)
+        {
+            distances[0] = dx0;
+            distances[1] = dx1;
+        }
+        else
+        {
+            distances[0] = dx1;
+            distances[1] = dx0;
+        }
+
+        if(dy0 < distances[0])
+        {
+            distances[1] = distances[0];
+            distances[0] = dy0;
+        }
+        else if(dy0 < distances[1])
+        {
+            distances[1] = dy0;
+        }
+
+        if(dy1 < distances[1])
+        {
+            sum += dy1 + distances[0];
+        }
+        else
+        {
+            sum += distances[0] + distances[1];
+        }
     }
 
     features->perimeter = state.perimeter.size();
     features->opponents = state.opponents.size();
     features->liberties = state.liberties.size();
     features->numberOfAdjacentOpponentBlocks = state.adjacentOpponentBlocks.size();
+    features->centerOfMass = sum / (2.0 * block->getSize());
     features->boundingBoxSize = (maxX - minX + 1) * (maxY - minY + 1);
 
     itt = state.liberties.begin();
@@ -569,11 +610,11 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
 
     features->thirdOrderLiberties = state.thirdOrderLiberties.size();
 
-    itt = state.perimeter.begin();
-    end = state.perimeter.end();
-
     std::set<BoardLocation> friendly;
     std::set<BoardLocation> enemy;
+
+    itt = state.perimeter.begin();
+    end = state.perimeter.end();
 
     for( ; itt != end; ++itt)
     {
