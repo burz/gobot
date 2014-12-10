@@ -18,8 +18,8 @@ void Board::removeDeadBlock(Block* block)
 
     block->setState(EMPTY);
 
-    std::vector<BoardLocation>::const_iterator itt = block->locationsBegin();
-    std::vector<BoardLocation>::const_iterator end = block->locationsEnd();
+    std::set<BoardLocation>::const_iterator itt = block->locationsBegin();
+    std::set<BoardLocation>::const_iterator end = block->locationsEnd();
 
     for( ; itt != end; ++itt)
     {
@@ -65,6 +65,82 @@ void Board::deleteAdjacentBlocks(
     }
 }
 
+int Board::checkIfEncountered(
+        std::set<BoardLocation> *encounteredLocations,
+        const int x,
+        const int y)
+{
+    BoardLocation location;
+
+    location.x = x;
+    location.y = y;
+
+    if(encounteredLocations->find(location) == encounteredLocations->end())
+    {
+        encounteredLocations->insert(location);
+
+        return 1;
+    }
+
+    return 0;
+}
+
+int Board::adjacentLiberties(Block* block0, Block* block)
+{
+    int result = 0;
+
+    std::set<BoardLocation> encounteredLocations;
+
+    std::set<BoardLocation>::iterator itt = block0->locationsBegin();
+    std::set<BoardLocation>::iterator end = block0->locationsEnd();
+
+    for( ; itt != end; ++itt)
+    {
+        Block* block1 = getBlock(itt->x - 1, itt->y);
+        Block* block2 = getBlock(itt->x, itt->y - 1);
+        Block* block3 = getBlock(itt->x + 1, itt->y);
+        Block* block4 = getBlock(itt->x, itt->y + 1);
+
+        if(block1 && block1->getState() == EMPTY && block->touches(itt->x - 1, itt->y))
+        {
+            result += checkIfEncountered(&encounteredLocations, itt->x - 1, itt->y);
+        }
+        else if(block2 && block2->getState() == EMPTY && block->touches(itt->x, itt->y - 1))
+        {
+            result += checkIfEncountered(&encounteredLocations, itt->x, itt->y - 1);
+        }
+        else if(block3 && block3->getState() == EMPTY && block->touches(itt->x + 1, itt->y))
+        {
+            result += checkIfEncountered(&encounteredLocations, itt->x + 1, itt->y);
+        }
+        else if(block4 && block4->getState() == EMPTY && block->touches(itt->x, itt->y + 1))
+        {
+            result += checkIfEncountered(&encounteredLocations, itt->x, itt->y + 1);
+        }
+
+        printf("Location: (%d, %d), Result: %d\n", itt->x, itt->y, result);
+    }
+
+    return result;
+}
+
+void Board::absorbAdjacentBlock(Block** currentBlock, Block* targetBlock, Block** deleted)
+{
+    int adjacentLibs = adjacentLiberties(*currentBlock, targetBlock);
+
+    targetBlock->absorb(*currentBlock);
+
+    changeBlocks(*currentBlock, targetBlock);
+
+    delete *currentBlock;
+
+    *deleted = *currentBlock;
+
+    *currentBlock = targetBlock;
+
+    (*currentBlock)->changeLiberties(adjacentLibs ? -adjacentLibs : -1);
+}
+
 Block* Board::updateAdjacentBlock(Block** currentBlock, Block* targetBlock)
 {
     Block* deleted = 0;
@@ -82,15 +158,7 @@ Block* Board::updateAdjacentBlock(Block** currentBlock, Block* targetBlock)
         }
         else if(targetBlock != *currentBlock)
         {
-            targetBlock->absorb(*currentBlock);
-
-            changeBlocks(*currentBlock, targetBlock);
-
-            delete *currentBlock;
-
-            deleted = *currentBlock;
-
-            *currentBlock = targetBlock;
+            absorbAdjacentBlock(currentBlock, targetBlock, &deleted);
         }
     }
 

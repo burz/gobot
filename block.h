@@ -3,14 +3,14 @@
 
 #include "definitions.h"
 
-#include <vector>
+#include <set>
 
 class Block
 {
   private:
     int liberties;
     SpaceState state;
-    std::vector<BoardLocation> locations;
+    std::set<BoardLocation> locations;
   public:
     Block(void);
     Block(const SpaceState state);
@@ -35,8 +35,8 @@ class Block
 
     void removeLocation(const BoardLocation location);
 
-    std::vector<BoardLocation>::const_iterator locationsBegin(void) const;
-    std::vector<BoardLocation>::const_iterator locationsEnd(void) const;
+    std::set<BoardLocation>::const_iterator locationsBegin(void) const;
+    std::set<BoardLocation>::const_iterator locationsEnd(void) const;
 
     void absorb(Block* block);
 

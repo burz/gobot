@@ -17,6 +17,11 @@ class Board
                               Block** block2,
                               Block** block3,
                               Block** block4);
+    int checkIfEncountered(std::set<BoardLocation> *encounteredLocations,
+                           const int x,
+                           const int y);
+    int adjacentLiberties(Block* block0, Block* block);
+    void absorbAdjacentBlock(Block** currentBlock, Block* targetBlock, Block** deleted);
     Block* updateAdjacentBlock(Block** currentBlock, Block* targetBlock);
   public:
     Board(const int size, const float komi);

@@ -4,6 +4,7 @@ CFLAGS = -c -g
 INCL = -I.
 
 FILES = \
+    definitions.o \
     space.o \
     block.o \
     board.o \

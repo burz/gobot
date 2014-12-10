@@ -12,4 +12,6 @@ typedef struct {
   int y;
 } BoardLocation;
 
+bool operator<(const BoardLocation& left, const BoardLocation& right);
+
 #endif

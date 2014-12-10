@@ -20,7 +20,7 @@ Block::Block(const SpaceState _state, const BoardLocation location, const int _l
 
     liberties = _liberties;
 
-    locations.push_back(location);
+    locations.insert(location);
 }
 
 bool Block::isMember(const SpaceState _state, const BoardLocation location)
@@ -71,14 +71,14 @@ void Block::setState(const SpaceState _state)
 
 void Block::add(const BoardLocation location, int changeInLiberties)
 {
-    locations.push_back(location);
+    locations.insert(location);
 
     liberties += changeInLiberties;
 }
 
 bool Block::touches(const int x, const int y) const
 {
-    std::vector<BoardLocation>::const_iterator itt = locations.begin();
+    std::set<BoardLocation>::const_iterator itt = locations.begin();
 
     for( ; itt != locations.end(); ++itt)
     {
@@ -96,7 +96,7 @@ bool Block::touches(const int x, const int y) const
 
 bool Block::touches(const BoardLocation location) const
 {
-    std::vector<BoardLocation>::const_iterator itt = locations.begin();
+    std::set<BoardLocation>::const_iterator itt = locations.begin();
 
     for( ; itt != locations.end(); ++itt)
     {
@@ -114,7 +114,7 @@ bool Block::touches(const BoardLocation location) const
 
 bool Block::contains(const BoardLocation location) const
 {
-    std::vector<BoardLocation>::const_iterator itt = locations.begin();
+    std::set<BoardLocation>::const_iterator itt = locations.begin();
 
     for( ; itt != locations.end(); ++itt)
     {
@@ -131,42 +131,42 @@ bool Block::contains(const BoardLocation location) const
 
 void Block::removeLocation(const BoardLocation location)
 {
-    std::vector<BoardLocation>::iterator itt = locations.begin();
+    std::set<BoardLocation>::iterator itt = locations.begin();
 
     for( ; itt != locations.end(); ++itt)
     {
         if(location.x == itt->x && location.y == itt->y)
         {
-            locations.erase(itt);
+            locations.erase(*itt);
 
             break;
         }
     }
 }
 
-std::vector<BoardLocation>::const_iterator Block::locationsBegin(void) const
+std::set<BoardLocation>::const_iterator Block::locationsBegin(void) const
 {
     return locations.begin();
 }
 
-std::vector<BoardLocation>::const_iterator Block::locationsEnd(void) const
+std::set<BoardLocation>::const_iterator Block::locationsEnd(void) const
 {
     return locations.end();
 }
 
 void Block::absorb(Block* block)
 {
-    std::vector<BoardLocation>::iterator itt = block->locations.begin();
-    std::vector<BoardLocation>::iterator end = block->locations.end();
+    std::set<BoardLocation>::iterator itt = block->locations.begin();
+    std::set<BoardLocation>::iterator end = block->locations.end();
 
-    locations.insert(locations.end(), itt, end);
+    locations.insert(itt, end);
 
-    liberties += block->getLiberties() - 1;
+    liberties += block->getLiberties();
 }
 
 void Block::print(void) const
 {
-    std::vector<BoardLocation>::const_iterator itt = locations.begin();
+    std::set<BoardLocation>::const_iterator itt = locations.begin();
 
     for( ; itt != locations.end(); ++itt)
     {
