@@ -11,18 +11,13 @@ class Board
     float score;
     Space** spaces;
 
-    void removeDeadBlock(Block* block);
-    void deleteAdjacentBlocks(Block* deleted,
-                              Block** block1,
-                              Block** block2,
-                              Block** block3,
-                              Block** block4);
-    int checkIfEncountered(std::set<BoardLocation> *encounteredLocations,
-                           const int x,
-                           const int y);
-    int adjacentLiberties(Block* block0, Block* block);
-    void absorbAdjacentBlock(Block** currentBlock, Block* targetBlock, Block** deleted);
-    Block* updateAdjacentBlock(Block** currentBlock, Block* targetBlock);
+    void recalculateLiberties(Block* block);
+    bool handleAdjacentBlock(Block* currentBlock, Block* block);
+    void removeDeadGroup(Block* block);
+    void handlePossiblyDeadBlocks(Block* block1,
+                                  Block* block2,
+                                  Block* block3,
+                                  Block* block4);
   public:
     Board(const int size, const float komi);
     ~Board(void);

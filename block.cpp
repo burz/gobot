@@ -160,8 +160,6 @@ void Block::absorb(Block* block)
     std::set<BoardLocation>::iterator end = block->locations.end();
 
     locations.insert(itt, end);
-
-    liberties += block->getLiberties();
 }
 
 void Block::print(void) const
