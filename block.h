@@ -2,6 +2,7 @@
 #define _BLOCK_H_
 
 #include "definitions.h"
+#include "features.h"
 
 #include <set>
 

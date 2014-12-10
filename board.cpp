@@ -339,3 +339,91 @@ void Board::print(void) const
         printf("\b\b \n");
     }
 }
+
+void Board::calculatePerimeterFeaturesForBlock(
+        PerimeterFeatureState* state,
+        Block* block0,
+        Block* block,
+        const BoardLocation location) const
+{
+    if(block0 != block)
+    {
+        state->perimeter.insert(location);
+    }
+    if(block->getState() == EMPTY)
+    {
+        state->liberties.insert(location);
+    }
+    else if(block0->getState() != block->getState())
+    {
+        state->opponents.insert(location);
+    }
+}
+
+void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block) const
+{
+    PerimeterFeatureState state;
+
+    std::set<BoardLocation>::const_iterator itt = block->locationsBegin();
+    std::set<BoardLocation>::const_iterator end = block->locationsEnd();
+
+    for( ; itt != end; ++itt)
+    {
+        Block* block1 = getBlock(itt->x - 1, itt->y);
+        Block* block2 = getBlock(itt->x, itt->y - 1);
+        Block* block3 = getBlock(itt->x + 1, itt->y);
+        Block* block4 = getBlock(itt->x, itt->y + 1);
+
+        if(block1)
+        {
+            BoardLocation location;
+
+            location.x = itt->x - 1;
+            location.y = itt->y;
+
+            calculatePerimeterFeaturesForBlock(&state, block, block1, location);
+        }
+        if(block2)
+        {
+            BoardLocation location;
+
+            location.x = itt->x;
+            location.y = itt->y - 1;
+
+            calculatePerimeterFeaturesForBlock(&state, block, block2, location);
+        }
+        if(block3)
+        {
+            BoardLocation location;
+
+            location.x = itt->x + 1;
+            location.y = itt->y;
+
+            calculatePerimeterFeaturesForBlock(&state, block, block3, location);
+        }
+        if(block4)
+        {
+            BoardLocation location;
+
+            location.x = itt->x;
+            location.y = itt->y + 1;
+
+            calculatePerimeterFeaturesForBlock(&state, block, block4, location);
+        }
+    }
+
+    features->perimeter = state.perimeter.size();
+    features->opponents = state.opponents.size();
+    features->liberties = state.liberties.size();
+}
+
+BlockFinalFeatures Board::generateFeatures(Block* block) const
+{
+    BlockFinalFeatures features;
+
+    features.size = block->getSize();
+
+    generatePerimeterFeatures(&features, block);
+
+    return features;
+}

@@ -53,4 +53,7 @@ void Game::playGame(bool printTurns) const
     printf("\n!!!!!!!!!!!!!FINAL BOARD!!!!!!!!!!!!!\n\n");
 
     board.print();
+
+    Block* block = board.getBlock(0, 1);
+    board.generateFeatures(block).print();
 }

@@ -4,6 +4,12 @@
 #include "space.h"
 #include "block.h"
 
+typedef struct {
+    std::set<BoardLocation> perimeter;
+    std::set<BoardLocation> liberties;
+    std::set<BoardLocation> opponents;
+} PerimeterFeatureState;
+
 class Board
 {
   private:
@@ -35,6 +41,15 @@ class Board
     void changeBlocks(Block* from, Block* to);
 
     void print(void) const;
+
+    // Feature generation
+
+    void calculatePerimeterFeaturesForBlock(PerimeterFeatureState* state,
+                                            Block* block0,
+                                            Block* block,
+                                            const BoardLocation location) const;
+    void generatePerimeterFeatures(BlockFinalFeatures *features, Block* block) const;
+    BlockFinalFeatures generateFeatures(Block* block) const;
 };
 
 #endif
