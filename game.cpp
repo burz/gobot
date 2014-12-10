@@ -20,7 +20,7 @@ void Game::addMove(const BoardLocation location)
     moves.push_back(location);
 }
 
-void Game::playGame(void) const
+void Game::playGame(bool printTurns) const
 {
     Board board(size, komi);
 
@@ -30,24 +30,27 @@ void Game::playGame(void) const
 
     for( ; itt != moves.end(); ++itt)
     {
-        printf("\n========Move: %3d========\n\nScore: %f\nMove: (%d, %d)\n\n",
-           i,
-           board.getScore(),
-           itt->x,
-           itt->y);
-
         SpaceState state = i % 2 == 1 ? BLACK : WHITE;
 
         board.playMove(itt->x, itt->y, state);
 
-        board.print();
+        if(printTurns)
+        {
+            printf("\n========Turn: %3d========\n\nScore: %f\nMove: (%d, %d)\n\n",
+               i,
+               board.getScore(),
+               itt->x,
+               itt->y);
 
-        Block* block = board.getBlock(2, 14);
-        block->print();
-        printf("Size: %d, Liberties: %d\n\n", block->getSize(), block->getLiberties());
+            board.print();
 
-        getchar();
+            getchar();
+        }
 
         ++i;
     }
+
+    printf("\n!!!!!!!!!!!!!FINAL BOARD!!!!!!!!!!!!!\n\n");
+
+    board.print();
 }

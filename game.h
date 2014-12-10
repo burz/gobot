@@ -18,7 +18,7 @@ class Game
 
     void addMove(const BoardLocation location);
 
-    void playGame(void) const;
+    void playGame(bool printTurns = false) const;
 };
 
 #endif
