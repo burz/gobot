@@ -145,6 +145,7 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
     features->boundingBoxSize = (maxX - minX + 1) * (maxY - minY + 1);
 
     features->protectedLiberties = 0;
+    features->autoAtariLiberties = 0;
 
     itt = state.liberties.begin();
     end = state.liberties.end();
@@ -155,6 +156,8 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
         Block* block2 = getBlock(itt->x, itt->y - 1);
         Block* block3 = getBlock(itt->x + 1, itt->y);
         Block* block4 = getBlock(itt->x, itt->y + 1);
+
+        bool autoAtari = false;
 
         if(block1 && block1->getState() == EMPTY)
         {
@@ -168,6 +171,11 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
                 state.secondOrderLiberties.insert(location);
             }
         }
+        else if(block1 && block1->getState() != block->getState() &&
+                block1->getLiberties() == 2)
+        {
+            autoAtari = true;
+        }
         if(block2 && block2->getState() == EMPTY)
         {
             BoardLocation location;
@@ -179,6 +187,11 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
             {
                 state.secondOrderLiberties.insert(location);
             }
+        }
+        else if(block2 && block2->getState() != block->getState() &&
+                block2->getLiberties() == 2)
+        {
+            autoAtari = true;
         }
         if(block3 && block3->getState() == EMPTY)
         {
@@ -192,6 +205,11 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
                 state.secondOrderLiberties.insert(location);
             }
         }
+        else if(block3 && block3->getState() != block->getState() &&
+                block3->getLiberties() == 2)
+        {
+            autoAtari = true;
+        }
         if(block4 && block4->getState() == EMPTY)
         {
             BoardLocation location;
@@ -204,11 +222,21 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
                 state.secondOrderLiberties.insert(location);
             }
         }
+        else if(block4 && block4->getState() != block->getState() &&
+                block4->getLiberties() == 2)
+        {
+            autoAtari = true;
+        }
 
         if((!block1 || block1 == block) && (!block2 || block2 == block) &&
            (!block3 || block3 == block) && (!block4 || block4 == block))
         {
             features->protectedLiberties += 1;
+        }
+
+        if(autoAtari)
+        {
+            features->autoAtariLiberties += 1;
         }
     }
 
