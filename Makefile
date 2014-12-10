@@ -10,7 +10,8 @@ FILES = \
     board.o \
     game.o \
     parser.o \
-    features.o
+    features.o \
+    board.features.o
 
 main: main.o $(FILES)
 	$(CC) -o main $^
