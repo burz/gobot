@@ -35,6 +35,9 @@ class Block
 
     void removeLocation(const BoardLocation location);
 
+    std::vector<BoardLocation>::const_iterator locationsBegin(void) const;
+    std::vector<BoardLocation>::const_iterator locationsEnd(void) const;
+
     void absorb(Block* block);
 
     void print(void) const;

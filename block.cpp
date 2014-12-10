@@ -144,6 +144,16 @@ void Block::removeLocation(const BoardLocation location)
     }
 }
 
+std::vector<BoardLocation>::const_iterator Block::locationsBegin(void) const
+{
+    return locations.begin();
+}
+
+std::vector<BoardLocation>::const_iterator Block::locationsEnd(void) const
+{
+    return locations.end();
+}
+
 void Block::absorb(Block* block)
 {
     std::vector<BoardLocation>::iterator itt = block->locations.begin();

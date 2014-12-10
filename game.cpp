@@ -30,7 +30,7 @@ void Game::playGame(void) const
 
     for( ; itt != moves.end(); ++itt)
     {
-        printf("\n========Move: %4d========\n\nScore: %f\nMove: (%d, %d)\n\n",
+        printf("\n========Move: %3d========\n\nScore: %f\nMove: (%d, %d)\n\n",
            i,
            board.getScore(),
            itt->x,
@@ -41,6 +41,10 @@ void Game::playGame(void) const
         board.playMove(itt->x, itt->y, state);
 
         board.print();
+
+        Block* block = board.getBlock(2, 14);
+        block->print();
+        printf("Size: %d, Liberties: %d\n\n", block->getSize(), block->getLiberties());
 
         getchar();
 

@@ -5,8 +5,70 @@
 #include <assert.h>
 #include <set>
 
-void Board::updateAdjacentBlock(Block** currentBlock, Block* targetBlock)
+void Board::removeDeadBlock(Block* block)
 {
+    if(block->getState() == BLACK)
+    {
+        score -= block->getSize();
+    }
+    else
+    {
+        score += block->getSize();
+    }
+
+    block->setState(EMPTY);
+
+    std::vector<BoardLocation>::const_iterator itt = block->locationsBegin();
+    std::vector<BoardLocation>::const_iterator end = block->locationsEnd();
+
+    for( ; itt != end; ++itt)
+    {
+        std::set<Block*> adjacentBlocks;
+
+        adjacentBlocks.insert(getBlock(itt->x - 1, itt->y));
+        adjacentBlocks.insert(getBlock(itt->x, itt->y - 1));
+        adjacentBlocks.insert(getBlock(itt->x + 1, itt->y));
+        adjacentBlocks.insert(getBlock(itt->x, itt->y + 1));
+
+        std::set<Block*>::iterator blockItt = adjacentBlocks.begin();
+        std::set<Block*>::iterator blockEnd = adjacentBlocks.end();
+
+        for( ; blockItt != blockEnd; ++blockItt)
+        {
+            (*blockItt)->changeLiberties(1);
+        }
+    }
+}
+
+void Board::deleteAdjacentBlocks(
+        Block* deleted,
+        Block** block1,
+        Block** block2,
+        Block** block3,
+        Block** block4)
+{
+    if(*block1 == deleted)
+    {
+        *block1 = 0;
+    }
+    if(*block2 == deleted)
+    {
+        *block2 = 0;
+    }
+    if(*block3 == deleted)
+    {
+        *block3 = 0;
+    }
+    if(*block4 == deleted)
+    {
+        *block4 = 0;
+    }
+}
+
+Block* Board::updateAdjacentBlock(Block** currentBlock, Block* targetBlock)
+{
+    Block* deleted = 0;
+
     if(targetBlock->getState() != EMPTY)
     {
         if(targetBlock->getState() != (*currentBlock)->getState())
@@ -15,16 +77,7 @@ void Board::updateAdjacentBlock(Block** currentBlock, Block* targetBlock)
 
             if(targetBlock->getLiberties() == 0)
             {
-                if(targetBlock->getState() == BLACK)
-                {
-                    score -= targetBlock->getSize();
-                }
-                else
-                {
-                    score += targetBlock->getSize();
-                }
-
-                targetBlock->setState(EMPTY);
+                removeDeadBlock(targetBlock);
             }
         }
         else if(targetBlock != *currentBlock)
@@ -35,9 +88,13 @@ void Board::updateAdjacentBlock(Block** currentBlock, Block* targetBlock)
 
             delete *currentBlock;
 
+            deleted = *currentBlock;
+
             *currentBlock = targetBlock;
         }
     }
+
+    return deleted;
 }
 
 Board::Board(const int _size, const float komi)
@@ -132,21 +189,27 @@ void Board::playMove(const int x, const int y, const SpaceState state)
 
     Block* currentBlock = new Block(state);
 
+    Block* deleted = 0;
+
     if(block1)
     {
-        updateAdjacentBlock(&currentBlock, block1);
+        deleted = updateAdjacentBlock(&currentBlock, block1);
+        deleteAdjacentBlocks(deleted, &block1, &block2, &block3, &block4);
     }
     if(block2)
     {
-        updateAdjacentBlock(&currentBlock, block2);
+        deleted = updateAdjacentBlock(&currentBlock, block2);
+        deleteAdjacentBlocks(deleted, &block1, &block2, &block3, &block4);
     }
     if(block3)
     {
-        updateAdjacentBlock(&currentBlock, block3);
+        deleted = updateAdjacentBlock(&currentBlock, block3);
+        deleteAdjacentBlocks(deleted, &block1, &block2, &block3, &block4);
     }
     if(block4)
     {
-        updateAdjacentBlock(&currentBlock, block4);
+        deleted = updateAdjacentBlock(&currentBlock, block4);
+        deleteAdjacentBlocks(deleted, &block1, &block2, &block3, &block4);
     }
 
     if(block1 && block1->getState() == EMPTY && !currentBlock->touches(x - 1, y))
