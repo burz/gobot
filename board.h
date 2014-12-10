@@ -11,6 +11,8 @@ typedef struct {
     std::set<BoardLocation> secondOrderLiberties;
     std::set<BoardLocation> thirdOrderLiberties;
     std::set<Block*> adjacentOpponentBlocks;
+    std::set<BoardLocation> friendly;
+    std::set<BoardLocation> enemy;
 } PerimeterFeatureState;
 
 class Board
@@ -32,6 +34,21 @@ class Board
                                             Block* block0,
                                             Block* block,
                                             const BoardLocation location) const;
+    void calculateSecondOrderLiberties(PerimeterFeatureState* state,
+                                       Block* block0,
+                                       Block* block,
+                                       const int x,
+                                       const int y,
+                                       bool* autoAtari) const;
+    void calculateThirdOrderLiberties(PerimeterFeatureState* state,
+                                      Block* block,
+                                      const int x,
+                                      const int y) const;
+    void calculateLocalMajority(PerimeterFeatureState* state,
+                                Block* block0,
+                                Block* block,
+                                const int x,
+                                const int y) const;
     void generatePerimeterFeatures(BlockFinalFeatures *features, Block* block) const;
   public:
     Board(const int size, const float komi);

@@ -7,10 +7,14 @@ typedef enum {
     WHITE
 } SpaceState;
 
-typedef struct {
-  int x;
-  int y;
-} BoardLocation;
+class BoardLocation
+{
+  public:
+    int x;
+    int y;
+
+    BoardLocation(const int x, const int y);
+};
 
 bool operator<(const BoardLocation& left, const BoardLocation& right);
 

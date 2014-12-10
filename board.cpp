@@ -26,10 +26,7 @@ Board::Board(const int _size, const float komi)
         {
             spaces[i][j] = space;
 
-            BoardLocation location;
-
-            location.x = i;
-            location.y = j;
+            BoardLocation location(i, j);
 
             block->add(location, 0);
         }
@@ -78,10 +75,7 @@ SpaceState Board::getState(const int x, const int y) const
 
 int canCount(std::set<BoardLocation>* counted, const int x, const int y)
 {
-    BoardLocation location;
-
-    location.x = x;
-    location.y = y;
+    BoardLocation location(x, y);
 
     if(counted->find(location) == counted->end())
     {
@@ -264,10 +258,7 @@ void fixBlockPointers(
 
 void Board::playMove(const int x, const int y, const SpaceState state)
 {
-    BoardLocation location;
-
-    location.x = x;
-    location.y = y;
+    BoardLocation location(x, y);
 
     Block* block0 = getBlock(x, y);
     Block* block1 = getBlock(x - 1, y);

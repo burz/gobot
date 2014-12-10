@@ -25,6 +25,70 @@ void Board::calculatePerimeterFeaturesForBlock(
     }
 }
 
+void Board::calculateSecondOrderLiberties(
+        PerimeterFeatureState* state,
+        Block* block0,
+        Block* block,
+        const int x,
+        const int y,
+        bool* autoAtari) const
+{
+    if(block->getState() == EMPTY)
+    {
+        BoardLocation location(x, y);
+
+        if(state->liberties.find(location) == state->liberties.end())
+        {
+            state->secondOrderLiberties.insert(location);
+        }
+    }
+    else if(block->getState() != block0->getState() &&
+            block->getLiberties() == 2)
+    {
+        *autoAtari = true;
+    }
+}
+
+void Board::calculateThirdOrderLiberties(
+        PerimeterFeatureState* state,
+        Block* block,
+        const int x,
+        const int y) const
+{
+    if(block->getState() == EMPTY)
+    {
+        BoardLocation location(x, y);
+
+        if(state->liberties.find(location) == state->liberties.end() &&
+           state->secondOrderLiberties.find(location) == state->secondOrderLiberties.end())
+        {
+            state->thirdOrderLiberties.insert(location);
+        }
+    }
+}
+
+void Board::calculateLocalMajority(
+        PerimeterFeatureState* state,
+        Block* block0,
+        Block* block,
+        const int x,
+        const int y) const
+{
+    if(block != block0)
+    {
+        BoardLocation location(x, y);
+
+        if(block->getState() == block0->getState())
+        {
+            state->friendly.insert(location);
+        }
+        else if(block->getState() != EMPTY)
+        {
+            state->enemy.insert(location);
+        }
+    }
+}
+
 void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block) const
 {
     PerimeterFeatureState state;
@@ -64,37 +128,25 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
 
         if(block1)
         {
-            BoardLocation location;
-
-            location.x = itt->x - 1;
-            location.y = itt->y;
+            BoardLocation location(itt->x - 1, itt->y);
 
             calculatePerimeterFeaturesForBlock(&state, block, block1, location);
         }
         if(block2)
         {
-            BoardLocation location;
-
-            location.x = itt->x;
-            location.y = itt->y - 1;
+            BoardLocation location(itt->x, itt->y - 1);
 
             calculatePerimeterFeaturesForBlock(&state, block, block2, location);
         }
         if(block3)
         {
-            BoardLocation location;
-
-            location.x = itt->x + 1;
-            location.y = itt->y;
+            BoardLocation location(itt->x + 1, itt->y);
 
             calculatePerimeterFeaturesForBlock(&state, block, block3, location);
         }
         if(block4)
         {
-            BoardLocation location;
-
-            location.x = itt->x;
-            location.y = itt->y + 1;
+            BoardLocation location(itt->x, itt->y + 1);
 
             calculatePerimeterFeaturesForBlock(&state, block, block4, location);
         }
@@ -159,73 +211,25 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
 
         bool autoAtari = false;
 
-        if(block1 && block1->getState() == EMPTY)
+        if(block1)
         {
-            BoardLocation location;
-
-            location.x = itt->x - 1;
-            location.y = itt->y;
-
-            if(state.liberties.find(location) == end)
-            {
-                state.secondOrderLiberties.insert(location);
-            }
+            calculateSecondOrderLiberties(&state, block, block1,
+                                          itt->x - 1, itt->y, &autoAtari);
         }
-        else if(block1 && block1->getState() != block->getState() &&
-                block1->getLiberties() == 2)
+        if(block2)
         {
-            autoAtari = true;
+            calculateSecondOrderLiberties(&state, block, block2,
+                                          itt->x, itt->y - 1, &autoAtari);
         }
-        if(block2 && block2->getState() == EMPTY)
+        if(block3)
         {
-            BoardLocation location;
-
-            location.x = itt->x;
-            location.y = itt->y - 1;
-
-            if(state.liberties.find(location) == end)
-            {
-                state.secondOrderLiberties.insert(location);
-            }
+            calculateSecondOrderLiberties(&state, block, block3,
+                                          itt->x + 1, itt->y, &autoAtari);
         }
-        else if(block2 && block2->getState() != block->getState() &&
-                block2->getLiberties() == 2)
+        if(block4)
         {
-            autoAtari = true;
-        }
-        if(block3 && block3->getState() == EMPTY)
-        {
-            BoardLocation location;
-
-            location.x = itt->x + 1;
-            location.y = itt->y;
-
-            if(state.liberties.find(location) == end)
-            {
-                state.secondOrderLiberties.insert(location);
-            }
-        }
-        else if(block3 && block3->getState() != block->getState() &&
-                block3->getLiberties() == 2)
-        {
-            autoAtari = true;
-        }
-        if(block4 && block4->getState() == EMPTY)
-        {
-            BoardLocation location;
-
-            location.x = itt->x;
-            location.y = itt->y + 1;
-
-            if(state.liberties.find(location) == end)
-            {
-                state.secondOrderLiberties.insert(location);
-            }
-        }
-        else if(block4 && block4->getState() != block->getState() &&
-                block4->getLiberties() == 2)
-        {
-            autoAtari = true;
+            calculateSecondOrderLiberties(&state, block, block4,
+                                          itt->x, itt->y + 1, &autoAtari);
         }
 
         if((!block1 || block1 == block) && (!block2 || block2 == block) &&
@@ -252,64 +256,25 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
         Block* block3 = getBlock(itt->x + 1, itt->y);
         Block* block4 = getBlock(itt->x, itt->y + 1);
 
-        if(block1 && block1->getState() == EMPTY)
+        if(block1)
         {
-            BoardLocation location;
-
-            location.x = itt->x - 1;
-            location.y = itt->y;
-
-            if(state.liberties.find(location) == state.liberties.end() &&
-               state.secondOrderLiberties.find(location) == end)
-            {
-                state.thirdOrderLiberties.insert(location);
-            }
+            calculateThirdOrderLiberties(&state, block1, itt->x - 1, itt->y);
         }
-        if(block2 && block2->getState() == EMPTY)
+        if(block2)
         {
-            BoardLocation location;
-
-            location.x = itt->x;
-            location.y = itt->y - 1;
-
-            if(state.liberties.find(location) == state.liberties.end() &&
-               state.secondOrderLiberties.find(location) == end)
-            {
-                state.thirdOrderLiberties.insert(location);
-            }
+            calculateThirdOrderLiberties(&state, block2, itt->x, itt->y - 1);
         }
-        if(block3 && block3->getState() == EMPTY)
+        if(block3)
         {
-            BoardLocation location;
-
-            location.x = itt->x + 1;
-            location.y = itt->y;
-
-            if(state.liberties.find(location) == state.liberties.end() &&
-               state.secondOrderLiberties.find(location) == end)
-            {
-                state.thirdOrderLiberties.insert(location);
-            }
+            calculateThirdOrderLiberties(&state, block3, itt->x + 1, itt->y);
         }
-        if(block4 && block4->getState() == EMPTY)
+        if(block4)
         {
-            BoardLocation location;
-
-            location.x = itt->x;
-            location.y = itt->y + 1;
-
-            if(state.liberties.find(location) == state.liberties.end() &&
-               state.secondOrderLiberties.find(location) == end)
-            {
-                state.thirdOrderLiberties.insert(location);
-            }
+            calculateThirdOrderLiberties(&state, block4, itt->x, itt->y + 1);
         }
     }
 
     features->thirdOrderLiberties = state.thirdOrderLiberties.size();
-
-    std::set<BoardLocation> friendly;
-    std::set<BoardLocation> enemy;
 
     itt = state.perimeter.begin();
     end = state.perimeter.end();
@@ -326,79 +291,31 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
 
         if(block0->getState() == block->getState())
         {
-            friendly.insert(*itt);
+            state.friendly.insert(*itt);
         }
         else if(block0->getState() != EMPTY)
         {
-            enemy.insert(*itt);
+            state.enemy.insert(*itt);
         }
-        if(block1 && block1 != block)
+        if(block1)
         {
-            BoardLocation location;
-
-            location.x = itt->x - 1;
-            location.y = itt->y;
-
-            if(block1->getState() == block->getState())
-            {
-                friendly.insert(location);
-            }
-            else if(block1->getState() != EMPTY)
-            {
-                enemy.insert(location);
-            }
+            calculateLocalMajority(&state, block, block1, itt->x - 1, itt->y);
         }
-        if(block2 && block2 != block)
+        if(block2)
         {
-            BoardLocation location;
-
-            location.x = itt->x;
-            location.y = itt->y - 1;
-
-            if(block2->getState() == block->getState())
-            {
-                friendly.insert(location);
-            }
-            else if(block2->getState() != EMPTY)
-            {
-                enemy.insert(location);
-            }
+            calculateLocalMajority(&state, block, block2, itt->x, itt->y - 1);
         }
-        if(block3 && block3 != block)
+        if(block3)
         {
-            BoardLocation location;
-
-            location.x = itt->x + 1;
-            location.y = itt->y;
-
-            if(block3->getState() == block->getState())
-            {
-                friendly.insert(location);
-            }
-            else if(block3->getState() != EMPTY)
-            {
-                enemy.insert(location);
-            }
+            calculateLocalMajority(&state, block, block3, itt->x + 1, itt->y);
         }
-        if(block4 && block4 != block)
+        if(block4)
         {
-            BoardLocation location;
-
-            location.x = itt->x;
-            location.y = itt->y + 1;
-
-            if(block4->getState() == block->getState())
-            {
-                friendly.insert(location);
-            }
-            else if(block4->getState() != EMPTY)
-            {
-                enemy.insert(location);
-            }
+            calculateLocalMajority(&state, block, block4, itt->x, itt->y + 1);
         }
     }
 
-    features->localMajority = friendly.size() - enemy.size();
+    features->localMajority = state.friendly.size() - state.enemy.size();
 }
 
 BlockFinalFeatures Board::generateFeatures(Block* block) const

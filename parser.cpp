@@ -28,10 +28,7 @@ bool parseFile(Game* game, const char *filename, const int size)
 
     while(fscanf(file, "%i %i", &x, &y) != EOF)
     {
-        BoardLocation location;
-
-        location.x = x;
-        location.y = y;
+        BoardLocation location(x, y);
 
         result.addMove(location);
     }
