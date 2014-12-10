@@ -8,6 +8,9 @@ typedef struct {
     std::set<BoardLocation> perimeter;
     std::set<BoardLocation> liberties;
     std::set<BoardLocation> opponents;
+    std::set<BoardLocation> secondOrderLiberties;
+    std::set<BoardLocation> thirdOrderLiberties;
+    std::set<Block*> adjacentOpponentBlocks;
 } PerimeterFeatureState;
 
 class Board

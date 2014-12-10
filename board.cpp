@@ -357,6 +357,7 @@ void Board::calculatePerimeterFeaturesForBlock(
     else if(block0->getState() != block->getState())
     {
         state->opponents.insert(location);
+        state->adjacentOpponentBlocks.insert(block);
     }
 }
 
@@ -367,8 +368,30 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
     std::set<BoardLocation>::const_iterator itt = block->locationsBegin();
     std::set<BoardLocation>::const_iterator end = block->locationsEnd();
 
+    int minX = itt->x;
+    int maxX = itt->x;
+    int minY = itt->y;
+    int maxY = itt->y;
+
     for( ; itt != end; ++itt)
     {
+        if(itt->x < minX)
+        {
+            minX = itt->x;
+        }
+        else if(itt->x > maxX)
+        {
+            maxX = itt->x;
+        }
+        if(itt->y < minY)
+        {
+            minY = itt->y;
+        }
+        else if(itt->y > maxY)
+        {
+            maxY = itt->y;
+        }
+
         Block* block1 = getBlock(itt->x - 1, itt->y);
         Block* block2 = getBlock(itt->x, itt->y - 1);
         Block* block3 = getBlock(itt->x + 1, itt->y);
@@ -415,6 +438,136 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
     features->perimeter = state.perimeter.size();
     features->opponents = state.opponents.size();
     features->liberties = state.liberties.size();
+    features->numberOfAdjacentOpponentBlocks = state.adjacentOpponentBlocks.size();
+    features->boundingBoxSize = (maxX - minX + 1) * (maxY - minY + 1);
+
+    itt = state.liberties.begin();
+    end = state.liberties.end();
+
+    for( ; itt != end; ++itt)
+    {
+        Block* block1 = getBlock(itt->x - 1, itt->y);
+        Block* block2 = getBlock(itt->x, itt->y - 1);
+        Block* block3 = getBlock(itt->x + 1, itt->y);
+        Block* block4 = getBlock(itt->x, itt->y + 1);
+
+        if(block1 && block1->getState() == EMPTY)
+        {
+            BoardLocation location;
+
+            location.x = itt->x - 1;
+            location.y = itt->y;
+
+            if(state.liberties.find(location) == end)
+            {
+                state.secondOrderLiberties.insert(location);
+            }
+        }
+        if(block2 && block2->getState() == EMPTY)
+        {
+            BoardLocation location;
+
+            location.x = itt->x;
+            location.y = itt->y - 1;
+
+            if(state.liberties.find(location) == end)
+            {
+                state.secondOrderLiberties.insert(location);
+            }
+        }
+        if(block3 && block3->getState() == EMPTY)
+        {
+            BoardLocation location;
+
+            location.x = itt->x + 1;
+            location.y = itt->y;
+
+            if(state.liberties.find(location) == end)
+            {
+                state.secondOrderLiberties.insert(location);
+            }
+        }
+        if(block4 && block4->getState() == EMPTY)
+        {
+            BoardLocation location;
+
+            location.x = itt->x;
+            location.y = itt->y + 1;
+
+            if(state.liberties.find(location) == end)
+            {
+                state.secondOrderLiberties.insert(location);
+            }
+        }
+    }
+
+    features->secondOrderLiberties = state.secondOrderLiberties.size();
+
+    itt = state.secondOrderLiberties.begin();
+    end = state.secondOrderLiberties.end();
+
+    for( ; itt != end; ++itt)
+    {
+        Block* block1 = getBlock(itt->x - 1, itt->y);
+        Block* block2 = getBlock(itt->x, itt->y - 1);
+        Block* block3 = getBlock(itt->x + 1, itt->y);
+        Block* block4 = getBlock(itt->x, itt->y + 1);
+
+        if(block1 && block1->getState() == EMPTY)
+        {
+            BoardLocation location;
+
+            location.x = itt->x - 1;
+            location.y = itt->y;
+
+            if(state.liberties.find(location) == state.liberties.end() &&
+               state.secondOrderLiberties.find(location) == end)
+            {
+                state.thirdOrderLiberties.insert(location);
+            }
+        }
+        if(block2 && block2->getState() == EMPTY)
+        {
+            BoardLocation location;
+
+            location.x = itt->x;
+            location.y = itt->y - 1;
+
+            if(state.liberties.find(location) == state.liberties.end() &&
+               state.secondOrderLiberties.find(location) == end)
+            {
+                state.thirdOrderLiberties.insert(location);
+            }
+        }
+        if(block3 && block3->getState() == EMPTY)
+        {
+            BoardLocation location;
+
+            location.x = itt->x + 1;
+            location.y = itt->y;
+
+            if(state.liberties.find(location) == state.liberties.end() &&
+               state.secondOrderLiberties.find(location) == end)
+            {
+                state.thirdOrderLiberties.insert(location);
+            }
+        }
+        if(block4 && block4->getState() == EMPTY)
+        {
+            BoardLocation location;
+
+            location.x = itt->x;
+            location.y = itt->y + 1;
+
+            if(state.liberties.find(location) == state.liberties.end() &&
+               state.secondOrderLiberties.find(location) == end)
+            {
+                state.thirdOrderLiberties.insert(location);
+            }
+        }
+    }
+
+    features->thirdOrderLiberties = state.thirdOrderLiberties.size();
 }
 
 BlockFinalFeatures Board::generateFeatures(Block* block) const
