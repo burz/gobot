@@ -482,6 +482,8 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
     features->centerOfMass = sum / (2.0 * block->getSize());
     features->boundingBoxSize = (maxX - minX + 1) * (maxY - minY + 1);
 
+    features->protectedLiberties = 0;
+
     itt = state.liberties.begin();
     end = state.liberties.end();
 
@@ -539,6 +541,12 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
             {
                 state.secondOrderLiberties.insert(location);
             }
+        }
+
+        if((!block1 || block1 == block) && (!block2 || block2 == block) &&
+           (!block3 || block3 == block) && (!block4 || block4 == block))
+        {
+            features->protectedLiberties += 1;
         }
     }
 
