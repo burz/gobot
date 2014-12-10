@@ -5,6 +5,77 @@
 #include <assert.h>
 #include <set>
 
+Board::Board(const int _size, const float komi)
+    : size(_size)
+{
+    score = komi;
+
+    spaces = new Space*[size]();
+
+    Block* block = new Block();
+
+    Space space(block);
+
+    for(int i = 0; i < size; ++i)
+    {
+        spaces[i] = (Space*) malloc(sizeof(Space) * size);
+
+        assert(spaces[i] != 0);
+
+        for(int j = 0; j < size; ++j)
+        {
+            spaces[i][j] = space;
+
+            BoardLocation location;
+
+            location.x = i;
+            location.y = j;
+
+            block->add(location, 0);
+        }
+    }
+}
+
+Board::~Board(void)
+{
+    std::set<Block*> blocks;
+
+    for(int x = 0; x < size; ++x) {
+        for(int y = 0; y < size; ++y) {
+            blocks.insert(spaces[x][y].getBlock());
+        }
+    }
+
+    std::set<Block*>::iterator itt = blocks.begin();
+
+    for( ; itt != blocks.end(); ++itt)
+    {
+        delete *itt;
+    }
+
+    for(int i = 0; i < size; ++i)
+    {
+        free(spaces[i]);
+    }
+
+    delete[] spaces;
+}
+
+int Board::getSize(void) const
+{
+    return size;
+}
+
+float Board::getScore(void) const
+{
+    return score;
+}
+
+SpaceState Board::getState(const int x, const int y) const
+{
+    return spaces[x][y].getState();
+}
+
 int canCount(std::set<BoardLocation>* counted, const int x, const int y)
 {
     BoardLocation location;
@@ -164,77 +235,6 @@ void Board::handlePossiblyDeadBlocks(
             removeDeadGroup(block4);
         }
     }
-}
-
-Board::Board(const int _size, const float komi)
-    : size(_size)
-{
-    score = komi;
-
-    spaces = new Space*[size]();
-
-    Block* block = new Block();
-
-    Space space(block);
-
-    for(int i = 0; i < size; ++i)
-    {
-        spaces[i] = (Space*) malloc(sizeof(Space) * size);
-
-        assert(spaces[i] != 0);
-
-        for(int j = 0; j < size; ++j)
-        {
-            spaces[i][j] = space;
-
-            BoardLocation location;
-
-            location.x = i;
-            location.y = j;
-
-            block->add(location, 0);
-        }
-    }
-}
-
-Board::~Board(void)
-{
-    std::set<Block*> blocks;
-
-    for(int x = 0; x < size; ++x) {
-        for(int y = 0; y < size; ++y) {
-            blocks.insert(spaces[x][y].getBlock());
-        }
-    }
-
-    std::set<Block*>::iterator itt = blocks.begin();
-
-    for( ; itt != blocks.end(); ++itt)
-    {
-        delete *itt;
-    }
-
-    for(int i = 0; i < size; ++i)
-    {
-        free(spaces[i]);
-    }
-
-    delete[] spaces;
-}
-
-int Board::getSize(void) const
-{
-    return size;
-}
-
-float Board::getScore(void) const
-{
-    return score;
-}
-
-SpaceState Board::getState(const int x, const int y) const
-{
-    return spaces[x][y].getState();
 }
 
 void fixBlockPointers(
@@ -568,6 +568,98 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
     }
 
     features->thirdOrderLiberties = state.thirdOrderLiberties.size();
+
+    itt = state.perimeter.begin();
+    end = state.perimeter.end();
+
+    std::set<BoardLocation> friendly;
+    std::set<BoardLocation> enemy;
+
+    for( ; itt != end; ++itt)
+    {
+        Block* block0 = getBlock(itt->x, itt->y);
+        Block* block1 = getBlock(itt->x - 1, itt->y);
+        Block* block2 = getBlock(itt->x, itt->y - 1);
+        Block* block3 = getBlock(itt->x + 1, itt->y);
+        Block* block4 = getBlock(itt->x, itt->y + 1);
+
+        assert(block0);
+
+        if(block0->getState() == block->getState())
+        {
+            friendly.insert(*itt);
+        }
+        else if(block0->getState() != EMPTY)
+        {
+            enemy.insert(*itt);
+        }
+        if(block1 && block1 != block)
+        {
+            BoardLocation location;
+
+            location.x = itt->x - 1;
+            location.y = itt->y;
+
+            if(block1->getState() == block->getState())
+            {
+                friendly.insert(location);
+            }
+            else if(block1->getState() != EMPTY)
+            {
+                enemy.insert(location);
+            }
+        }
+        if(block2 && block2 != block)
+        {
+            BoardLocation location;
+
+            location.x = itt->x;
+            location.y = itt->y - 1;
+
+            if(block2->getState() == block->getState())
+            {
+                friendly.insert(location);
+            }
+            else if(block2->getState() != EMPTY)
+            {
+                enemy.insert(location);
+            }
+        }
+        if(block3 && block3 != block)
+        {
+            BoardLocation location;
+
+            location.x = itt->x + 1;
+            location.y = itt->y;
+
+            if(block3->getState() == block->getState())
+            {
+                friendly.insert(location);
+            }
+            else if(block3->getState() != EMPTY)
+            {
+                enemy.insert(location);
+            }
+        }
+        if(block4 && block4 != block)
+        {
+            BoardLocation location;
+
+            location.x = itt->x;
+            location.y = itt->y + 1;
+
+            if(block4->getState() == block->getState())
+            {
+                friendly.insert(location);
+            }
+            else if(block4->getState() != EMPTY)
+            {
+                enemy.insert(location);
+            }
+        }
+    }
+
+    features->localMajority = friendly.size() - enemy.size();
 }
 
 BlockFinalFeatures Board::generateFeatures(Block* block) const

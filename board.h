@@ -27,6 +27,12 @@ class Board
                                   Block* block2,
                                   Block* block3,
                                   Block* block4);
+
+    void calculatePerimeterFeaturesForBlock(PerimeterFeatureState* state,
+                                            Block* block0,
+                                            Block* block,
+                                            const BoardLocation location) const;
+    void generatePerimeterFeatures(BlockFinalFeatures *features, Block* block) const;
   public:
     Board(const int size, const float komi);
     ~Board(void);
@@ -45,13 +51,6 @@ class Board
 
     void print(void) const;
 
-    // Feature generation
-
-    void calculatePerimeterFeaturesForBlock(PerimeterFeatureState* state,
-                                            Block* block0,
-                                            Block* block,
-                                            const BoardLocation location) const;
-    void generatePerimeterFeatures(BlockFinalFeatures *features, Block* block) const;
     BlockFinalFeatures generateFeatures(Block* block) const;
 };
 
