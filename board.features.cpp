@@ -43,9 +43,40 @@ void Board::calculateSecondOrderLiberties(
         }
     }
     else if(block->getState() != block0->getState() &&
-            block->getLiberties() == 2)
+            block0->getLiberties() == 2)
     {
-        *autoAtari = true;
+        Block* block1 = getBlock(x - 1, y);
+        Block* block2 = getBlock(x, y - 1);
+        Block* block3 = getBlock(x + 1, y);
+        Block* block4 = getBlock(x, y + 1);
+
+        int count = 0;
+
+        if(block1 && (block1->getState() == EMPTY && block0->touches(x, y) ||
+           block1->getState() != block0->getState()))
+        {
+            count++;
+        }
+        if(block2 && (block2->getState() == EMPTY && block0->touches(x, y) ||
+           block2->getState() != block0->getState()))
+        {
+            count++;
+        }
+        if(block3 && (block3->getState() == EMPTY && block0->touches(x, y) ||
+           block3->getState() != block0->getState()))
+        {
+            count++;
+        }
+        if(block4 && (block4->getState() == EMPTY && block0->touches(x, y) ||
+           block4->getState() != block0->getState()))
+        {
+            count++;
+        }
+
+        if(count > 2)
+        {
+            *autoAtari = true;
+        }
     }
 }
 
