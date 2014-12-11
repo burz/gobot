@@ -1,7 +1,7 @@
 CC = g++
 CFLAGS = -c -g
 
-INCL = -I.
+INCL = -Isrc
 
 FILES = \
     definitions.o \
@@ -22,5 +22,5 @@ reformat: reformat.hs
 clean:
 	rm -f *.o *.hi
 
-%.o: %.cpp
+%.o: src/%.cpp
 	$(CC) $(CFLAGS) $^ $(INCL)

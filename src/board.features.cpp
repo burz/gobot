@@ -4,11 +4,12 @@
 #include <math.h>
 #include <set>
 
-void Board::calculatePerimeterFeaturesForBlock(
+inline
+void calculatePerimeterFeaturesForBlock(
         PerimeterFeatureState* state,
         Block* block0,
         Block* block,
-        const BoardLocation location) const
+        const BoardLocation& location)
 {
     if(block0 != block)
     {
@@ -51,40 +52,195 @@ void Board::calculateSecondOrderLiberties(
         Block* block4 = getBlock(x, y + 1);
 
         int count = 0;
+        int perimeter = 0;
 
-        if(block1 && (block1->getState() == EMPTY && block0->touches(x, y) ||
-           block1->getState() != block0->getState()))
+        if(block1)
         {
-            count++;
+            if(block1->getState() == EMPTY && block0->touches(x, y) ||
+               block1->getState() != block0->getState())
+            {
+                ++count;
+            }
+
+            ++perimeter;
         }
-        if(block2 && (block2->getState() == EMPTY && block0->touches(x, y) ||
-           block2->getState() != block0->getState()))
+        if(block2)
         {
-            count++;
+            if(block2->getState() == EMPTY && block0->touches(x, y) ||
+               block2->getState() != block0->getState())
+            {
+                ++count;
+            }
+
+            ++perimeter;
         }
-        if(block3 && (block3->getState() == EMPTY && block0->touches(x, y) ||
-           block3->getState() != block0->getState()))
+        if(block3)
         {
-            count++;
+            if(block3->getState() == EMPTY && block0->touches(x, y) ||
+               block3->getState() != block0->getState())
+            {
+                ++count;
+            }
+
+            ++perimeter;
         }
-        if(block4 && (block4->getState() == EMPTY && block0->touches(x, y) ||
-           block4->getState() != block0->getState()))
+        if(block4)
         {
-            count++;
+            if(block4->getState() == EMPTY && block0->touches(x, y) ||
+               block4->getState() != block0->getState())
+            {
+                ++count;
+            }
+
+            ++perimeter;
         }
 
-        if(count > 2)
+        if(count > perimeter - 2)
         {
             *autoAtari = true;
         }
     }
 }
 
-void Board::calculateThirdOrderLiberties(
+inline
+void calculateProtectedBlock(
+        Block* block0,
+        Block* block,
+        std::set<Block*>& lowLiberties,
+        int& count)
+{
+    if(block->getState() != EMPTY)
+    {
+        if(block->getState() == block0->getState())
+        {
+            ++count;
+        }
+        else if(block->getState() != block0->getState() &&
+                block->getLiberties() < 2)
+        {
+            lowLiberties.insert(block);
+        }
+    }
+}
+
+inline
+int isShared(
+        Block* block,
+        std::set<Block*>& lowLiberties,
+        const int& x,
+        const int& y)
+{
+    if(block->getState() == EMPTY)
+    {
+        bool shared = false;
+
+        std::set<Block*>::iterator itt = lowLiberties.begin();
+        std::set<Block*>::iterator end = lowLiberties.end();
+
+        for( ; itt != end; ++itt)
+        {
+            if((*itt)->touches(x, y))
+            {
+                shared = true;
+
+                break;
+            }
+        }
+
+        if(shared)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+bool Board::isProtected(Block* block, const int x, const int y) const
+{
+    Block* block1 = getBlock(x - 1, y);
+    Block* block2 = getBlock(x, y - 1);
+    Block* block3 = getBlock(x + 1, y);
+    Block* block4 = getBlock(x, y + 1);
+
+    int count = 0;
+    int perimeter = 0;
+
+    std::set<Block*> lowLiberties;
+
+    if(block1)
+    {
+        calculateProtectedBlock(block, block1, lowLiberties, count);
+
+        ++perimeter;
+    }
+    if(block2)
+    {
+        calculateProtectedBlock(block, block2, lowLiberties, count);
+
+        ++perimeter;
+    }
+    if(block3)
+    {
+        calculateProtectedBlock(block, block3, lowLiberties, count);
+
+        ++perimeter;
+    }
+    if(block4)
+    {
+        calculateProtectedBlock(block, block4, lowLiberties, count);
+
+        ++perimeter;
+    }
+
+    if(lowLiberties.size() > 0)
+    {
+        int sharedCount = 0;
+        int totalLiberties = -lowLiberties.size();
+
+        if(block1)
+        {
+            sharedCount += isShared(block1, lowLiberties, x - 1, y);
+            totalLiberties += block1->getLiberties();
+        }
+        if(block2)
+        {
+            sharedCount += isShared(block2, lowLiberties, x, y - 1);
+            totalLiberties += block1->getLiberties();
+        }
+        if(block3)
+        {
+            sharedCount += isShared(block3, lowLiberties, x + 1, y);
+            totalLiberties += block1->getLiberties();
+        }
+        if(block4)
+        {
+            sharedCount += isShared(block4, lowLiberties, x, y + 1);
+            totalLiberties += block1->getLiberties();
+        }
+
+        if(totalLiberties - sharedCount < 2)
+        {
+            count += lowLiberties.size();
+        }
+    }
+        
+    if(count >= perimeter - 1)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+inline
+void calculateThirdOrderLiberties(
         PerimeterFeatureState* state,
         Block* block,
-        const int x,
-        const int y) const
+        const int& x,
+        const int& y)
 {
     if(block->getState() == EMPTY)
     {
@@ -98,12 +254,13 @@ void Board::calculateThirdOrderLiberties(
     }
 }
 
-void Board::calculateLocalMajority(
+inline
+void calculateLocalMajority(
         PerimeterFeatureState* state,
         Block* block0,
         Block* block,
-        const int x,
-        const int y) const
+        const int& x,
+        const int& y)
 {
     if(block != block0)
     {
@@ -263,8 +420,7 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
                                           itt->x, itt->y + 1, &autoAtari);
         }
 
-        if((!block1 || block1 == block) && (!block2 || block2 == block) &&
-           (!block3 || block3 == block) && (!block4 || block4 == block))
+        if(isProtected(block, itt->x, itt->y))
         {
             features->protectedLiberties += 1;
         }

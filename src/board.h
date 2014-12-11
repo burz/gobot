@@ -30,25 +30,13 @@ class Board
                                   Block* block3,
                                   Block* block4);
 
-    void calculatePerimeterFeaturesForBlock(PerimeterFeatureState* state,
-                                            Block* block0,
-                                            Block* block,
-                                            const BoardLocation location) const;
     void calculateSecondOrderLiberties(PerimeterFeatureState* state,
                                        Block* block0,
                                        Block* block,
                                        const int x,
                                        const int y,
                                        bool* autoAtari) const;
-    void calculateThirdOrderLiberties(PerimeterFeatureState* state,
-                                      Block* block,
-                                      const int x,
-                                      const int y) const;
-    void calculateLocalMajority(PerimeterFeatureState* state,
-                                Block* block0,
-                                Block* block,
-                                const int x,
-                                const int y) const;
+    bool isProtected(Block* block, const int x, const int y) const;
     void generatePerimeterFeatures(BlockFinalFeatures *features, Block* block) const;
   public:
     Board(const int size, const float komi);

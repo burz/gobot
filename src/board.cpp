@@ -73,13 +73,14 @@ SpaceState Board::getState(const int x, const int y) const
     return spaces[x][y].getState();
 }
 
-int canCount(std::set<BoardLocation>* counted, const int x, const int y)
+inline
+int canCount(std::set<BoardLocation>& counted, const int& x, const int& y)
 {
     BoardLocation location(x, y);
 
-    if(counted->find(location) == counted->end())
+    if(counted.find(location) == counted.end())
     {
-        counted->insert(location);
+        counted.insert(location);
 
         return 1;
     }
@@ -109,19 +110,19 @@ void Board::recalculateLiberties(Block* block)
 
         if(block1 && block1->getState() == EMPTY)
         {
-            result += canCount(&counted, itt->x - 1, itt->y);
+            result += canCount(counted, itt->x - 1, itt->y);
         }
         if(block2 && block2->getState() == EMPTY)
         {
-            result += canCount(&counted, itt->x, itt->y - 1);
+            result += canCount(counted, itt->x, itt->y - 1);
         }
         if(block3 && block3->getState() == EMPTY)
         {
-            result += canCount(&counted, itt->x + 1, itt->y);
+            result += canCount(counted, itt->x + 1, itt->y);
         }
         if(block4 && block4->getState() == EMPTY)
         {
-            result += canCount(&counted, itt->x, itt->y + 1);
+            result += canCount(counted, itt->x, itt->y + 1);
         }
     }
 
@@ -231,28 +232,29 @@ void Board::handlePossiblyDeadBlocks(
     }
 }
 
+inline
 void fixBlockPointers(
         Block* block0,
-        Block** block1,
-        Block** block2,
-        Block** block3,
-        Block** block4)
+        Block*& block1,
+        Block*& block2,
+        Block*& block3,
+        Block*& block4)
 {
-    if(*block1 == block0)
+    if(block1 == block0)
     {
-        *block1 = 0;
+        block1 = 0;
     }
-    if(*block2 == block0)
+    if(block2 == block0)
     {
-        *block2 = 0;
+        block2 = 0;
     }
-    if(*block3 == block0)
+    if(block3 == block0)
     {
-        *block3 = 0;
+        block3 = 0;
     }
-    if(*block4 == block0)
+    if(block4 == block0)
     {
-        *block4 = 0;
+        block4 = 0;
     }
 }
 
@@ -276,19 +278,19 @@ void Board::playMove(const int x, const int y, const SpaceState state)
 
     if(block1 && handleAdjacentBlock(currentBlock, block1))
     {
-        fixBlockPointers(block1, &block1, &block2, &block3, &block4);
+        fixBlockPointers(block1, block1, block2, block3, block4);
     }
     if(block2 && handleAdjacentBlock(currentBlock, block2))
     {
-        fixBlockPointers(block2, &block1, &block2, &block3, &block4);
+        fixBlockPointers(block2, block1, block2, block3, block4);
     }
     if(block3 && handleAdjacentBlock(currentBlock, block3))
     {
-        fixBlockPointers(block3, &block1, &block2, &block3, &block4);
+        fixBlockPointers(block3, block1, block2, block3, block4);
     }
     if(block4 && handleAdjacentBlock(currentBlock, block4))
     {
-        fixBlockPointers(block4, &block1, &block2, &block3, &block4);
+        fixBlockPointers(block4, block1, block2, block3, block4);
     }
 
     recalculateLiberties(currentBlock);
