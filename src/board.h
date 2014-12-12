@@ -69,9 +69,12 @@ class Board
     void setBlock(const int x, const int y, Block* block);
     void changeBlocks(Block* from, Block* to);
 
+    void getBlocks(std::set<Block*>& blocks) const;
+
     void print(void) const;
 
-    BlockFinalFeatures generateFeatures(Block* block) const;
+    BlockFinalFeatures generateFinalFeatures(Block* block) const;
+    float* generateFinalFeatureVector(Block* block) const;
 };
 
 #endif

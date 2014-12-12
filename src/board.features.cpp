@@ -128,28 +128,28 @@ void Board::calculateOptimisticChain(
         Block* block3 = getBlock(x + 1, y);
         Block* block4 = getBlock(x, y + 1);
 
-        if(block1 && block1->getState() == block0->getState() && block1 != block0 &&
+        if(block1 && block1->getState() == block0->getState() &&
            state->optimisticChain.find(block1) == state->optimisticChain.end())
         {
             state->optimisticChain.insert(block1);
 
             optimisticList.push_back(block1);
         }
-        if(block2 && block2->getState() == block0->getState() && block2 != block0 &&
+        if(block2 && block2->getState() == block0->getState() &&
            state->optimisticChain.find(block2) == state->optimisticChain.end())
         {
             state->optimisticChain.insert(block2);
 
             optimisticList.push_back(block2);
         }
-        if(block3 && block3->getState() == block0->getState() && block3 != block0 &&
+        if(block3 && block3->getState() == block0->getState() &&
            state->optimisticChain.find(block3) == state->optimisticChain.end())
         {
             state->optimisticChain.insert(block3);
 
             optimisticList.push_back(block3);
         }
-        if(block4 && block4->getState() == block0->getState() && block4 != block0 &&
+        if(block4 && block4->getState() == block0->getState() &&
            state->optimisticChain.find(block4) == state->optimisticChain.end())
         {
             state->optimisticChain.insert(block4);
@@ -187,25 +187,25 @@ void Board::generateOptimisticChain(
             Block* block3 = getBlock(itt->x + 1, itt->y);
             Block* block4 = getBlock(itt->x, itt->y + 1);
 
-            if(block1 && block1 != block && block1 != chainedBlock &&
+            if(block1 &&
                state->optimisticChain.find(block1) == state->optimisticChain.end())
             {
                 calculateOptimisticChain(state, block, block1, itt->x - 1, itt->y,
                                          perimeter, optimisticList);
             }
-            if(block2 && block2 != block &&
+            if(block2 &&
                state->optimisticChain.find(block2) == state->optimisticChain.end())
             {
                 calculateOptimisticChain(state, block, block2, itt->x, itt->y - 1,
                                          perimeter, optimisticList);
             }
-            if(block3 && block3 != block &&
+            if(block3 &&
                state->optimisticChain.find(block3) == state->optimisticChain.end())
             {
                 calculateOptimisticChain(state, block, block3, itt->x + 1, itt->y,
                                          perimeter, optimisticList);
             }
-            if(block4 && block4 != block &&
+            if(block4 &&
                state->optimisticChain.find(block4) == state->optimisticChain.end())
             {
                 calculateOptimisticChain(state, block, block4, itt->x, itt->y + 1,
@@ -505,6 +505,10 @@ void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block) co
 
     std::vector<Block*> optimisticList;
 
+    state.optimisticChain.insert(block);
+
+    optimisticList.push_back(block);
+
     itt = state.liberties.begin();
     end = state.liberties.end();
 
@@ -625,7 +629,7 @@ void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block) co
     features->localMajority = state.friendly.size() - state.enemy.size();
 }
 
-BlockFinalFeatures Board::generateFeatures(Block* block) const
+BlockFinalFeatures Board::generateFinalFeatures(Block* block) const
 {
     BlockFinalFeatures features;
 
@@ -634,4 +638,9 @@ BlockFinalFeatures Board::generateFeatures(Block* block) const
     generateLocalFeatures(&features, block);
 
     return features;
+}
+
+float* Board::generateFinalFeatureVector(Block* block) const
+{
+    return generateFinalFeatures(block).getFeatureVector();
 }

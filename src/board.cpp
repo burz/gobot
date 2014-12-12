@@ -322,6 +322,15 @@ void Board::changeBlocks(Block* from, Block* to)
     }
 }
 
+void Board::getBlocks(std::set<Block*>& blocks) const
+{
+    for(int x = 0; x < size; ++x) {
+        for(int y = 0; y < size; ++y) {
+            blocks.insert(getBlock(x, y));
+        }
+    }
+}
+
 void Board::print(void) const
 {
     for(int x = 0; x < size; ++x) {

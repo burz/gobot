@@ -25,7 +25,7 @@ class BlockFinalFeatures
     int OCPerimeter;
 
     void print(void) const;
-    float* getFeatures(void) const;
+    float* getFeatureVector(void) const;
 };
 
 #endif

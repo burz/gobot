@@ -17,7 +17,7 @@ void BlockFinalFeatures::print(void) const
     printf("Size: %d\nPerimeter: %d\n", OCSize, OCPerimeter);
 }
 
-float* BlockFinalFeatures::getFeatures(void) const
+float* BlockFinalFeatures::getFeatureVector(void) const
 {
     float* result = new float[NUMBER_OF_FEATURES]();
 
