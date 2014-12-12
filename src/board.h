@@ -4,6 +4,8 @@
 #include "space.h"
 #include "block.h"
 
+#include <vector>
+
 typedef struct {
     std::set<BoardLocation> perimeter;
     std::set<BoardLocation> liberties;
@@ -13,7 +15,8 @@ typedef struct {
     std::set<Block*> adjacentOpponentBlocks;
     std::set<BoardLocation> friendly;
     std::set<BoardLocation> enemy;
-} PerimeterFeatureState;
+    std::set<Block*> optimisticChain;
+} LocalFeatureState;
 
 class Board
 {
@@ -30,14 +33,26 @@ class Board
                                   Block* block3,
                                   Block* block4);
 
-    void calculateSecondOrderLiberties(PerimeterFeatureState* state,
+    void calculateSecondOrderLiberties(LocalFeatureState* state,
                                        Block* block0,
                                        Block* block,
                                        const int x,
                                        const int y,
-                                       bool* autoAtari) const;
+                                       bool& autoAtari,
+                                       std::vector<Block*>& optimisticList) const;
+    void calculateOptimisticChain(LocalFeatureState* state,
+                                  Block* block0,
+                                  Block* block,
+                                  const int x,
+                                  const int y,
+                                  std::set<BoardLocation>& perimeter,
+                                  std::vector<Block*>& optimisticList) const;
+    void generateOptimisticChain(BlockFinalFeatures *features,
+                                 LocalFeatureState* state,
+                                 Block* block,
+                                 std::vector<Block*>& optimisticList) const;
     bool isProtected(Block* block, const int x, const int y) const;
-    void generatePerimeterFeatures(BlockFinalFeatures *features, Block* block) const;
+    void generateLocalFeatures(BlockFinalFeatures *features, Block* block) const;
   public:
     Board(const int size, const float komi);
     ~Board(void);

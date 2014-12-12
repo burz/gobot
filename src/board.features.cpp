@@ -5,8 +5,8 @@
 #include <set>
 
 inline
-void calculatePerimeterFeaturesForBlock(
-        PerimeterFeatureState* state,
+void calculateLocalFeaturesForBlock(
+        LocalFeatureState* state,
         Block* block0,
         Block* block,
         const BoardLocation& location)
@@ -27,12 +27,13 @@ void calculatePerimeterFeaturesForBlock(
 }
 
 void Board::calculateSecondOrderLiberties(
-        PerimeterFeatureState* state,
+        LocalFeatureState* state,
         Block* block0,
         Block* block,
         const int x,
         const int y,
-        bool* autoAtari) const
+        bool& autoAtari,
+        std::vector<Block*>& optimisticList) const
 {
     if(block->getState() == EMPTY)
     {
@@ -43,8 +44,13 @@ void Board::calculateSecondOrderLiberties(
             state->secondOrderLiberties.insert(location);
         }
     }
-    else if(block->getState() != block0->getState() &&
-            block0->getLiberties() == 2)
+    else if(block->getState() == block0->getState() && block != block0 &&
+            state->optimisticChain.find(block) == state->optimisticChain.end())
+    {
+        state->optimisticChain.insert(block);
+        optimisticList.push_back(block);
+    }
+    else if(block0->getLiberties() == 2)
     {
         Block* block1 = getBlock(x - 1, y);
         Block* block2 = getBlock(x, y - 1);
@@ -97,9 +103,119 @@ void Board::calculateSecondOrderLiberties(
 
         if(count > perimeter - 2)
         {
-            *autoAtari = true;
+            autoAtari = true;
         }
     }
+}
+
+void Board::calculateOptimisticChain(
+        LocalFeatureState* state,
+        Block* block0,
+        Block* block,
+        const int x,
+        const int y,
+        std::set<BoardLocation>& perimeter,
+        std::vector<Block*>& optimisticList) const
+{
+    BoardLocation location(x, y);
+
+    perimeter.insert(location);
+
+    if(block->getState() == EMPTY)
+    {
+        Block* block1 = getBlock(x - 1, y);
+        Block* block2 = getBlock(x, y - 1);
+        Block* block3 = getBlock(x + 1, y);
+        Block* block4 = getBlock(x, y + 1);
+
+        if(block1 && block1->getState() == block0->getState() && block1 != block0 &&
+           state->optimisticChain.find(block1) == state->optimisticChain.end())
+        {
+            state->optimisticChain.insert(block1);
+
+            optimisticList.push_back(block1);
+        }
+        if(block2 && block2->getState() == block0->getState() && block2 != block0 &&
+           state->optimisticChain.find(block2) == state->optimisticChain.end())
+        {
+            state->optimisticChain.insert(block2);
+
+            optimisticList.push_back(block2);
+        }
+        if(block3 && block3->getState() == block0->getState() && block3 != block0 &&
+           state->optimisticChain.find(block3) == state->optimisticChain.end())
+        {
+            state->optimisticChain.insert(block3);
+
+            optimisticList.push_back(block3);
+        }
+        if(block4 && block4->getState() == block0->getState() && block4 != block0 &&
+           state->optimisticChain.find(block4) == state->optimisticChain.end())
+        {
+            state->optimisticChain.insert(block4);
+
+            optimisticList.push_back(block4);
+        }
+    }
+}
+
+void Board::generateOptimisticChain(
+        BlockFinalFeatures* features,
+        LocalFeatureState* state,
+        Block* block,
+        std::vector<Block*>& optimisticList) const
+{
+    features->OCSize = 0;
+
+    std::set<BoardLocation> perimeter;
+
+    while(optimisticList.size() > 0)
+    {
+        Block* chainedBlock = optimisticList.back();
+
+        optimisticList.pop_back();
+
+        features->OCSize += chainedBlock->getSize();
+
+        std::set<BoardLocation>::const_iterator itt = chainedBlock->locationsBegin();
+        std::set<BoardLocation>::const_iterator end = chainedBlock->locationsEnd();
+
+        for( ; itt != end; ++itt)
+        {
+            Block* block1 = getBlock(itt->x - 1, itt->y);
+            Block* block2 = getBlock(itt->x, itt->y - 1);
+            Block* block3 = getBlock(itt->x + 1, itt->y);
+            Block* block4 = getBlock(itt->x, itt->y + 1);
+
+            if(block1 && block1 != block && block1 != chainedBlock &&
+               state->optimisticChain.find(block1) == state->optimisticChain.end())
+            {
+                calculateOptimisticChain(state, block, block1, itt->x - 1, itt->y,
+                                         perimeter, optimisticList);
+            }
+            if(block2 && block2 != block &&
+               state->optimisticChain.find(block2) == state->optimisticChain.end())
+            {
+                calculateOptimisticChain(state, block, block2, itt->x, itt->y - 1,
+                                         perimeter, optimisticList);
+            }
+            if(block3 && block3 != block &&
+               state->optimisticChain.find(block3) == state->optimisticChain.end())
+            {
+                calculateOptimisticChain(state, block, block3, itt->x + 1, itt->y,
+                                         perimeter, optimisticList);
+            }
+            if(block4 && block4 != block &&
+               state->optimisticChain.find(block4) == state->optimisticChain.end())
+            {
+                calculateOptimisticChain(state, block, block4, itt->x, itt->y + 1,
+                                         perimeter, optimisticList);
+            }
+        }
+    }
+
+    features->OCNumberOfBlocks = state->optimisticChain.size();
+    features->OCPerimeter = perimeter.size();
 }
 
 inline
@@ -237,7 +353,7 @@ bool Board::isProtected(Block* block, const int x, const int y) const
 
 inline
 void calculateThirdOrderLiberties(
-        PerimeterFeatureState* state,
+        LocalFeatureState* state,
         Block* block,
         const int& x,
         const int& y)
@@ -256,7 +372,7 @@ void calculateThirdOrderLiberties(
 
 inline
 void calculateLocalMajority(
-        PerimeterFeatureState* state,
+        LocalFeatureState* state,
         Block* block0,
         Block* block,
         const int& x,
@@ -277,9 +393,9 @@ void calculateLocalMajority(
     }
 }
 
-void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block) const
+void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block) const
 {
-    PerimeterFeatureState state;
+    LocalFeatureState state;
 
     std::set<BoardLocation>::const_iterator itt = block->locationsBegin();
     std::set<BoardLocation>::const_iterator end = block->locationsEnd();
@@ -318,25 +434,25 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
         {
             BoardLocation location(itt->x - 1, itt->y);
 
-            calculatePerimeterFeaturesForBlock(&state, block, block1, location);
+            calculateLocalFeaturesForBlock(&state, block, block1, location);
         }
         if(block2)
         {
             BoardLocation location(itt->x, itt->y - 1);
 
-            calculatePerimeterFeaturesForBlock(&state, block, block2, location);
+            calculateLocalFeaturesForBlock(&state, block, block2, location);
         }
         if(block3)
         {
             BoardLocation location(itt->x + 1, itt->y);
 
-            calculatePerimeterFeaturesForBlock(&state, block, block3, location);
+            calculateLocalFeaturesForBlock(&state, block, block3, location);
         }
         if(block4)
         {
             BoardLocation location(itt->x, itt->y + 1);
 
-            calculatePerimeterFeaturesForBlock(&state, block, block4, location);
+            calculateLocalFeaturesForBlock(&state, block, block4, location);
         }
 
         int distances[2];
@@ -387,6 +503,8 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
     features->protectedLiberties = 0;
     features->autoAtariLiberties = 0;
 
+    std::vector<Block*> optimisticList;
+
     itt = state.liberties.begin();
     end = state.liberties.end();
 
@@ -401,23 +519,23 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
 
         if(block1)
         {
-            calculateSecondOrderLiberties(&state, block, block1,
-                                          itt->x - 1, itt->y, &autoAtari);
+            calculateSecondOrderLiberties(&state, block, block1, itt->x - 1, itt->y,
+                                          autoAtari, optimisticList);
         }
         if(block2)
         {
-            calculateSecondOrderLiberties(&state, block, block2,
-                                          itt->x, itt->y - 1, &autoAtari);
+            calculateSecondOrderLiberties(&state, block, block2, itt->x, itt->y - 1,
+                                          autoAtari, optimisticList);
         }
         if(block3)
         {
-            calculateSecondOrderLiberties(&state, block, block3,
-                                          itt->x + 1, itt->y, &autoAtari);
+            calculateSecondOrderLiberties(&state, block, block3, itt->x + 1, itt->y,
+                                          autoAtari, optimisticList);
         }
         if(block4)
         {
-            calculateSecondOrderLiberties(&state, block, block4,
-                                          itt->x, itt->y + 1, &autoAtari);
+            calculateSecondOrderLiberties(&state, block, block4, itt->x, itt->y + 1,
+                                          autoAtari, optimisticList);
         }
 
         if(isProtected(block, itt->x, itt->y))
@@ -432,6 +550,8 @@ void Board::generatePerimeterFeatures(BlockFinalFeatures *features, Block* block
     }
 
     features->secondOrderLiberties = state.secondOrderLiberties.size();
+
+    generateOptimisticChain(features, &state, block, optimisticList);
 
     itt = state.secondOrderLiberties.begin();
     end = state.secondOrderLiberties.end();
@@ -511,7 +631,7 @@ BlockFinalFeatures Board::generateFeatures(Block* block) const
 
     features.size = block->getSize();
 
-    generatePerimeterFeatures(&features, block);
+    generateLocalFeatures(&features, block);
 
     return features;
 }
