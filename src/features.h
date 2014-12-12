@@ -1,7 +1,7 @@
 #ifndef _FEATURES_H_
 #define _FEATURES_H_
 
-#define NUMBER_OF_FEATURES 15
+#define NUMBER_OF_FEATURES 24
 
 class BlockFinalFeatures
 {
@@ -23,6 +23,18 @@ class BlockFinalFeatures
     int OCNumberOfBlocks;
     int OCSize;
     int OCPerimeter;
+    // Weakest Adjacent Enemy Features
+    int WAEPerimeter;
+    int WAELiberties;
+    int WAESharedLiberties;
+    // Second Weakest Adjacent Enemy Features
+    int SWAEPerimeter;
+    int SWAELiberties;
+    int SWAESharedLiberties;
+    // Weakest Adjacent Chained Enemy Features
+    int WACEPerimeter;
+    int WACELiberties;
+    int WACESharedLiberties;
 
     void print(void) const;
     float* getFeatureVector(void) const;

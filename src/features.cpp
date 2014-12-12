@@ -12,9 +12,21 @@ void BlockFinalFeatures::print(void) const
     printf("Third-order Liberties: %d\nNumber of Adjacent Opponent Blocks: %d\n",
             thirdOrderLiberties, numberOfAdjacentOpponentBlocks);
     printf("Local Majority: %d\nCenter of Mass: %f\n", localMajority, centerOfMass);
-    printf("Bounding Box Size: %d\n\nOptimistic Chain Features\n", boundingBoxSize);
-    printf("-------------------------\nNumber of Blocks: %d\n", OCNumberOfBlocks);
-    printf("Size: %d\nPerimeter: %d\n", OCSize, OCPerimeter);
+    printf("Bounding Box Size: %d\n\n", boundingBoxSize);
+    printf("Optimistic Chain Features\n-------------------------\n");
+    printf("Number of Blocks: %d\nSize: %d\n", OCNumberOfBlocks, OCSize);
+    printf("Perimeter: %d\n\n", OCPerimeter);
+    printf("Weakest Adjacent Enemy Features\n-------------------------------\n");
+    printf("Perimeter: %d\nLiberties: %d\n", WAEPerimeter, WAELiberties);
+    printf("Shared Liberties: %d\n\n", WAESharedLiberties);
+    printf("Second Weakest Adjacent Enemy Features\n");
+    printf("--------------------------------------\n");
+    printf("Perimeter: %d\nLiberties: %d\n", SWAEPerimeter, SWAELiberties);
+    printf("Shared Liberties: %d\n\n", SWAESharedLiberties);
+    printf("Weakest Adjacent Chained Enemy Features\n");
+    printf("---------------------------------------\n");
+    printf("Perimeter: %d\nLiberties: %d\n", WACEPerimeter, WACELiberties);
+    printf("Shared Liberties: %d\n", WACESharedLiberties);
 }
 
 float* BlockFinalFeatures::getFeatureVector(void) const
@@ -38,6 +50,18 @@ float* BlockFinalFeatures::getFeatureVector(void) const
     result[12] = OCNumberOfBlocks;
     result[13] = OCSize;
     result[14] = OCPerimeter;
+    // Weakest Adjacent Enemy Features
+    result[15] = WAEPerimeter;
+    result[16] = WAELiberties;
+    result[17] = WAESharedLiberties;
+    // Second Weakest Adjacent Enemy Features
+    result[18] = SWAEPerimeter;
+    result[19] = SWAELiberties;
+    result[20] = SWAESharedLiberties;
+    // Weakest Adjacent Chained Enemy Features
+    result[21] = WACEPerimeter;
+    result[22] = WACELiberties;
+    result[23] = WACESharedLiberties;
 
     return result;
 }
