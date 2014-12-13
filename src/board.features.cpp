@@ -36,15 +36,13 @@ void handleTerritoryMember(
         const int& x,
         const int& y,
         std::set<BoardLocation>& perimeter,
-        std::set<BoardLocation>& directLiberties,
-        std::set<BoardLocation>& friendlyLiberties,
-        std::set<BoardLocation>& enemyLiberties)
+        bool& directLiberty,
+        bool& friendlyLiberty,
+        bool& enemyLiberty)
 {
     if(block == block0)
     {
-        BoardLocation location(x, y);
-
-        directLiberties.insert(location);
+        directLiberty = true;
     }
     else if(block->getState() != EMPTY)
     {
@@ -54,11 +52,11 @@ void handleTerritoryMember(
 
         if(block->getState() == block0->getState())
         {
-            friendlyLiberties.insert(location);
+            friendlyLiberty = true;
         }
         else
         {
-            enemyLiberties.insert(location);
+            enemyLiberty = true;
         }
     }
 }
@@ -135,9 +133,10 @@ void Board::handleAdjacentTerritories(
     for( ; itt != end; ++itt)
     {
         std::set<BoardLocation> perimeter;
-        std::set<BoardLocation> directLiberties;
-        std::set<BoardLocation> friendlyLiberties;
-        std::set<BoardLocation> enemyLiberties;
+
+        int directLiberties = 0;
+        int friendlyLiberties = 0;
+        int enemyLiberties = 0;
 
         std::set<BoardLocation>::const_iterator locationItt = (*itt)->locationsBegin();
         std::set<BoardLocation>::const_iterator locationEnd = (*itt)->locationsEnd();
@@ -151,35 +150,52 @@ void Board::handleAdjacentTerritories(
             Block* block3 = getBlock(locationItt->x + 1, locationItt->y);
             Block* block4 = getBlock(locationItt->x, locationItt->y + 1);
 
+            bool directLiberty = false;
+            bool friendlyLiberty = false;
+            bool enemyLiberty = false;
+
             if(block1)
             {
                 handleTerritoryMember(block, block1, locationItt->x - 1, locationItt->y,
-                                      perimeter, directLiberties, friendlyLiberties,
-                                      enemyLiberties);
+                                      perimeter, directLiberty, friendlyLiberty,
+                                      enemyLiberty);
             }
             if(block2)
             {
                 handleTerritoryMember(block, block2, locationItt->x, locationItt->y - 1,
-                                      perimeter, directLiberties, friendlyLiberties,
-                                      enemyLiberties);
+                                      perimeter, directLiberty, friendlyLiberty,
+                                      enemyLiberty);
             }
             if(block3)
             {
                 handleTerritoryMember(block, block3, locationItt->x + 1, locationItt->y,
-                                      perimeter, directLiberties, friendlyLiberties,
-                                      enemyLiberties);
+                                      perimeter, directLiberty, friendlyLiberty,
+                                      enemyLiberty);
             }
             if(block4)
             {
                 handleTerritoryMember(block, block4, locationItt->x, locationItt->y + 1,
-                                      perimeter, directLiberties, friendlyLiberties,
-                                      enemyLiberties);
+                                      perimeter, directLiberty, friendlyLiberty,
+                                      enemyLiberty);
+            }
+
+            if(directLiberty)
+            {
+                ++directLiberties;
+            }
+            if(friendlyLiberty)
+            {
+                ++friendlyLiberties;
+            }
+            if(enemyLiberty)
+            {
+                ++enemyLiberties;
             }
 
             partialSum += chooseSmallestDistances(size, locationItt->x, locationItt->y);
         }
 
-        if(enemyLiberties.size() == 0)
+        if(enemyLiberties == 0)
         {
             ++CETNumberOfTerritories;
             CETSize += (*itt)->getSize();
@@ -190,9 +206,9 @@ void Board::handleAdjacentTerritories(
         else
         {
             ++DTNumberOfTerritories;
-            DTDirectLiberties = directLiberties.size();
-            DTLibertiesOfFriendlyBlocks = friendlyLiberties.size();
-            DTLibertiesOfEnemyBlocks = enemyLiberties.size();
+            DTDirectLiberties += directLiberties;
+            DTLibertiesOfFriendlyBlocks += friendlyLiberties;
+            DTLibertiesOfEnemyBlocks += enemyLiberties;
         }
     }
 
