@@ -25,6 +25,7 @@ class Board
     const int size;
     float score;
     Space** spaces;
+    bool splitEmpties;
 
     void recalculateLiberties(Block* block);
     bool handleAdjacentBlock(Block* currentBlock, Block* block);
@@ -33,6 +34,8 @@ class Board
                                   Block* block2,
                                   Block* block3,
                                   Block* block4);
+
+    void splitEmptyBlocks(void);
 
     void calculateSecondOrderLiberties(LocalFeatureState* state,
                                        Block* block0,
@@ -76,14 +79,15 @@ class Board
 
     Block* getBlock(const int x, const int y) const;
     void setBlock(const int x, const int y, Block* block);
+    void setBlock(const BoardLocation& location, Block* block) const;
     void changeBlocks(Block* from, Block* to);
 
     void getBlocks(std::set<Block*>& blocks) const;
 
     void print(void) const;
 
-    BlockFinalFeatures generateFinalFeatures(Block* block) const;
-    float* generateFinalFeatureVector(Block* block) const;
+    BlockFinalFeatures generateFinalFeatures(Block* block);
+    float* generateFinalFeatureVector(Block* block);
 };
 
 #endif

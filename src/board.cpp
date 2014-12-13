@@ -10,6 +10,8 @@ Board::Board(const int _size, const float komi)
 {
     score = komi;
 
+    splitEmpties = false;
+
     spaces = new Space*[size]();
 
     Block* block = new Block();
@@ -28,7 +30,7 @@ Board::Board(const int _size, const float komi)
 
             BoardLocation location(i, j);
 
-            block->add(location, 0);
+            block->add(location);
         }
     }
 }
@@ -301,6 +303,8 @@ void Board::playMove(const int x, const int y, const SpaceState state)
     recalculateLiberties(currentBlock);
 
     handlePossiblyDeadBlocks(block1, block2, block3, block4);
+
+    splitEmpties = false;
 }
 
 Block* Board::getBlock(const int x, const int y) const
@@ -318,6 +322,11 @@ void Board::setBlock(const int x, const int y, Block* block)
     spaces[x][y].setBlock(block);
 }
 
+void Board::setBlock(const BoardLocation& location, Block* block) const
+{
+    spaces[location.x][location.y].setBlock(block);
+}
+
 void Board::changeBlocks(Block* from, Block* to)
 {
     for(int x = 0; x < size; ++x) {
@@ -332,6 +341,61 @@ void Board::getBlocks(std::set<Block*>& blocks) const
     for(int x = 0; x < size; ++x) {
         for(int y = 0; y < size; ++y) {
             blocks.insert(getBlock(x, y));
+        }
+    }
+}
+
+void Board::splitEmptyBlocks(void)
+{
+    std::set<Block*> oldBlocks;
+    std::vector<Block*> newEmptyBlocks;
+
+    getBlocks(oldBlocks);
+
+    std::set<Block*>::iterator itt = oldBlocks.begin();
+    std::set<Block*>::iterator end = oldBlocks.end();
+
+    for( ; itt != end; ++itt)
+    {
+        if((*itt)->getState() == EMPTY)
+        {
+            std::set<BoardLocation>::iterator locationItt = (*itt)->locationsBegin();
+            std::set<BoardLocation>::iterator locationEnd = (*itt)->locationsEnd();
+
+            for( ; locationItt != locationEnd; ++locationItt)
+            {
+                bool placed = false;
+
+                std::vector<Block*>::iterator emptyItt = newEmptyBlocks.begin();
+                std::vector<Block*>::iterator emptyEnd = newEmptyBlocks.end();
+
+                for( ; emptyItt != emptyEnd; ++emptyItt)
+                {
+                    if((*emptyItt)->touches(*locationItt))
+                    {
+                        (*emptyItt)->add(*locationItt);
+
+                        setBlock(*locationItt, *emptyItt);
+
+                        placed = true;
+
+                        break;
+                    }
+                }
+
+                if(!placed)
+                {
+                    Block* block = new Block(EMPTY);
+
+                    block->add(*locationItt);
+
+                    setBlock(*locationItt, block);
+
+                    newEmptyBlocks.push_back(block);
+                }
+            }
+
+            delete *itt;
         }
     }
 }

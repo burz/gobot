@@ -14,7 +14,10 @@ Block::Block(const SpaceState _state)
     liberties = 0;
 }
 
-Block::Block(const SpaceState _state, const BoardLocation location, const int _liberties)
+Block::Block(
+        const SpaceState _state,
+        const BoardLocation& location,
+        const int _liberties)
 {
     state = _state;
 
@@ -23,7 +26,7 @@ Block::Block(const SpaceState _state, const BoardLocation location, const int _l
     locations.insert(location);
 }
 
-bool Block::isMember(const SpaceState _state, const BoardLocation location)
+bool Block::isMember(const SpaceState _state, const BoardLocation& location)
 {
     if(state == _state)
     {
@@ -69,11 +72,9 @@ void Block::setState(const SpaceState _state)
     state = _state;
 }
 
-void Block::add(const BoardLocation location, int changeInLiberties)
+void Block::add(const BoardLocation& location)
 {
     locations.insert(location);
-
-    liberties += changeInLiberties;
 }
 
 bool Block::touches(const int x, const int y) const
@@ -94,7 +95,7 @@ bool Block::touches(const int x, const int y) const
     return false;
 }
 
-bool Block::touches(const BoardLocation location) const
+bool Block::touches(const BoardLocation& location) const
 {
     std::set<BoardLocation>::const_iterator itt = locations.begin();
 
@@ -112,7 +113,7 @@ bool Block::touches(const BoardLocation location) const
     return false;
 }
 
-bool Block::contains(const BoardLocation location) const
+bool Block::contains(const BoardLocation& location) const
 {
     std::set<BoardLocation>::const_iterator itt = locations.begin();
 
@@ -129,7 +130,7 @@ bool Block::contains(const BoardLocation location) const
     return false;
 }
 
-void Block::removeLocation(const BoardLocation location)
+void Block::removeLocation(const BoardLocation& location)
 {
     std::set<BoardLocation>::iterator itt = locations.begin();
 

@@ -788,8 +788,15 @@ void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block) co
     features->localMajority = state.friendly.size() - state.enemy.size();
 }
 
-BlockFinalFeatures Board::generateFinalFeatures(Block* block) const
+BlockFinalFeatures Board::generateFinalFeatures(Block* block)
 {
+    if(!splitEmpties)
+    {
+        splitEmptyBlocks();
+
+        splitEmpties = true;
+    }
+
     BlockFinalFeatures features;
 
     features.size = block->getSize();
@@ -799,7 +806,7 @@ BlockFinalFeatures Board::generateFinalFeatures(Block* block) const
     return features;
 }
 
-float* Board::generateFinalFeatureVector(Block* block) const
+float* Board::generateFinalFeatureVector(Block* block)
 {
     return generateFinalFeatures(block).getFeatureVector();
 }

@@ -15,9 +15,9 @@ class Block
   public:
     Block(void);
     Block(const SpaceState state);
-    Block(const SpaceState state, const BoardLocation location, const int liberties);
+    Block(const SpaceState state, const BoardLocation& location, const int liberties);
 
-    bool isMember(const SpaceState state, const BoardLocation location);
+    bool isMember(const SpaceState state, const BoardLocation& location);
 
     int getSize(void) const;
 
@@ -28,13 +28,13 @@ class Block
     SpaceState getState(void) const;
     void setState(const SpaceState state);
 
-    void add(const BoardLocation location, int changeInLiberties);
+    void add(const BoardLocation& location);
 
     bool touches(const int x, const int y) const;
-    bool touches(const BoardLocation location) const;
-    bool contains(const BoardLocation location) const;
+    bool touches(const BoardLocation& location) const;
+    bool contains(const BoardLocation& location) const;
 
-    void removeLocation(const BoardLocation location);
+    void removeLocation(const BoardLocation& location);
 
     std::set<BoardLocation>::const_iterator locationsBegin(void) const;
     std::set<BoardLocation>::const_iterator locationsEnd(void) const;
