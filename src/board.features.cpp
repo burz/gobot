@@ -887,6 +887,15 @@ void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block) co
 
     generateOptimisticChain(features, &state, block, optimisticList);
 
+    handleAdjacentTerritories(state.optimisticChain,
+                              state.adjacentChainedTerritories,
+                              features->OCCETNumberOfTerritories, features->OCCETSize,
+                              features->OCCETPerimeter, features->OCCETCenterOfMass,
+                              features->OCDTNumberOfTerritories,
+                              features->OCDTDirectLiberties,
+                              features->OCDTLibertiesOfFriendlyBlocks,
+                              features->OCDTLibertiesOfEnemyBlocks);
+
     generateWeakestEnemyFeatures(features, &state, block);
 
     itt = state.secondOrderLiberties.begin();
