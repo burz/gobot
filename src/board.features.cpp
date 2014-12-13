@@ -352,6 +352,132 @@ bool Board::isProtected(Block* block, const int x, const int y) const
 }
 
 inline
+void calculateWeakEnemyPerimeter(
+        int& liberties,
+        int& sharedLiberties,
+        Block* block0,
+        Block* block,
+        const int& x,
+        const int& y,
+        std::set<BoardLocation>& perimeter)
+{
+    BoardLocation location(x, y);
+
+    if(perimeter.find(location) == perimeter.end())
+    {
+        perimeter.insert(location);
+
+        if(block->getState() == EMPTY)
+        {
+            liberties += 1;
+
+            if(block0->touches(x, y))
+            {
+                sharedLiberties += 1;
+            }
+        }
+    }
+}
+
+void Board::calculateWeakEnemyFeatures(
+        int& perimeter,
+        int& liberties,
+        int& sharedLiberties,
+        Block* block0,
+        Block* block) const
+{
+    liberties = 0;
+    sharedLiberties = 0;
+
+    std::set<BoardLocation> perimeterPoints;
+
+    std::set<BoardLocation>::const_iterator itt = block->locationsBegin();
+    std::set<BoardLocation>::const_iterator end = block->locationsEnd();
+
+    for( ; itt != end; ++itt)
+    {
+        Block* block1 = getBlock(itt->x - 1, itt->y);
+        Block* block2 = getBlock(itt->x, itt->y - 1);
+        Block* block3 = getBlock(itt->x + 1, itt->y);
+        Block* block4 = getBlock(itt->x, itt->y + 1);
+
+        if(block1 && block1 != block)
+        {
+            calculateWeakEnemyPerimeter(liberties, sharedLiberties, block0, block1,
+                                        itt->x - 1, itt->y, perimeterPoints);
+        }
+        if(block2 && block2 != block)
+        {
+            calculateWeakEnemyPerimeter(liberties, sharedLiberties, block0, block2,
+                                        itt->x, itt->y - 1, perimeterPoints);
+        }
+        if(block3 && block3 != block)
+        {
+            calculateWeakEnemyPerimeter(liberties, sharedLiberties, block0, block3,
+                                        itt->x + 1, itt->y, perimeterPoints);
+        }
+        if(block4 && block4 != block)
+        {
+            calculateWeakEnemyPerimeter(liberties, sharedLiberties, block0, block4,
+                                        itt->x, itt->y + 1, perimeterPoints);
+        }
+    }
+
+    perimeter = perimeterPoints.size();
+}
+
+void Board::generateWeakestEnemyFeatures(
+        BlockFinalFeatures *features,
+        LocalFeatureState* state,
+        Block* block) const
+{
+    Block* weakestBlocks[] = { 0, 0 };
+
+    std::set<Block*>::const_iterator itt = state->adjacentOpponentBlocks.begin();
+    std::set<Block*>::const_iterator end = state->adjacentOpponentBlocks.end();
+
+    for( ; itt != end; ++itt)
+    {
+        if(!weakestBlocks[0] || (*itt)->getLiberties() < weakestBlocks[0]->getLiberties())
+        {
+            weakestBlocks[1] = weakestBlocks[0];
+            weakestBlocks[0] = *itt;
+        }
+        else if(!weakestBlocks[1] ||
+                (*itt)->getLiberties() < weakestBlocks[1]->getLiberties())
+        {
+            weakestBlocks[1] = *itt;
+        }
+    }
+
+    if(weakestBlocks[0])
+    {
+        calculateWeakEnemyFeatures(features->WAEPerimeter,
+                                   features->WAELiberties,
+                                   features->WAESharedLiberties,
+                                   block, weakestBlocks[0]);
+    }
+    else
+    {
+        features->WAEPerimeter = 0;
+        features->WAELiberties = 0;
+        features->WAESharedLiberties = 0;
+    }
+    if(weakestBlocks[1])
+    {
+        calculateWeakEnemyFeatures(features->SWAEPerimeter, features->SWAELiberties,
+                                   features->SWAESharedLiberties,
+                                   block, weakestBlocks[1]);
+    }
+    else
+    {
+        features->SWAEPerimeter = 0;
+        features->SWAELiberties = 0;
+        features->SWAESharedLiberties = 0;
+    }
+}
+
+inline
 void calculateThirdOrderLiberties(
         LocalFeatureState* state,
         Block* block,
@@ -556,6 +682,8 @@ void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block) co
     features->secondOrderLiberties = state.secondOrderLiberties.size();
 
     generateOptimisticChain(features, &state, block, optimisticList);
+
+    generateWeakestEnemyFeatures(features, &state, block);
 
     itt = state.secondOrderLiberties.begin();
     end = state.secondOrderLiberties.end();

@@ -52,6 +52,14 @@ class Board
                                  Block* block,
                                  std::vector<Block*>& optimisticList) const;
     bool isProtected(Block* block, const int x, const int y) const;
+    void calculateWeakEnemyFeatures(int& perimeter,
+                                    int& liberties,
+                                    int& sharedLiberties,
+                                    Block* block0,
+                                    Block* block) const;
+    void generateWeakestEnemyFeatures(BlockFinalFeatures *features,
+                                      LocalFeatureState* state,
+                                      Block* block) const;
     void generateLocalFeatures(BlockFinalFeatures *features, Block* block) const;
   public:
     Board(const int size, const float komi);
