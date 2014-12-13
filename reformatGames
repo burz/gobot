@@ -5,7 +5,7 @@ then
     mkdir reformatedGames
 fi
 
-FILES=$(find . -type f -name '*.sgf')
+FILES=$(find games -type f -name '*.sgf')
 
 A=0
 
