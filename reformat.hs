@@ -38,10 +38,15 @@ dataPoint = do
 convertMove :: String -> Position
 convertMove (x : y : _) = (ord x - 97, ord y - 97)
 
+validateMove :: Position -> Parser Position
+validateMove (x, y) = if (x, y) >= (0, 0) && (x, y) < (19, 19)
+    then return (x, y)
+    else fail "Illegal move"
+
 move :: Parser Position
 move = do
     dataPoints <- many dataPoint
-    return $ foldr find (0, 0) dataPoints
+    validateMove $ foldr find (0, 0) dataPoints
     where find (f, a) r = if f == "W"
             then convertMove a
             else if f == "B"
