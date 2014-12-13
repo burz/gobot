@@ -348,7 +348,7 @@ void Board::getBlocks(std::set<Block*>& blocks) const
 void Board::splitEmptyBlocks(void)
 {
     std::set<Block*> oldBlocks;
-    std::vector<Block*> newEmptyBlocks;
+    std::set<Block*> newEmptyBlocks;
 
     getBlocks(oldBlocks);
 
@@ -364,23 +364,44 @@ void Board::splitEmptyBlocks(void)
 
             for( ; locationItt != locationEnd; ++locationItt)
             {
-                bool placed = false;
+                Block* placed = 0;
 
-                std::vector<Block*>::iterator emptyItt = newEmptyBlocks.begin();
-                std::vector<Block*>::iterator emptyEnd = newEmptyBlocks.end();
+                std::set<Block*> toDelete;
+
+                std::set<Block*>::iterator emptyItt = newEmptyBlocks.begin();
+                std::set<Block*>::iterator emptyEnd = newEmptyBlocks.end();
 
                 for( ; emptyItt != emptyEnd; ++emptyItt)
                 {
                     if((*emptyItt)->touches(*locationItt))
                     {
-                        (*emptyItt)->add(*locationItt);
+                        if(placed)
+                        {
+                            placed->absorb(*emptyItt);
 
-                        setBlock(*locationItt, *emptyItt);
+                            changeBlocks(*emptyItt, placed);
 
-                        placed = true;
+                            toDelete.insert(*emptyItt);
+                        }
+                        else
+                        {
+                            (*emptyItt)->add(*locationItt);
 
-                        break;
+                            setBlock(*locationItt, *emptyItt);
+
+                            placed = *emptyItt;
+                        }
                     }
+                }
+
+                std::set<Block*>::iterator toDeleteItt = toDelete.begin();
+                std::set<Block*>::iterator toDeleteEnd = toDelete.end();
+
+                for( ; toDeleteItt != toDeleteEnd; ++toDeleteItt)
+                {
+                    newEmptyBlocks.erase(*toDeleteItt);
+
+                    delete *toDeleteItt;
                 }
 
                 if(!placed)
@@ -391,7 +412,7 @@ void Board::splitEmptyBlocks(void)
 
                     setBlock(*locationItt, block);
 
-                    newEmptyBlocks.push_back(block);
+                    newEmptyBlocks.insert(block);
                 }
             }
 
