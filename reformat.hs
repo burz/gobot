@@ -1,11 +1,12 @@
-import Text.Parsec
-import qualified Text.Parsec.Token as Token
-import Text.Parsec.Language
-import Text.Parsec.String
 import Control.Applicative ((<*), (*>))
 import Data.Char (ord)
 import System.Environment (getArgs)
+import System.Exit (exitFailure)
 import System.IO
+import Text.Parsec
+import Text.Parsec.Language
+import Text.Parsec.String
+import qualified Text.Parsec.Token as Token
 
 lexer = Token.makeTokenParser emptyDef
     { Token.identStart = letter
@@ -79,7 +80,8 @@ main = do
         (f : o : _) -> do
             r <- parseFile f
             case r of
-                Left e -> putStrLn $ "Poorly formed file: " ++ show e
-                Right g -> do
-                    writeFile o $ show g
+                Left e -> do
+                    putStrLn $ "Poorly formed file: " ++ show e
+                    exitFailure
+                Right g -> writeFile o $ show g
         _ -> putStrLn "Usage: reformat filename output"
