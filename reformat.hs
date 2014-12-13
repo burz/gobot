@@ -1,11 +1,16 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 import Control.Applicative ((<*), (*>))
+import Control.Exception
 import Data.Char (ord)
+import Prelude hiding (catch)
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
 import System.IO
 import Text.Parsec
 import Text.Parsec.Language
 import Text.Parsec.String
+import Text.Read (readMaybe)
 import qualified Text.Parsec.Token as Token
 
 lexer = Token.makeTokenParser emptyDef
@@ -43,17 +48,21 @@ move = do
                 then convertMove a
                 else r
 
-convertScore :: String -> Double
+convertScore :: String -> Maybe Double
 convertScore (c : _ : s) = if c == 'B'
-    then -1.0 * read s
-    else read s
+    then readMaybe s >>= \x -> Just $ -1.0 * x
+    else readMaybe s
 
 header :: Parser HeaderInfo
 header = do
     dataPoints <- many dataPoint
-    return $ foldr find (0.0, 0.0) dataPoints
+    let r = foldr find (Nothing, Nothing) dataPoints
+    case r of
+        (Nothing, _) -> fail "Couldn't read komi"
+        (_, Nothing) -> fail "No final score"
+        (Just k, Just s) -> return (k, s)
     where find (f, a) (k, s) = if f == "KM"
-            then (read a, s)
+            then (readMaybe a, s)
             else if f == "RE"
                 then (k, convertScore a)
                 else (k, s)
@@ -78,7 +87,9 @@ main = do
     a <- getArgs
     case a of
         (f : o : _) -> do
-            r <- parseFile f
+            r <- parseFile f `catch` \(e :: SomeException) -> do
+                putStrLn $ "Win by resignation" ++ show e
+                exitFailure
             case r of
                 Left e -> do
                     putStrLn $ "Poorly formed file: " ++ show e
