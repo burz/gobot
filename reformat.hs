@@ -1,7 +1,4 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-
 import Control.Applicative ((<*), (*>))
-import Control.Exception
 import Data.Char (ord)
 import Prelude hiding (catch)
 import System.Environment (getArgs)
@@ -92,9 +89,7 @@ main = do
     a <- getArgs
     case a of
         (f : o : _) -> do
-            r <- parseFile f `catch` \(e :: SomeException) -> do
-                putStrLn $ "Win by resignation" ++ show e
-                exitFailure
+            r <- parseFile f
             case r of
                 Left e -> do
                     putStrLn $ "Poorly formed file: " ++ show e
