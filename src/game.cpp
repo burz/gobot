@@ -15,12 +15,23 @@ Game::Game(const int _size, const float _komi, const float _finalScore)
     finalScore = _finalScore;
 }
 
+Game::~Game()
+{
+    std::map<Block*, float*>::iterator itt = featureMap.begin();
+    std::map<Block*, float*>::iterator end = featureMap.end();
+
+    for( ; itt != end; ++itt)
+    {
+        delete[] itt->second;
+    }
+}
+
 void Game::addMove(const BoardLocation location)
 {
     moves.push_back(location);
 }
 
-void Game::playGame(bool printTurns) const
+Board Game::playGame(void) const
 {
     Board board(size, komi);
 
@@ -32,48 +43,58 @@ void Game::playGame(bool printTurns) const
     {
         SpaceState state = i % 2 == 1 ? BLACK : WHITE;
 
-        board.playMove(itt->x, itt->y, state);
-
-        if(printTurns)
+        if(!(itt->x == 19 && itt->y == 19))
         {
-            printf("\n========Turn: %3d========\n\nScore: %f\nMove: (%d, %d)\n\n",
-               i,
-               board.getScore(),
-               itt->x,
-               itt->y);
-
-            board.print();
-
-            getchar();
+            board.playMove(itt->x, itt->y, state);
         }
 
         ++i;
     }
 
-    printf("\n!!!!!!!!!!!!!FINAL BOARD!!!!!!!!!!!!!\n\n");
+    board.splitEmptyBlocks();
 
-    board.print();
+    return board;
+}
 
-    Block* block = board.getBlock(0, 1);
-    board.generateFinalFeatures(block).print();
+void Game::generateFeatureVectors(void)
+{
+    Board board(size, komi);
 
-    printf("\n##########################\n\n");
+    std::vector<BoardLocation>::const_iterator itt = moves.begin();
+    std::vector<BoardLocation>::const_iterator end = moves.end();
 
-    block = board.getBlock(18, 13);
-    board.generateFinalFeatures(block).print();
+    int i = 1;
 
-    printf("\n##########################\n\n");
+    for( ; itt != end; ++itt)
+    {
+        SpaceState state = i % 2 == 1 ? BLACK : WHITE;
 
-    block = board.getBlock(6, 13);
-    board.generateFinalFeatures(block).print();
+        if(!(itt->x == 19 && itt->y == 19))
+        {
+            board.playMove(itt->x, itt->y, state);
+        }
 
-    printf("\n##########################\n\n");
+        ++i;
+    }
 
-    block = board.getBlock(0, 13);
-    board.generateFinalFeatures(block).print();
+    board.splitEmptyBlocks();
 
-    printf("\n##########################\n\n");
+    std::set<Block*> blocks;
 
-    block = board.getBlock(8, 4);
-    board.generateFinalFeatures(block).print();
+    board.getBlocks(blocks);
+
+    std::set<Block*>::iterator blockItt = blocks.begin();
+    std::set<Block*>::iterator blockEnd = blocks.end();
+
+    for( ; blockItt != blockEnd; ++blockItt)
+    {
+        if((*blockItt)->getState() != EMPTY)
+        {
+            float* features = board.generateFinalFeatureVector(*blockItt);
+
+            std::pair<Block*, float*> mapping(*blockItt, features);
+
+            featureMap.insert(mapping);
+        }
+    }
 }

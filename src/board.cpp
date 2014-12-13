@@ -10,7 +10,7 @@ Board::Board(const int _size, const float komi)
 {
     score = komi;
 
-    splitEmpties = false;
+    modified = true;
 
     spaces = new Space*[size]();
 
@@ -270,6 +270,11 @@ void Board::playMove(const int x, const int y, const SpaceState state)
     Block* block3 = getBlock(x + 1, y);
     Block* block4 = getBlock(x, y + 1);
 
+    if(!block0)
+    {
+        printf("(%d, %d)\n", x, y);
+    }
+
     assert(block0);
 
     block0->removeLocation(location);
@@ -304,7 +309,7 @@ void Board::playMove(const int x, const int y, const SpaceState state)
 
     handlePossiblyDeadBlocks(block1, block2, block3, block4);
 
-    splitEmpties = false;
+    modified = true;
 }
 
 Block* Board::getBlock(const int x, const int y) const

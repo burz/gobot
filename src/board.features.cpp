@@ -358,6 +358,26 @@ void Board::calculateSecondOrderLiberties(
     }
 }
 
+int Board::lookupBlockInChainMap(Block* block) const
+{
+    int i = 0;
+
+    std::vector<std::set<Block*> >::const_iterator itt = optimisticChains.begin();
+    std::vector<std::set<Block*> >::const_iterator end = optimisticChains.end();
+
+    for( ; itt != end; ++itt)
+    {
+        if(itt->find(block) != itt->end())
+        {
+            return i;
+        }
+
+        ++i;
+    }
+
+    return -1;
+}
+
 inline
 void broadenOptimisticChain(
         LocalFeatureState* state,
@@ -595,17 +615,17 @@ bool Board::isProtected(Block* block, const int x, const int y) const
         if(block2)
         {
             sharedCount += isShared(block2, lowLiberties, x, y - 1);
-            totalLiberties += block1->getLiberties();
+            totalLiberties += block2->getLiberties();
         }
         if(block3)
         {
             sharedCount += isShared(block3, lowLiberties, x + 1, y);
-            totalLiberties += block1->getLiberties();
+            totalLiberties += block3->getLiberties();
         }
         if(block4)
         {
             sharedCount += isShared(block4, lowLiberties, x, y + 1);
-            totalLiberties += block1->getLiberties();
+            totalLiberties += block4->getLiberties();
         }
 
         if(totalLiberties - sharedCount < 2)
@@ -804,7 +824,7 @@ void calculateLocalMajority(
     }
 }
 
-void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block) const
+void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block)
 {
     LocalFeatureState state;
 
@@ -946,18 +966,65 @@ void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block) co
 
     features->secondOrderLiberties = state.secondOrderLiberties.size();
 
-    generateOptimisticChain(features, &state, block, optimisticList);
+    int index = lookupBlockInChainMap(block);
 
-    handleAdjacentTerritories(state.optimisticChain,
-                              state.adjacentChainedTerritories,
-                              features->OCCETNumberOfTerritories, features->OCCETSize,
-                              features->OCCETPerimeter, features->OCCETCenterOfMass,
-                              features->OCENumberOfBlocks, features->OCESize,
-                              features->OCEPerimeter,
-                              features->OCDTNumberOfTerritories,
-                              features->OCDTDirectLiberties,
-                              features->OCDTLibertiesOfFriendlyBlocks,
-                              features->OCDTLibertiesOfEnemyBlocks);
+    if(index != -1)
+    {
+        OptimisticChainFeatures OCFeatures = optimisticChainFeatures[index];
+
+        features->OCNumberOfBlocks = OCFeatures.NumberOfBlocks;
+        features->OCSize = OCFeatures.Size;
+        features->OCPerimeter  = OCFeatures.Perimeter;
+        features->OCCETNumberOfTerritories = OCFeatures.CETNumberOfTerritories;
+        features->OCCETSize = OCFeatures.CETSize;
+        features->OCCETPerimeter = OCFeatures.CETPerimeter;
+        features->OCCETCenterOfMass = OCFeatures.CETCenterOfMass;
+        features->OCENumberOfBlocks = OCFeatures.ENumberOfBlocks;
+        features->OCESize = OCFeatures.ESize;
+        features->OCEPerimeter = OCFeatures.EPerimeter;
+        features->OCDTNumberOfTerritories = OCFeatures.DTNumberOfTerritories;
+        features->OCDTDirectLiberties = OCFeatures.DTDirectLiberties;
+        features->OCDTLibertiesOfFriendlyBlocks =
+            OCFeatures.DTLibertiesOfFriendlyBlocks;
+        features->OCDTLibertiesOfEnemyBlocks = OCFeatures.DTLibertiesOfEnemyBlocks;
+    }
+    else
+    {
+        generateOptimisticChain(features, &state, block, optimisticList);
+
+        handleAdjacentTerritories(state.optimisticChain,
+                                  state.adjacentChainedTerritories,
+                                  features->OCCETNumberOfTerritories,
+                                  features->OCCETSize, features->OCCETPerimeter,
+                                  features->OCCETCenterOfMass,
+                                  features->OCENumberOfBlocks, features->OCESize,
+                                  features->OCEPerimeter,
+                                  features->OCDTNumberOfTerritories,
+                                  features->OCDTDirectLiberties,
+                                  features->OCDTLibertiesOfFriendlyBlocks,
+                                  features->OCDTLibertiesOfEnemyBlocks);
+
+        OptimisticChainFeatures OCFeatures;
+
+        OCFeatures.NumberOfBlocks = features->OCNumberOfBlocks;
+        OCFeatures.Size = features->OCSize;
+        OCFeatures.Perimeter = features->OCPerimeter;
+        OCFeatures.CETNumberOfTerritories = features->OCCETNumberOfTerritories;
+        OCFeatures.CETSize = features->OCCETSize;
+        OCFeatures.CETPerimeter = features->OCCETPerimeter;
+        OCFeatures.CETCenterOfMass = features->OCCETCenterOfMass;
+        OCFeatures.ENumberOfBlocks = features->OCENumberOfBlocks;
+        OCFeatures.ESize = features->OCESize;
+        OCFeatures.EPerimeter = features->OCEPerimeter;
+        OCFeatures.DTNumberOfTerritories = features->OCDTNumberOfTerritories;
+        OCFeatures.DTDirectLiberties = features->OCDTDirectLiberties;
+        OCFeatures.DTLibertiesOfFriendlyBlocks
+            = features->OCDTLibertiesOfFriendlyBlocks;
+        OCFeatures.DTLibertiesOfEnemyBlocks = features->OCDTLibertiesOfEnemyBlocks;
+
+        optimisticChains.push_back(state.optimisticChain);
+        optimisticChainFeatures.push_back(OCFeatures);
+    }
 
     generateWeakestEnemyFeatures(features, &state, block);
 
@@ -1035,11 +1102,12 @@ void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block) co
 
 BlockFinalFeatures Board::generateFinalFeatures(Block* block)
 {
-    if(!splitEmpties)
+    if(modified)
     {
-        splitEmptyBlocks();
+        optimisticChains.clear();
+        optimisticChainFeatures.clear();
 
-        splitEmpties = true;
+        modified = false;
     }
 
     BlockFinalFeatures features;

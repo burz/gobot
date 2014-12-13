@@ -3,6 +3,23 @@
 
 #define NUMBER_OF_FEATURES 46
 
+typedef struct {
+    int NumberOfBlocks;
+    int Size;
+    int Perimeter;
+    int CETNumberOfTerritories;
+    int CETSize;
+    int CETPerimeter;
+    float CETCenterOfMass;
+    int ENumberOfBlocks;
+    int ESize;
+    int EPerimeter;
+    int DTNumberOfTerritories;
+    int DTDirectLiberties;
+    int DTLibertiesOfFriendlyBlocks;
+    int DTLibertiesOfEnemyBlocks;
+} OptimisticChainFeatures;
+
 class BlockFinalFeatures
 {
   public:

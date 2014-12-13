@@ -10,6 +10,7 @@ FILES = \
     board.o \
     game.o \
     parser.o \
+    directoryLoader.o \
     features.o \
     board.features.o
 

@@ -39,7 +39,7 @@ convertMove :: String -> Position
 convertMove (x : y : _) = (ord x - 97, ord y - 97)
 
 validateMove :: Position -> Parser Position
-validateMove (x, y) = if (x, y) >= (0, 0) && (x, y) < (19, 19)
+validateMove (x, y) = if (x, y) >= (0, 0) && (x, y) <= (19, 19)
     then return (x, y)
     else fail "Illegal move"
 

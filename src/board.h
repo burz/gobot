@@ -27,7 +27,9 @@ class Board
     const int size;
     float score;
     Space** spaces;
-    bool splitEmpties;
+    bool modified;
+    std::vector<std::set<Block*> > optimisticChains;
+    std::vector<OptimisticChainFeatures> optimisticChainFeatures;
 
     void recalculateLiberties(Block* block);
     bool handleAdjacentBlock(Block* currentBlock, Block* block);
@@ -36,8 +38,6 @@ class Board
                                   Block* block2,
                                   Block* block3,
                                   Block* block4);
-
-    void splitEmptyBlocks(void);
 
     bool isFalseEye(Block* block) const;
     void handleAdjacentTerritories(std::set<Block*>& chain,
@@ -60,6 +60,7 @@ class Board
                                        const int y,
                                        bool& autoAtari,
                                        std::vector<Block*>& optimisticList) const;
+    int lookupBlockInChainMap(Block* block) const;
     void calculateOptimisticChain(LocalFeatureState* state,
                                   Block* block0,
                                   Block* block,
@@ -80,7 +81,7 @@ class Board
     void generateWeakestEnemyFeatures(BlockFinalFeatures *features,
                                       LocalFeatureState* state,
                                       Block* block) const;
-    void generateLocalFeatures(BlockFinalFeatures *features, Block* block) const;
+    void generateLocalFeatures(BlockFinalFeatures *features, Block* block);
   public:
     Board(const int size, const float komi);
     ~Board(void);
@@ -97,6 +98,8 @@ class Board
     void setBlock(const int x, const int y, Block* block);
     void setBlock(const BoardLocation& location, Block* block) const;
     void changeBlocks(Block* from, Block* to);
+
+    void splitEmptyBlocks(void);
 
     void getBlocks(std::set<Block*>& blocks) const;
 
