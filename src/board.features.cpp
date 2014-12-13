@@ -31,7 +31,7 @@ void calculateLocalFeaturesForBlock(
 
 inline
 void handleTerritoryMember(
-        Block* block0,
+        std::set<Block*>& chain,
         Block* block,
         const int& x,
         const int& y,
@@ -40,7 +40,7 @@ void handleTerritoryMember(
         bool& friendlyLiberty,
         bool& enemyLiberty)
 {
-    if(block == block0)
+    if(chain.find(block) != chain.end())
     {
         directLiberty = true;
     }
@@ -50,7 +50,7 @@ void handleTerritoryMember(
 
         perimeter.insert(location);
 
-        if(block->getState() == block0->getState())
+        if(block->getState() == (*chain.begin())->getState())
         {
             friendlyLiberty = true;
         }
@@ -106,8 +106,8 @@ int chooseSmallestDistances(
 }
 
 void Board::handleAdjacentTerritories(
-        LocalFeatureState* state,
-        Block* block,
+        std::set<Block*>& chain,
+        std::set<Block*>& adjacentTerritories,
         int& CETNumberOfTerritories,
         int& CETSize,
         int& CETPerimeter,
@@ -127,8 +127,8 @@ void Board::handleAdjacentTerritories(
 
     int sum = 0;
 
-    std::set<Block*>::const_iterator itt = state->adjacentTerritories.begin();
-    std::set<Block*>::const_iterator end = state->adjacentTerritories.end();
+    std::set<Block*>::const_iterator itt = adjacentTerritories.begin();
+    std::set<Block*>::const_iterator end = adjacentTerritories.end();
 
     for( ; itt != end; ++itt)
     {
@@ -156,25 +156,25 @@ void Board::handleAdjacentTerritories(
 
             if(block1)
             {
-                handleTerritoryMember(block, block1, locationItt->x - 1, locationItt->y,
+                handleTerritoryMember(chain, block1, locationItt->x - 1, locationItt->y,
                                       perimeter, directLiberty, friendlyLiberty,
                                       enemyLiberty);
             }
             if(block2)
             {
-                handleTerritoryMember(block, block2, locationItt->x, locationItt->y - 1,
+                handleTerritoryMember(chain, block2, locationItt->x, locationItt->y - 1,
                                       perimeter, directLiberty, friendlyLiberty,
                                       enemyLiberty);
             }
             if(block3)
             {
-                handleTerritoryMember(block, block3, locationItt->x + 1, locationItt->y,
+                handleTerritoryMember(chain, block3, locationItt->x + 1, locationItt->y,
                                       perimeter, directLiberty, friendlyLiberty,
                                       enemyLiberty);
             }
             if(block4)
             {
-                handleTerritoryMember(block, block4, locationItt->x, locationItt->y + 1,
+                handleTerritoryMember(chain, block4, locationItt->x, locationItt->y + 1,
                                       perimeter, directLiberty, friendlyLiberty,
                                       enemyLiberty);
             }
@@ -816,12 +816,19 @@ void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block) co
     features->centerOfMass = sum / (2.0 * block->getSize());
     features->boundingBoxSize = (maxX - minX + 1) * (maxY - minY + 1);
 
-    handleAdjacentTerritories(&state, block, features->CETNumberOfTerritories,
-                              features->CETSize, features->CETPerimeter,
-                              features->CETCenterOfMass, features->DTNumberOfTerritories,
+    std::set<Block*>* blockSet = new std::set<Block*>();
+
+    blockSet->insert(block);
+
+    handleAdjacentTerritories(*blockSet, state.adjacentTerritories,
+                              features->CETNumberOfTerritories, features->CETSize,
+                              features->CETPerimeter, features->CETCenterOfMass,
+                              features->DTNumberOfTerritories,
                               features->DTDirectLiberties,
                               features->DTLibertiesOfFriendlyBlocks,
                               features->DTLibertiesOfEnemyBlocks);
+
+    delete blockSet;
 
     features->protectedLiberties = 0;
     features->autoAtariLiberties = 0;

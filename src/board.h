@@ -39,8 +39,8 @@ class Board
 
     void splitEmptyBlocks(void);
 
-    void handleAdjacentTerritories(LocalFeatureState* state,
-                                   Block* block,
+    void handleAdjacentTerritories(std::set<Block*>& chain,
+                                   std::set<Block*>& adjacentTerritories,
                                    int& CETNumberOfTerritories,
                                    int& CETSize,
                                    int& CETPerimeter,
