@@ -7,6 +7,11 @@ typedef enum {
     WHITE
 } SpaceState;
 
+const char* spaceStateString(
+        const SpaceState state,
+        const bool shorter = false,
+        const bool colored = true);
+
 class BoardLocation
 {
   public:

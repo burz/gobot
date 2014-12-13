@@ -12,14 +12,13 @@ class DirectoryIterator
   private:
     DIR* dir;
     struct dirent *ent;
-    char directory[100];
 
     DirectoryIterator(void);
   public:
     DirectoryIterator(const char* directory);
     ~DirectoryIterator(void);
 
-    Game operator*(void);
+    const char* operator*(void);
     DirectoryIterator& operator++(void);
 
     static DirectoryIterator end(void);

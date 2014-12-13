@@ -40,11 +40,9 @@ DirectoryIterator::DirectoryIterator(void)
     dir = 0;
 }
 
-DirectoryIterator::DirectoryIterator(const char* _directory)
+DirectoryIterator::DirectoryIterator(const char* directory)
 {
-    strcpy(directory, _directory);
-
-    dir = opendir(_directory);
+    dir = opendir(directory);
 
     if(dir == 0)
     {
@@ -69,20 +67,16 @@ DirectoryIterator::~DirectoryIterator()
     }
 }
 
-Game DirectoryIterator::operator*(void)
+const char* DirectoryIterator::operator*(void)
 {
-    Game game;
-
     if(dir && ent)
     {
-        char filePath[100] = "";
-
-        sprintf(filePath, "%s/%s", directory, ent->d_name);
-
-        parseFile(&game, filePath);
+        return ent->d_name;
     }
-
-    return game;
+    else
+    {
+        return 0;
+    }
 }
 
 DirectoryIterator& DirectoryIterator::operator++(void)

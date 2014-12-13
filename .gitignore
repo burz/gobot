@@ -6,6 +6,7 @@
 
 games/*
 reformatedGames/*
+gameFeatures/*
 
 main
 reformat

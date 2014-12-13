@@ -82,4 +82,28 @@ class BlockFinalFeatures
     float* getFeatureVector(void) const;
 };
 
+inline
+bool operator==(const BlockFinalFeatures& x, const BlockFinalFeatures& y)
+{
+    float* xv = x.getFeatureVector();
+    float* yv = y.getFeatureVector();
+
+    bool result = true;
+
+    for(int i = 0; i < NUMBER_OF_FEATURES; ++i)
+    {
+        if(xv[i] != yv[i])
+        {
+            result = false;
+
+            break;
+        }
+    }
+
+    delete[] xv;
+    delete[] yv;
+
+    return result;
+}
+
 #endif

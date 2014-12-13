@@ -12,6 +12,7 @@ FILES = \
     parser.o \
     directoryLoader.o \
     features.o \
+    featureFile.o \
     board.features.o
 
 main: main.o $(FILES)
