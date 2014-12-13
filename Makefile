@@ -18,6 +18,9 @@ FILES = \
 main: main.o $(FILES)
 	$(CC) -o main $^
 
+generateFeatureFiles: generateFeatureFiles.o $(FILES)
+	$(CC) -o generateFeatureFiles $^
+
 reformat: reformat.hs
 	ghc $^
 

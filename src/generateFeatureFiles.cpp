@@ -1,4 +1,3 @@
-#include "block.h"
 #include "board.h"
 #include "game.h"
 #include "parser.h"
@@ -9,15 +8,22 @@
 
 int main(int argc, char *argv[])
 {
+    if(argc < 3)
+    {
+        printf("Usage generateFeatureFiles inputDirectory outputDirectly\n");
+
+        return 1;
+    }
+
     char buffer[100];
     int i = 0;
 
-    DirectoryIterator itt("reformatedGames");
+    DirectoryIterator itt(argv[1]);
     DirectoryIterator end = DirectoryIterator::end();
 
     for( ; itt != end; ++itt)
     {
-        sprintf(buffer, "reformatedGames/%s", *itt);
+        sprintf(buffer, "%s/%s", argv[1], *itt);
 
         Game game;
 
@@ -30,7 +36,7 @@ int main(int argc, char *argv[])
 
         Board finalBoard = game.playGame();
 
-        sprintf(buffer, "gameFeatures/%sf", *itt);
+        sprintf(buffer, "%s/%sf", argv[2], *itt);
 
         if(!writeFeaturesToFile(finalBoard, buffer))
         {
@@ -42,6 +48,7 @@ int main(int argc, char *argv[])
         if(i % 100 == 0)
         {
             printf(".");
+
             fflush(stdout);
         }
 
@@ -49,30 +56,6 @@ int main(int argc, char *argv[])
     }
 
     printf("\n");
-
-//    std::vector<Game> games;
-//
-//    loadDirectory(games, "reformatedGames");
-//
-//    int i = 0;
-//
-//    std::vector<Game>::iterator itt = games.begin();
-//    std::vector<Game>::iterator end = games.end();
-//
-//    for( ; itt != end; ++itt)
-//    {
-//        itt->generateFeatureVectors();
-//
-//        if(i % 100 == 0)
-//        {
-//            printf(".");
-//            fflush(stdout);
-//        }
-//
-//        ++i;
-//    }
-//
-//    printf("\n");
 
     return 0;
 }

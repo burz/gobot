@@ -19,6 +19,11 @@ bool loadDirectory(std::vector<Game>& games, const char* directory)
 
     while((ent = readdir(dir)) != 0)
     {
+        if(!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, ".."))
+        {
+            continue;
+        }
+
         char filePath[100];
 
         sprintf(filePath, "%s/%s", directory, ent->d_name);
@@ -51,6 +56,14 @@ DirectoryIterator::DirectoryIterator(const char* directory)
 
     ent = readdir(dir);
 
+    if(ent && !strcmp(ent->d_name, "."))
+    {
+        ent = readdir(dir);
+    }
+    if(ent && !strcmp(ent->d_name, ".."))
+    {
+        ent = readdir(dir);
+    }
     if(!ent)
     {
         closedir(dir);

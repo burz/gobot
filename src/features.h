@@ -20,9 +20,7 @@ typedef struct {
     int DTLibertiesOfEnemyBlocks;
 } OptimisticChainFeatures;
 
-class BlockFinalFeatures
-{
-  public:
+typedef struct {
     // Local Features
     int size;
     int perimeter;
@@ -77,16 +75,16 @@ class BlockFinalFeatures
     int DTDirectLiberties;
     int DTLibertiesOfFriendlyBlocks;
     int DTLibertiesOfEnemyBlocks;
+} BlockFinalFeatures;
 
-    void print(void) const;
-    float* getFeatureVector(void) const;
-};
+void printFeatures(const BlockFinalFeatures& features);
+float* getFeatureVector(const BlockFinalFeatures& features);
 
 inline
 bool operator==(const BlockFinalFeatures& x, const BlockFinalFeatures& y)
 {
-    float* xv = x.getFeatureVector();
-    float* yv = y.getFeatureVector();
+    float* xv = getFeatureVector(x);
+    float* yv = getFeatureVector(y);
 
     bool result = true;
 

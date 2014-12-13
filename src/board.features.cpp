@@ -1121,5 +1121,5 @@ BlockFinalFeatures Board::generateFinalFeatures(Block* block)
 
 float* Board::generateFinalFeatureVector(Block* block)
 {
-    return generateFinalFeatures(block).getFeatureVector();
+    return getFeatureVector(generateFinalFeatures(block));
 }
