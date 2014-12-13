@@ -108,6 +108,29 @@ void Board::calculateSecondOrderLiberties(
     }
 }
 
+inline
+void broadenOptimisticChain(
+        LocalFeatureState* state,
+        Block* block0,
+        Block* block,
+        std::vector<Block*>& optimisticList)
+{
+    if(block->getState() == block0->getState())
+    {
+        if(state->optimisticChain.find(block) == state->optimisticChain.end())
+        {
+            state->optimisticChain.insert(block);
+
+            optimisticList.push_back(block);
+        }
+    }
+    else if(!state->weakestAdjacentChainedBlock ||
+            block->getLiberties() < state->weakestAdjacentChainedBlock->getLiberties())
+    {
+        state->weakestAdjacentChainedBlock = block;
+    }
+}
+
 void Board::calculateOptimisticChain(
         LocalFeatureState* state,
         Block* block0,
@@ -128,34 +151,28 @@ void Board::calculateOptimisticChain(
         Block* block3 = getBlock(x + 1, y);
         Block* block4 = getBlock(x, y + 1);
 
-        if(block1 && block1->getState() == block0->getState() &&
-           state->optimisticChain.find(block1) == state->optimisticChain.end())
+        if(block1 && block1->getState() != EMPTY)
         {
-            state->optimisticChain.insert(block1);
-
-            optimisticList.push_back(block1);
+            broadenOptimisticChain(state, block0, block1, optimisticList);
         }
-        if(block2 && block2->getState() == block0->getState() &&
-           state->optimisticChain.find(block2) == state->optimisticChain.end())
+        if(block2 && block2->getState() != EMPTY)
         {
-            state->optimisticChain.insert(block2);
-
-            optimisticList.push_back(block2);
+            broadenOptimisticChain(state, block0, block2, optimisticList);
         }
-        if(block3 && block3->getState() == block0->getState() &&
-           state->optimisticChain.find(block3) == state->optimisticChain.end())
+        if(block3 && block3->getState() != EMPTY)
         {
-            state->optimisticChain.insert(block3);
-
-            optimisticList.push_back(block3);
+            broadenOptimisticChain(state, block0, block3, optimisticList);
         }
-        if(block4 && block4->getState() == block0->getState() &&
-           state->optimisticChain.find(block4) == state->optimisticChain.end())
+        if(block4 && block4->getState() != EMPTY)
         {
-            state->optimisticChain.insert(block4);
-
-            optimisticList.push_back(block4);
+            broadenOptimisticChain(state, block0, block4, optimisticList);
         }
+    }
+    else if(block->getState() != block0->getState() &&
+           (!state->weakestAdjacentChainedBlock ||
+            block->getLiberties() < state->weakestAdjacentChainedBlock->getLiberties()))
+    {
+        state->weakestAdjacentChainedBlock = block;
     }
 }
 
@@ -166,6 +183,8 @@ void Board::generateOptimisticChain(
         std::vector<Block*>& optimisticList) const
 {
     features->OCSize = 0;
+
+    state->weakestAdjacentChainedBlock = 0;
 
     std::set<BoardLocation> perimeter;
 
@@ -452,8 +471,7 @@ void Board::generateWeakestEnemyFeatures(
 
     if(weakestBlocks[0])
     {
-        calculateWeakEnemyFeatures(features->WAEPerimeter,
-                                   features->WAELiberties,
+        calculateWeakEnemyFeatures(features->WAEPerimeter, features->WAELiberties,
                                    features->WAESharedLiberties,
                                    block, weakestBlocks[0]);
     }
@@ -474,6 +492,18 @@ void Board::generateWeakestEnemyFeatures(
         features->SWAEPerimeter = 0;
         features->SWAELiberties = 0;
         features->SWAESharedLiberties = 0;
+    }
+    if(state->weakestAdjacentChainedBlock)
+    {
+        calculateWeakEnemyFeatures(features->WACEPerimeter, features->WACELiberties,
+                                   features->WACESharedLiberties,
+                                   block, state->weakestAdjacentChainedBlock);
+    }
+    else
+    {
+        features->WACEPerimeter = 0;
+        features->WACELiberties = 0;
+        features->WACESharedLiberties = 0;
     }
 }
 
