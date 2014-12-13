@@ -1,7 +1,7 @@
 #ifndef _FEATURES_H_
 #define _FEATURES_H_
 
-#define NUMBER_OF_FEATURES 40
+#define NUMBER_OF_FEATURES 46
 
 class BlockFinalFeatures
 {

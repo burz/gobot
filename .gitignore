@@ -5,6 +5,7 @@
 *.sgfo
 
 games/*
+reformatedGames/*
 
 main
 reformat

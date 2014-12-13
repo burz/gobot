@@ -1,0 +1,25 @@
+#!/bin/bash
+
+if [ ! -d reformatedGames ]
+then
+    mkdir reformatedGames
+fi
+
+FILES=$(find . -type f -name '*.sgf')
+
+A=0
+
+for FILE in $FILES
+do
+    ./reformat $FILE reformatedGames/output$A.sgfo &> /dev/null
+
+    if [ $((A % 100)) == 0 ]
+    then
+        echo -n .
+    fi
+
+    A=$((A + 1))
+done
+
+echo
+
