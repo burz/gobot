@@ -40,17 +40,17 @@ void handleTerritoryMember(
         bool& friendlyLiberty,
         bool& enemyLiberty)
 {
-    if(chain.find(block) != chain.end())
-    {
-        directLiberty = true;
-    }
-    else if(block->getState() != EMPTY)
+    if(block->getState() != EMPTY)
     {
         BoardLocation location(x, y);
 
         perimeter.insert(location);
 
-        if(block->getState() == (*chain.begin())->getState())
+        if(chain.find(block) != chain.end())
+        {
+            directLiberty = true;
+        }
+        else if(block->getState() == (*chain.begin())->getState())
         {
             friendlyLiberty = true;
         }
@@ -105,6 +105,48 @@ int chooseSmallestDistances(
     }
 }
 
+bool Board::isFalseEye(Block* block) const
+{
+    BoardLocation location = *block->locationsBegin();
+
+    int count = 0;
+
+    Block* block1 = getBlock(location.x - 1, location.y - 1);
+    Block* block2 = getBlock(location.x + 1, location.y - 1);
+    Block* block3 = getBlock(location.x - 1, location.y + 1);
+    Block* block4 = getBlock(location.x + 1, location.y + 1);
+
+    if(block1 && block1->getState() != block->getState() &&
+       block1->getState() != EMPTY)
+    {
+        ++count;
+    }
+    if(block2 && block2->getState() != block->getState() &&
+       block2->getState() != EMPTY)
+    {
+        ++count;
+    }
+    if(block3 && block3->getState() != block->getState() &&
+       block3->getState() != EMPTY)
+    {
+        ++count;
+    }
+    if(block4 && block4->getState() != block->getState() &&
+       block4->getState() != EMPTY)
+    {
+        ++count;
+    }
+
+    if(count > 1)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void Board::handleAdjacentTerritories(
         std::set<Block*>& chain,
         std::set<Block*>& adjacentTerritories,
@@ -112,6 +154,9 @@ void Board::handleAdjacentTerritories(
         int& CETSize,
         int& CETPerimeter,
         float& CETCenterOfMass,
+        int& ENumberOfBlocks,
+        int& ESize,
+        int& EPerimeter,
         int& DTNumberOfTerritories,
         int& DTDirectLiberties,
         int& DTLibertiesOfFriendlyBlocks,
@@ -120,6 +165,9 @@ void Board::handleAdjacentTerritories(
     CETNumberOfTerritories = 0;
     CETSize = 0;
     CETPerimeter = 0;
+    ENumberOfBlocks = 0;
+    ESize = 0;
+    EPerimeter = 0;
     DTNumberOfTerritories = 0;
     DTDirectLiberties = 0;
     DTLibertiesOfFriendlyBlocks = 0;
@@ -156,27 +204,27 @@ void Board::handleAdjacentTerritories(
 
             if(block1)
             {
-                handleTerritoryMember(chain, block1, locationItt->x - 1, locationItt->y,
-                                      perimeter, directLiberty, friendlyLiberty,
-                                      enemyLiberty);
+                handleTerritoryMember(chain, block1, locationItt->x - 1,
+                                      locationItt->y, perimeter, directLiberty,
+                                      friendlyLiberty, enemyLiberty);
             }
             if(block2)
             {
-                handleTerritoryMember(chain, block2, locationItt->x, locationItt->y - 1,
-                                      perimeter, directLiberty, friendlyLiberty,
-                                      enemyLiberty);
+                handleTerritoryMember(chain, block2, locationItt->x,
+                                      locationItt->y - 1, perimeter, directLiberty,
+                                      friendlyLiberty, enemyLiberty);
             }
             if(block3)
             {
-                handleTerritoryMember(chain, block3, locationItt->x + 1, locationItt->y,
-                                      perimeter, directLiberty, friendlyLiberty,
-                                      enemyLiberty);
+                handleTerritoryMember(chain, block3, locationItt->x + 1,
+                                      locationItt->y, perimeter, directLiberty,
+                                      friendlyLiberty, enemyLiberty);
             }
             if(block4)
             {
-                handleTerritoryMember(chain, block4, locationItt->x, locationItt->y + 1,
-                                      perimeter, directLiberty, friendlyLiberty,
-                                      enemyLiberty);
+                handleTerritoryMember(chain, block4, locationItt->x,
+                                      locationItt->y + 1, perimeter, directLiberty,
+                                      friendlyLiberty, enemyLiberty);
             }
 
             if(directLiberty)
@@ -197,11 +245,23 @@ void Board::handleAdjacentTerritories(
 
         if(enemyLiberties == 0)
         {
+            int size = (*itt)->getSize();
+
             ++CETNumberOfTerritories;
-            CETSize += (*itt)->getSize();
+            CETSize += size;
             CETPerimeter += perimeter.size();
 
             sum += partialSum;
+
+            if(size < 4)
+            {
+                if(size != 1 || !isFalseEye(*itt))
+                {
+                    ++ENumberOfBlocks;
+                    ESize += size;
+                    EPerimeter += perimeter.size();
+                }
+            }
         }
         else
         {
@@ -823,7 +883,8 @@ void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block) co
     handleAdjacentTerritories(*blockSet, state.adjacentTerritories,
                               features->CETNumberOfTerritories, features->CETSize,
                               features->CETPerimeter, features->CETCenterOfMass,
-                              features->DTNumberOfTerritories,
+                              features->ENumberOfBlocks, features->ESize,
+                              features->EPerimeter, features->DTNumberOfTerritories,
                               features->DTDirectLiberties,
                               features->DTLibertiesOfFriendlyBlocks,
                               features->DTLibertiesOfEnemyBlocks);
@@ -891,6 +952,8 @@ void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block) co
                               state.adjacentChainedTerritories,
                               features->OCCETNumberOfTerritories, features->OCCETSize,
                               features->OCCETPerimeter, features->OCCETCenterOfMass,
+                              features->OCENumberOfBlocks, features->OCESize,
+                              features->OCEPerimeter,
                               features->OCDTNumberOfTerritories,
                               features->OCDTDirectLiberties,
                               features->OCDTLibertiesOfFriendlyBlocks,

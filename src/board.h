@@ -39,12 +39,16 @@ class Board
 
     void splitEmptyBlocks(void);
 
+    bool isFalseEye(Block* block) const;
     void handleAdjacentTerritories(std::set<Block*>& chain,
                                    std::set<Block*>& adjacentTerritories,
                                    int& CETNumberOfTerritories,
                                    int& CETSize,
                                    int& CETPerimeter,
                                    float& CETCenterOfMass,
+                                   int& ENumberOfBlocks,
+                                   int& ESize,
+                                   int& EPerimeter,
                                    int& DTNumberOfTerritories,
                                    int& DTDirectLiberties,
                                    int& DTLibertiesOfFriendlyBlocks,

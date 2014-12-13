@@ -16,6 +16,9 @@ void BlockFinalFeatures::print(void) const
     printf("Color Enclosed Territory Features\n---------------------------------\n");
     printf("Number of Territories: %d\nSize: %d\n", CETNumberOfTerritories, CETSize);
     printf("Perimeter: %d\nCenter of Mass: %f\n\n", CETPerimeter, CETCenterOfMass);
+    printf("Eyespace Features\n-----------------\n");
+    printf("Number of Blocks: %d\nSize: %d\nPerimeter: %d\n\n",
+           ENumberOfBlocks, ESize, EPerimeter);
     printf("Optimistic Chain Features\n-------------------------\n");
     printf("Number of Blocks: %d\nSize: %d\n", OCNumberOfBlocks, OCSize);
     printf("Perimeter: %d\nNumber of Color Enclosed Territories %d\n",
@@ -23,6 +26,9 @@ void BlockFinalFeatures::print(void) const
     printf("Size of Color Enclosed Territories: %d\n", OCCETSize);
     printf("Perimeter of Color Enclosed Territories: %d\n", OCCETPerimeter);
     printf("Center of Mass of Color Enclosed Territories: %f\n", OCCETCenterOfMass);
+    printf("Number of Adjacent Eyespace Blocks: %d\n", OCENumberOfBlocks);
+    printf("Adjacent Eyspace Size: %d\n", OCESize);
+    printf("Adjacent Eyespace Perimeter: %d\n", OCEPerimeter);
     printf("Number of Disputed Territories: %d\n", OCDTNumberOfTerritories);
     printf("Direct Liberties in Disputed Territories: %d\n", OCDTDirectLiberties);
     printf("Friendly Liberties in Disputed Territories: %d\n",
@@ -64,40 +70,47 @@ float* BlockFinalFeatures::getFeatureVector(void) const
     result[9] = localMajority;
     result[10] = centerOfMass;
     result[11] = boundingBoxSize;
+    // Eyespace Features
+    result[12] = ENumberOfBlocks;
+    result[13] = ESize;
+    result[14] = EPerimeter;
     // Color Enclosed Territory Features
-    result[12] = CETNumberOfTerritories;
-    result[13] = CETSize;
-    result[14] = CETPerimeter;
-    result[15] = CETCenterOfMass;
+    result[15] = CETNumberOfTerritories;
+    result[16] = CETSize;
+    result[17] = CETPerimeter;
+    result[18] = CETCenterOfMass;
     // Optimistic Chain Features
-    result[16] = OCNumberOfBlocks;
-    result[17] = OCSize;
-    result[18] = OCPerimeter;
-    result[19] = OCCETNumberOfTerritories;
-    result[20] = OCCETSize;
-    result[21] = OCCETPerimeter;
-    result[22] = OCCETCenterOfMass;
-    result[23] = OCDTNumberOfTerritories;
-    result[24] = OCDTDirectLiberties;
-    result[25] = OCDTLibertiesOfFriendlyBlocks;
-    result[26] = OCDTLibertiesOfEnemyBlocks;
+    result[19] = OCNumberOfBlocks;
+    result[20] = OCSize;
+    result[21] = OCPerimeter;
+    result[22] = OCCETNumberOfTerritories;
+    result[23] = OCCETSize;
+    result[24] = OCCETPerimeter;
+    result[25] = OCCETCenterOfMass;
+    result[26] = OCENumberOfBlocks;
+    result[27] = OCESize;
+    result[28] = OCEPerimeter;
+    result[29] = OCDTNumberOfTerritories;
+    result[30] = OCDTDirectLiberties;
+    result[31] = OCDTLibertiesOfFriendlyBlocks;
+    result[32] = OCDTLibertiesOfEnemyBlocks;
     // Weakest Adjacent Enemy Features
-    result[27] = WAEPerimeter;
-    result[28] = WAELiberties;
-    result[29] = WAESharedLiberties;
+    result[33] = WAEPerimeter;
+    result[34] = WAELiberties;
+    result[35] = WAESharedLiberties;
     // Second Weakest Adjacent Enemy Features
-    result[30] = SWAEPerimeter;
-    result[31] = SWAELiberties;
-    result[32] = SWAESharedLiberties;
+    result[36] = SWAEPerimeter;
+    result[37] = SWAELiberties;
+    result[38] = SWAESharedLiberties;
     // Weakest Adjacent Chained Enemy Features
-    result[33] = WACEPerimeter;
-    result[34] = WACELiberties;
-    result[35] = WACESharedLiberties;
+    result[39] = WACEPerimeter;
+    result[40] = WACELiberties;
+    result[41] = WACESharedLiberties;
     // Disputed Territory Features
-    result[36] = DTNumberOfTerritories;
-    result[37] = DTDirectLiberties;
-    result[38] = DTLibertiesOfFriendlyBlocks;
-    result[39] = DTLibertiesOfEnemyBlocks;
+    result[42] = DTNumberOfTerritories;
+    result[43] = DTDirectLiberties;
+    result[44] = DTLibertiesOfFriendlyBlocks;
+    result[45] = DTLibertiesOfEnemyBlocks;
 
     return result;
 }
