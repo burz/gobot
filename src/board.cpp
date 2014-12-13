@@ -272,6 +272,11 @@ void Board::playMove(const int x, const int y, const SpaceState state)
 
     block0->removeLocation(location);
 
+    if(block0->getSize() == 0)
+    {
+        delete block0;
+    }
+
     Block* currentBlock = new Block(state, location, 0);
 
     setBlock(x, y, currentBlock);

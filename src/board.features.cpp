@@ -457,7 +457,8 @@ void Board::generateWeakestEnemyFeatures(
 
     for( ; itt != end; ++itt)
     {
-        if(!weakestBlocks[0] || (*itt)->getLiberties() < weakestBlocks[0]->getLiberties())
+        if(!weakestBlocks[0] ||
+           (*itt)->getLiberties() < weakestBlocks[0]->getLiberties())
         {
             weakestBlocks[1] = weakestBlocks[0];
             weakestBlocks[0] = *itt;
