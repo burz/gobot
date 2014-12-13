@@ -108,17 +108,24 @@ int chooseSmallestDistances(
 }
 
 void Board::handleAdjacentTerritories(
-        BlockFinalFeatures* features,
         LocalFeatureState* state,
-        Block* block) const
+        Block* block,
+        int& CETNumberOfTerritories,
+        int& CETSize,
+        int& CETPerimeter,
+        float& CETCenterOfMass,
+        int& DTNumberOfTerritories,
+        int& DTDirectLiberties,
+        int& DTLibertiesOfFriendlyBlocks,
+        int& DTLibertiesOfEnemyBlocks) const
 {
-    features->CETNumberOfTerritories = 0;
-    features->CETSize = 0;
-    features->CETPerimeter = 0;
-    features->DTNumberOfTerritories = 0;
-    features->DTDirectLiberties = 0;
-    features->DTLibertiesOfFriendlyBlocks = 0;
-    features->DTLibertiesOfEnemyBlocks = 0;
+    CETNumberOfTerritories = 0;
+    CETSize = 0;
+    CETPerimeter = 0;
+    DTNumberOfTerritories = 0;
+    DTDirectLiberties = 0;
+    DTLibertiesOfFriendlyBlocks = 0;
+    DTLibertiesOfEnemyBlocks = 0;
 
     int sum = 0;
 
@@ -174,28 +181,28 @@ void Board::handleAdjacentTerritories(
 
         if(enemyLiberties.size() == 0)
         {
-            ++features->CETNumberOfTerritories;
-            features->CETSize += (*itt)->getSize();
-            features->CETPerimeter += perimeter.size();
+            ++CETNumberOfTerritories;
+            CETSize += (*itt)->getSize();
+            CETPerimeter += perimeter.size();
 
             sum += partialSum;
         }
         else
         {
-            ++features->DTNumberOfTerritories;
-            features->DTDirectLiberties = directLiberties.size();
-            features->DTLibertiesOfFriendlyBlocks = friendlyLiberties.size();
-            features->DTLibertiesOfEnemyBlocks = enemyLiberties.size();
+            ++DTNumberOfTerritories;
+            DTDirectLiberties = directLiberties.size();
+            DTLibertiesOfFriendlyBlocks = friendlyLiberties.size();
+            DTLibertiesOfEnemyBlocks = enemyLiberties.size();
         }
     }
 
-    if(features->CETSize)
+    if(CETSize)
     {
-        features->CETCenterOfMass = sum / (2.0 * features->CETSize);
+        CETCenterOfMass = sum / (2.0 * CETSize);
     }
     else
     {
-        features->CETCenterOfMass = 0.0;
+        CETCenterOfMass = 0.0;
     }
 }
 
@@ -282,7 +289,11 @@ void broadenOptimisticChain(
         Block* block,
         std::vector<Block*>& optimisticList)
 {
-    if(block->getState() == block0->getState())
+    if(block->getState() == EMPTY)
+    {
+        state->adjacentChainedTerritories.insert(block);
+    }
+    else if(block->getState() == block0->getState())
     {
         if(state->optimisticChain.find(block) == state->optimisticChain.end())
         {
@@ -318,19 +329,19 @@ void Board::calculateOptimisticChain(
         Block* block3 = getBlock(x + 1, y);
         Block* block4 = getBlock(x, y + 1);
 
-        if(block1 && block1->getState() != EMPTY)
+        if(block1)
         {
             broadenOptimisticChain(state, block0, block1, optimisticList);
         }
-        if(block2 && block2->getState() != EMPTY)
+        if(block2)
         {
             broadenOptimisticChain(state, block0, block2, optimisticList);
         }
-        if(block3 && block3->getState() != EMPTY)
+        if(block3)
         {
             broadenOptimisticChain(state, block0, block3, optimisticList);
         }
-        if(block4 && block4->getState() != EMPTY)
+        if(block4)
         {
             broadenOptimisticChain(state, block0, block4, optimisticList);
         }
@@ -789,7 +800,12 @@ void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block) co
     features->centerOfMass = sum / (2.0 * block->getSize());
     features->boundingBoxSize = (maxX - minX + 1) * (maxY - minY + 1);
 
-    handleAdjacentTerritories(features, &state, block);
+    handleAdjacentTerritories(&state, block, features->CETNumberOfTerritories,
+                              features->CETSize, features->CETPerimeter,
+                              features->CETCenterOfMass, features->DTNumberOfTerritories,
+                              features->DTDirectLiberties,
+                              features->DTLibertiesOfFriendlyBlocks,
+                              features->DTLibertiesOfEnemyBlocks);
 
     features->protectedLiberties = 0;
     features->autoAtariLiberties = 0;

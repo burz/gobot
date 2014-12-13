@@ -39,9 +39,16 @@ class Board
 
     void splitEmptyBlocks(void);
 
-    void handleAdjacentTerritories(BlockFinalFeatures* features,
-                                   LocalFeatureState* state,
-                                   Block* block) const;
+    void handleAdjacentTerritories(LocalFeatureState* state,
+                                   Block* block,
+                                   int& CETNumberOfTerritories,
+                                   int& CETSize,
+                                   int& CETPerimeter,
+                                   float& CETCenterOfMass,
+                                   int& DTNumberOfTerritories,
+                                   int& DTDirectLiberties,
+                                   int& DTLibertiesOfFriendlyBlocks,
+                                   int& DTLibertiesOfEnemyBlocks) const;
     void calculateSecondOrderLiberties(LocalFeatureState* state,
                                        Block* block0,
                                        Block* block,

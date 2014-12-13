@@ -22,6 +22,7 @@ void BlockFinalFeatures::print(void) const
            OCPerimeter, OCCETNumberOfTerritories);
     printf("Size of Color Enclosed Territories: %d\n", OCCETSize);
     printf("Perimeter of Color Enclosed Territories: %d\n", OCCETPerimeter);
+    printf("Center of Mass of Color Enclosed Territories: %f\n", OCCETCenterOfMass);
     printf("Number of Disputed Territories: %d\n", OCDTNumberOfTerritories);
     printf("Direct Liberties in Disputed Territories: %d\n", OCDTDirectLiberties);
     printf("Friendly Liberties in Disputed Territories: %d\n",
@@ -75,27 +76,28 @@ float* BlockFinalFeatures::getFeatureVector(void) const
     result[19] = OCCETNumberOfTerritories;
     result[20] = OCCETSize;
     result[21] = OCCETPerimeter;
-    result[22] = OCDTNumberOfTerritories;
-    result[23] = OCDTDirectLiberties;
-    result[24] = OCDTLibertiesOfFriendlyBlocks;
-    result[25] = OCDTLibertiesOfEnemyBlocks;
+    result[22] = OCCETCenterOfMass;
+    result[23] = OCDTNumberOfTerritories;
+    result[24] = OCDTDirectLiberties;
+    result[25] = OCDTLibertiesOfFriendlyBlocks;
+    result[26] = OCDTLibertiesOfEnemyBlocks;
     // Weakest Adjacent Enemy Features
-    result[26] = WAEPerimeter;
-    result[27] = WAELiberties;
-    result[28] = WAESharedLiberties;
+    result[27] = WAEPerimeter;
+    result[28] = WAELiberties;
+    result[29] = WAESharedLiberties;
     // Second Weakest Adjacent Enemy Features
-    result[29] = SWAEPerimeter;
-    result[30] = SWAELiberties;
-    result[31] = SWAESharedLiberties;
+    result[30] = SWAEPerimeter;
+    result[31] = SWAELiberties;
+    result[32] = SWAESharedLiberties;
     // Weakest Adjacent Chained Enemy Features
-    result[32] = WACEPerimeter;
-    result[33] = WACELiberties;
-    result[34] = WACESharedLiberties;
+    result[33] = WACEPerimeter;
+    result[34] = WACELiberties;
+    result[35] = WACESharedLiberties;
     // Disputed Territory Features
-    result[35] = DTNumberOfTerritories;
-    result[36] = DTDirectLiberties;
-    result[37] = DTLibertiesOfFriendlyBlocks;
-    result[38] = DTLibertiesOfEnemyBlocks;
+    result[36] = DTNumberOfTerritories;
+    result[37] = DTDirectLiberties;
+    result[38] = DTLibertiesOfFriendlyBlocks;
+    result[39] = DTLibertiesOfEnemyBlocks;
 
     return result;
 }

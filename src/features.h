@@ -1,7 +1,7 @@
 #ifndef _FEATURES_H_
 #define _FEATURES_H_
 
-#define NUMBER_OF_FEATURES 39
+#define NUMBER_OF_FEATURES 40
 
 class BlockFinalFeatures
 {
@@ -31,6 +31,7 @@ class BlockFinalFeatures
     int OCCETNumberOfTerritories;
     int OCCETSize;
     int OCCETPerimeter;
+    float OCCETCenterOfMass;
     int OCDTNumberOfTerritories;
     int OCDTDirectLiberties;
     int OCDTLibertiesOfFriendlyBlocks;
