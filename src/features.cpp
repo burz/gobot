@@ -62,6 +62,11 @@ float* BlockFinalFeatures::getFeatureVector(void) const
     result[21] = WACEPerimeter;
     result[22] = WACELiberties;
     result[23] = WACESharedLiberties;
+    // Disputed Territory Features
+    result[24] = DTNumberOfTerritories;
+    result[25] = DTDirectLiberties;
+    result[26] = DTLibertiesOfFriendlyBlocks;
+    result[27] = DTLibertiesOfEnemyBlocks;
 
     return result;
 }

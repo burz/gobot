@@ -1,7 +1,7 @@
 #ifndef _FEATURES_H_
 #define _FEATURES_H_
 
-#define NUMBER_OF_FEATURES 24
+#define NUMBER_OF_FEATURES 28
 
 class BlockFinalFeatures
 {
@@ -35,6 +35,11 @@ class BlockFinalFeatures
     int WACEPerimeter;
     int WACELiberties;
     int WACESharedLiberties;
+    // Disputed Territory Features
+    int DTNumberOfTerritories;
+    int DTDirectLiberties;
+    int DTLibertiesOfFriendlyBlocks;
+    int DTLibertiesOfEnemyBlocks;
 
     void print(void) const;
     float* getFeatureVector(void) const;

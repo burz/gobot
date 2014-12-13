@@ -15,6 +15,7 @@ typedef struct {
     std::set<Block*> adjacentOpponentBlocks;
     std::set<BoardLocation> friendly;
     std::set<BoardLocation> enemy;
+    std::set<Block*> adjacentTerritories;
     std::set<Block*> optimisticChain;
     Block* weakestAdjacentChainedBlock;
 } LocalFeatureState;

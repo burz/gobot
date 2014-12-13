@@ -11,17 +11,20 @@ void calculateLocalFeaturesForBlock(
         Block* block,
         const BoardLocation& location)
 {
-    if(block0 != block)
+    if(block != block0)
     {
         state->perimeter.insert(location);
     }
     if(block->getState() == EMPTY)
     {
         state->liberties.insert(location);
+
+        state->adjacentTerritories.insert(block);
     }
-    else if(block0->getState() != block->getState())
+    else if(block->getState() != block0->getState())
     {
         state->opponents.insert(location);
+
         state->adjacentOpponentBlocks.insert(block);
     }
 }
