@@ -29,6 +29,115 @@ void calculateLocalFeaturesForBlock(
     }
 }
 
+inline
+void handleTerritoryMember(
+        Block* block0,
+        Block* block,
+        const int& x,
+        const int& y,
+        std::set<BoardLocation>& perimeter,
+        std::set<BoardLocation>& directLiberties,
+        std::set<BoardLocation>& friendlyLiberties,
+        std::set<BoardLocation>& enemyLiberties)
+{
+    if(block == block0)
+    {
+        BoardLocation location(x, y);
+
+        directLiberties.insert(location);
+    }
+    else if(block->getState() != EMPTY)
+    {
+        BoardLocation location(x, y);
+
+        perimeter.insert(location);
+
+        if(block->getState() == block0->getState())
+        {
+            friendlyLiberties.insert(location);
+        }
+        else
+        {
+            enemyLiberties.insert(location);
+        }
+    }
+}
+
+void Board::handleAdjacentTerritories(
+        BlockFinalFeatures* features,
+        LocalFeatureState* state,
+        Block* block) const
+{
+    features->CETNumberOfTerritories = 0;
+    features->CETSize = 0;
+    features->CETPerimeter = 0;
+    features->DTNumberOfTerritories = 0;
+    features->DTDirectLiberties = 0;
+    features->DTLibertiesOfFriendlyBlocks = 0;
+    features->DTLibertiesOfEnemyBlocks = 0;
+
+    std::set<Block*>::const_iterator itt = state->adjacentTerritories.begin();
+    std::set<Block*>::const_iterator end = state->adjacentTerritories.end();
+
+    for( ; itt != end; ++itt)
+    {
+        std::set<BoardLocation> perimeter;
+        std::set<BoardLocation> directLiberties;
+        std::set<BoardLocation> friendlyLiberties;
+        std::set<BoardLocation> enemyLiberties;
+
+        std::set<BoardLocation>::const_iterator locationItt = (*itt)->locationsBegin();
+        std::set<BoardLocation>::const_iterator locationEnd = (*itt)->locationsEnd();
+
+        for( ; locationItt != locationEnd; ++locationItt)
+        {
+            Block* block1 = getBlock(locationItt->x - 1, locationItt->y);
+            Block* block2 = getBlock(locationItt->x, locationItt->y - 1);
+            Block* block3 = getBlock(locationItt->x + 1, locationItt->y);
+            Block* block4 = getBlock(locationItt->x, locationItt->y + 1);
+
+            if(block1)
+            {
+                handleTerritoryMember(block, block1, locationItt->x - 1, locationItt->y,
+                                      perimeter, directLiberties, friendlyLiberties,
+                                      enemyLiberties);
+            }
+            if(block2)
+            {
+                handleTerritoryMember(block, block2, locationItt->x, locationItt->y - 1,
+                                      perimeter, directLiberties, friendlyLiberties,
+                                      enemyLiberties);
+            }
+            if(block3)
+            {
+                handleTerritoryMember(block, block3, locationItt->x + 1, locationItt->y,
+                                      perimeter, directLiberties, friendlyLiberties,
+                                      enemyLiberties);
+            }
+            if(block4)
+            {
+                handleTerritoryMember(block, block4, locationItt->x, locationItt->y + 1,
+                                      perimeter, directLiberties, friendlyLiberties,
+                                      enemyLiberties);
+            }
+        }
+
+        if(enemyLiberties.size() == 0)
+        {
+            ++features->CETNumberOfTerritories;
+            features->CETSize += block->getSize();
+            features->CETPerimeter += perimeter.size();
+        }
+        else
+        {
+            ++features->DTNumberOfTerritories;
+            features->DTDirectLiberties = directLiberties.size();
+            features->DTLibertiesOfFriendlyBlocks = friendlyLiberties.size();
+            features->DTLibertiesOfEnemyBlocks = enemyLiberties.size();
+        }
+    }
+}
+
 void Board::calculateSecondOrderLiberties(
         LocalFeatureState* state,
         Block* block0,
@@ -391,11 +500,11 @@ void calculateWeakEnemyPerimeter(
 
         if(block->getState() == EMPTY)
         {
-            liberties += 1;
+            ++liberties;
 
             if(block0->touches(x, y))
             {
-                sharedLiberties += 1;
+                ++sharedLiberties;
             }
         }
     }
@@ -660,6 +769,8 @@ void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block) co
     features->centerOfMass = sum / (2.0 * block->getSize());
     features->boundingBoxSize = (maxX - minX + 1) * (maxY - minY + 1);
 
+    handleAdjacentTerritories(features, &state, block);
+
     features->protectedLiberties = 0;
     features->autoAtariLiberties = 0;
 
@@ -704,12 +815,12 @@ void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block) co
 
         if(isProtected(block, itt->x, itt->y))
         {
-            features->protectedLiberties += 1;
+            ++features->protectedLiberties;
         }
 
         if(autoAtari)
         {
-            features->autoAtariLiberties += 1;
+            ++features->autoAtariLiberties;
         }
     }
 

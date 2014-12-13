@@ -13,11 +13,11 @@ typedef struct {
     std::set<BoardLocation> secondOrderLiberties;
     std::set<BoardLocation> thirdOrderLiberties;
     std::set<Block*> adjacentOpponentBlocks;
+    Block* weakestAdjacentChainedBlock;
     std::set<BoardLocation> friendly;
     std::set<BoardLocation> enemy;
     std::set<Block*> adjacentTerritories;
     std::set<Block*> optimisticChain;
-    Block* weakestAdjacentChainedBlock;
 } LocalFeatureState;
 
 class Board
@@ -38,6 +38,9 @@ class Board
 
     void splitEmptyBlocks(void);
 
+    void handleAdjacentTerritories(BlockFinalFeatures* features,
+                                   LocalFeatureState* state,
+                                   Block* block) const;
     void calculateSecondOrderLiberties(LocalFeatureState* state,
                                        Block* block0,
                                        Block* block,

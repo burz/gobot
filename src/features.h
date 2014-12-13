@@ -19,6 +19,10 @@ class BlockFinalFeatures
     int localMajority;
     float centerOfMass;
     int boundingBoxSize;
+    // Color Enclosed Territory Features
+    int CETNumberOfTerritories;
+    int CETSize;
+    int CETPerimeter;
     // Optimistic Chain Features
     int OCNumberOfBlocks;
     int OCSize;

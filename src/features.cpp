@@ -10,9 +10,12 @@ void BlockFinalFeatures::print(void) const
     printf("Auto-atari Liberties: %d\nSecond-order Liberties: %d\n",
            autoAtariLiberties, secondOrderLiberties);
     printf("Third-order Liberties: %d\nNumber of Adjacent Opponent Blocks: %d\n",
-            thirdOrderLiberties, numberOfAdjacentOpponentBlocks);
+           thirdOrderLiberties, numberOfAdjacentOpponentBlocks);
     printf("Local Majority: %d\nCenter of Mass: %f\n", localMajority, centerOfMass);
     printf("Bounding Box Size: %d\n\n", boundingBoxSize);
+    printf("Color Enclosed Territory Features\n---------------------------------\n");
+    printf("Number of Territories: %d\nSize: %d\n", CETNumberOfTerritories, CETSize);
+    printf("Perimeter: %d\n\n", CETPerimeter);
     printf("Optimistic Chain Features\n-------------------------\n");
     printf("Number of Blocks: %d\nSize: %d\n", OCNumberOfBlocks, OCSize);
     printf("Perimeter: %d\n\n", OCPerimeter);
@@ -26,7 +29,12 @@ void BlockFinalFeatures::print(void) const
     printf("Weakest Adjacent Chained Enemy Features\n");
     printf("---------------------------------------\n");
     printf("Perimeter: %d\nLiberties: %d\n", WACEPerimeter, WACELiberties);
-    printf("Shared Liberties: %d\n", WACESharedLiberties);
+    printf("Shared Liberties: %d\n\n", WACESharedLiberties);
+    printf("Disputed Territory Features\n---------------------------\n");
+    printf("Number of Territories: %d\nDirect Liberties: %d\n",
+           DTNumberOfTerritories, DTDirectLiberties);
+    printf("Liberties of Friendly Blocks: %d\nLiberties of Enemy Blocks: %d\n",
+           DTLibertiesOfFriendlyBlocks, DTLibertiesOfEnemyBlocks);
 }
 
 float* BlockFinalFeatures::getFeatureVector(void) const
