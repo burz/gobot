@@ -1,7 +1,7 @@
 #ifndef _FEATURES_H_
 #define _FEATURES_H_
 
-#define NUMBER_OF_FEATURES 28
+#define NUMBER_OF_FEATURES 39
 
 class BlockFinalFeatures
 {
@@ -23,10 +23,18 @@ class BlockFinalFeatures
     int CETNumberOfTerritories;
     int CETSize;
     int CETPerimeter;
+    float CETCenterOfMass;
     // Optimistic Chain Features
     int OCNumberOfBlocks;
     int OCSize;
     int OCPerimeter;
+    int OCCETNumberOfTerritories;
+    int OCCETSize;
+    int OCCETPerimeter;
+    int OCDTNumberOfTerritories;
+    int OCDTDirectLiberties;
+    int OCDTLibertiesOfFriendlyBlocks;
+    int OCDTLibertiesOfEnemyBlocks;
     // Weakest Adjacent Enemy Features
     int WAEPerimeter;
     int WAELiberties;

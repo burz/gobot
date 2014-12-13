@@ -63,6 +63,50 @@ void handleTerritoryMember(
     }
 }
 
+inline
+int chooseSmallestDistances(
+        const int size,
+        const int x,
+        const int y)
+{
+    int dx0 = x;
+    int dx1 = size - x - 1;
+    int dy0 = y;
+    int dy1 = size - y - 1;
+
+    int distances[2];
+
+    if(dx0 < dx1)
+    {
+        distances[0] = dx0;
+        distances[1] = dx1;
+    }
+    else
+    {
+        distances[0] = dx1;
+        distances[1] = dx0;
+    }
+
+    if(dy0 < distances[0])
+    {
+        distances[1] = distances[0];
+        distances[0] = dy0;
+    }
+    else if(dy0 < distances[1])
+    {
+        distances[1] = dy0;
+    }
+
+    if(dy1 < distances[1])
+    {
+        return dy1 + distances[0];
+    }
+    else
+    {
+        return distances[0] + distances[1];
+    }
+}
+
 void Board::handleAdjacentTerritories(
         BlockFinalFeatures* features,
         LocalFeatureState* state,
@@ -76,6 +120,8 @@ void Board::handleAdjacentTerritories(
     features->DTLibertiesOfFriendlyBlocks = 0;
     features->DTLibertiesOfEnemyBlocks = 0;
 
+    int sum = 0;
+
     std::set<Block*>::const_iterator itt = state->adjacentTerritories.begin();
     std::set<Block*>::const_iterator end = state->adjacentTerritories.end();
 
@@ -88,6 +134,8 @@ void Board::handleAdjacentTerritories(
 
         std::set<BoardLocation>::const_iterator locationItt = (*itt)->locationsBegin();
         std::set<BoardLocation>::const_iterator locationEnd = (*itt)->locationsEnd();
+
+        int partialSum = 0;
 
         for( ; locationItt != locationEnd; ++locationItt)
         {
@@ -120,13 +168,17 @@ void Board::handleAdjacentTerritories(
                                       perimeter, directLiberties, friendlyLiberties,
                                       enemyLiberties);
             }
+
+            partialSum += chooseSmallestDistances(size, locationItt->x, locationItt->y);
         }
 
         if(enemyLiberties.size() == 0)
         {
             ++features->CETNumberOfTerritories;
-            features->CETSize += block->getSize();
+            features->CETSize += (*itt)->getSize();
             features->CETPerimeter += perimeter.size();
+
+            sum += partialSum;
         }
         else
         {
@@ -136,6 +188,33 @@ void Board::handleAdjacentTerritories(
             features->DTLibertiesOfEnemyBlocks = enemyLiberties.size();
         }
     }
+
+    if(features->CETSize)
+    {
+        features->CETCenterOfMass = sum / (2.0 * features->CETSize);
+    }
+    else
+    {
+        features->CETCenterOfMass = 0.0;
+    }
+}
+
+inline
+void updateCountAndPerimeter(
+        Block* block0,
+        Block*  block,
+        const int& x,
+        const int& y,
+        int& count,
+        int& perimeter)
+{
+    if(block->getState() == EMPTY && block0->touches(x, y) ||
+       block->getState() != block0->getState())
+    {
+        ++count;
+    }
+
+    ++perimeter;
 }
 
 void Board::calculateSecondOrderLiberties(
@@ -174,43 +253,19 @@ void Board::calculateSecondOrderLiberties(
 
         if(block1)
         {
-            if(block1->getState() == EMPTY && block0->touches(x, y) ||
-               block1->getState() != block0->getState())
-            {
-                ++count;
-            }
-
-            ++perimeter;
+            updateCountAndPerimeter(block0, block1, x, y, count, perimeter);
         }
         if(block2)
         {
-            if(block2->getState() == EMPTY && block0->touches(x, y) ||
-               block2->getState() != block0->getState())
-            {
-                ++count;
-            }
-
-            ++perimeter;
+            updateCountAndPerimeter(block0, block2, x, y, count, perimeter);
         }
         if(block3)
         {
-            if(block3->getState() == EMPTY && block0->touches(x, y) ||
-               block3->getState() != block0->getState())
-            {
-                ++count;
-            }
-
-            ++perimeter;
+            updateCountAndPerimeter(block0, block3, x, y, count, perimeter);
         }
         if(block4)
         {
-            if(block4->getState() == EMPTY && block0->touches(x, y) ||
-               block4->getState() != block0->getState())
-            {
-                ++count;
-            }
-
-            ++perimeter;
+            updateCountAndPerimeter(block0, block4, x, y, count, perimeter);
         }
 
         if(count > perimeter - 2)
@@ -724,42 +779,7 @@ void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block) co
             calculateLocalFeaturesForBlock(&state, block, block4, location);
         }
 
-        int distances[2];
-
-        int dx0 = itt->x;
-        int dx1 = size - itt->x;
-        int dy0 = itt->y;
-        int dy1 = size - itt->y;
-
-        if(dx0 < dx1)
-        {
-            distances[0] = dx0;
-            distances[1] = dx1;
-        }
-        else
-        {
-            distances[0] = dx1;
-            distances[1] = dx0;
-        }
-
-        if(dy0 < distances[0])
-        {
-            distances[1] = distances[0];
-            distances[0] = dy0;
-        }
-        else if(dy0 < distances[1])
-        {
-            distances[1] = dy0;
-        }
-
-        if(dy1 < distances[1])
-        {
-            sum += dy1 + distances[0];
-        }
-        else
-        {
-            sum += distances[0] + distances[1];
-        }
+        sum += chooseSmallestDistances(size, itt->x, itt->y);
     }
 
     features->perimeter = state.perimeter.size();

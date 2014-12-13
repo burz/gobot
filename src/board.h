@@ -18,6 +18,7 @@ typedef struct {
     std::set<BoardLocation> enemy;
     std::set<Block*> adjacentTerritories;
     std::set<Block*> optimisticChain;
+    std::set<Block*> adjacentChainedTerritories;
 } LocalFeatureState;
 
 class Board

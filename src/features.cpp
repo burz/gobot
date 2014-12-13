@@ -15,10 +15,19 @@ void BlockFinalFeatures::print(void) const
     printf("Bounding Box Size: %d\n\n", boundingBoxSize);
     printf("Color Enclosed Territory Features\n---------------------------------\n");
     printf("Number of Territories: %d\nSize: %d\n", CETNumberOfTerritories, CETSize);
-    printf("Perimeter: %d\n\n", CETPerimeter);
+    printf("Perimeter: %d\nCenter of Mass: %f\n\n", CETPerimeter, CETCenterOfMass);
     printf("Optimistic Chain Features\n-------------------------\n");
     printf("Number of Blocks: %d\nSize: %d\n", OCNumberOfBlocks, OCSize);
-    printf("Perimeter: %d\n\n", OCPerimeter);
+    printf("Perimeter: %d\nNumber of Color Enclosed Territories %d\n",
+           OCPerimeter, OCCETNumberOfTerritories);
+    printf("Size of Color Enclosed Territories: %d\n", OCCETSize);
+    printf("Perimeter of Color Enclosed Territories: %d\n", OCCETPerimeter);
+    printf("Number of Disputed Territories: %d\n", OCDTNumberOfTerritories);
+    printf("Direct Liberties in Disputed Territories: %d\n", OCDTDirectLiberties);
+    printf("Friendly Liberties in Disputed Territories: %d\n",
+           OCDTLibertiesOfFriendlyBlocks);
+    printf("Enemy Liberties in Disputed Territories: %d\n\n",
+           OCDTLibertiesOfEnemyBlocks);
     printf("Weakest Adjacent Enemy Features\n-------------------------------\n");
     printf("Perimeter: %d\nLiberties: %d\n", WAEPerimeter, WAELiberties);
     printf("Shared Liberties: %d\n\n", WAESharedLiberties);
@@ -54,27 +63,39 @@ float* BlockFinalFeatures::getFeatureVector(void) const
     result[9] = localMajority;
     result[10] = centerOfMass;
     result[11] = boundingBoxSize;
+    // Color Enclosed Territory Features
+    result[12] = CETNumberOfTerritories;
+    result[13] = CETSize;
+    result[14] = CETPerimeter;
+    result[15] = CETCenterOfMass;
     // Optimistic Chain Features
-    result[12] = OCNumberOfBlocks;
-    result[13] = OCSize;
-    result[14] = OCPerimeter;
+    result[16] = OCNumberOfBlocks;
+    result[17] = OCSize;
+    result[18] = OCPerimeter;
+    result[19] = OCCETNumberOfTerritories;
+    result[20] = OCCETSize;
+    result[21] = OCCETPerimeter;
+    result[22] = OCDTNumberOfTerritories;
+    result[23] = OCDTDirectLiberties;
+    result[24] = OCDTLibertiesOfFriendlyBlocks;
+    result[25] = OCDTLibertiesOfEnemyBlocks;
     // Weakest Adjacent Enemy Features
-    result[15] = WAEPerimeter;
-    result[16] = WAELiberties;
-    result[17] = WAESharedLiberties;
+    result[26] = WAEPerimeter;
+    result[27] = WAELiberties;
+    result[28] = WAESharedLiberties;
     // Second Weakest Adjacent Enemy Features
-    result[18] = SWAEPerimeter;
-    result[19] = SWAELiberties;
-    result[20] = SWAESharedLiberties;
+    result[29] = SWAEPerimeter;
+    result[30] = SWAELiberties;
+    result[31] = SWAESharedLiberties;
     // Weakest Adjacent Chained Enemy Features
-    result[21] = WACEPerimeter;
-    result[22] = WACELiberties;
-    result[23] = WACESharedLiberties;
+    result[32] = WACEPerimeter;
+    result[33] = WACELiberties;
+    result[34] = WACESharedLiberties;
     // Disputed Territory Features
-    result[24] = DTNumberOfTerritories;
-    result[25] = DTDirectLiberties;
-    result[26] = DTLibertiesOfFriendlyBlocks;
-    result[27] = DTLibertiesOfEnemyBlocks;
+    result[35] = DTNumberOfTerritories;
+    result[36] = DTDirectLiberties;
+    result[37] = DTLibertiesOfFriendlyBlocks;
+    result[38] = DTLibertiesOfEnemyBlocks;
 
     return result;
 }
