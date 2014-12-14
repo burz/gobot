@@ -1,7 +1,9 @@
 CC = g++
 CFLAGS = -c -g
 
-INCL = -Isrc
+SRCDIR = src
+
+INCL = -I$(SRCDIR)
 
 FILES = \
     definitions.o \
@@ -13,7 +15,8 @@ FILES = \
     directoryLoader.o \
     features.o \
     featureFile.o \
-    board.features.o
+    board.features.o \
+    rprop.o
 
 main: main.o $(FILES)
 	$(CC) -o main $^
@@ -27,5 +30,5 @@ reformat: reformat.hs
 clean:
 	rm -f *.o *.hi
 
-%.o: src/%.cpp
+%.o: $(SRCDIR)/%.cpp
 	$(CC) $(CFLAGS) $^ $(INCL)
