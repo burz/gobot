@@ -8,7 +8,7 @@ RProp::RProp(void)
 inline
 float randomFloatAroundZero(void)
 {
-    return static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 2.0)) - 1.0;
+    return static_cast<float>(rand()) / static_cast<float>(RAND_MAX / 2.0) - 1.0;
 }
 
 RProp::RProp(const int& _inputSize, const int& _hiddenSize)
@@ -50,9 +50,51 @@ RProp::~RProp(void)
     }
 }
 
-void RProp::train(std::vector<Game>& games)
+void RProp::initializeTrainingParameters(void)
 {
+    inputDerivative = new float*[hiddenSize]();
+    inputDelta = new float*[hiddenSize]();
+    inputDeltaW = new float*[hiddenSize]();
+    lastInputDerivative = new float*[hiddenSize]();
+    lastInputDelta = new float*[hiddenSize]();
+    lastInputDeltaW = new float*[hiddenSize]();
+
+    for(int i = 0; i < hiddenSize; ++i)
+    {
+        inputDerivative[i] = new float[inputSize]();
+        inputDelta[i] = new float[inputSize]();
+        inputDeltaW[i] = new float[inputSize]();
+        lastInputDerivative[i] = new float[inputSize]();
+        lastInputDelta[i] = new float[inputSize]();
+        lastInputDeltaW[i] = new float[inputSize]();
+    }
+}
+
+void RProp::cleanUpTrainingParameters(void)
+{
+    for(int i = 0; i < hiddenSize; ++i)
+    {
+        delete[] inputDerivative[i];
+        delete[] inputDelta[i];
+        delete[] inputDeltaW[i];
+        delete[] lastInputDerivative[i];
+        delete[] lastInputDelta[i];
+        delete[] lastInputDeltaW[i];
+    }
+
+    delete[] inputDerivative;
+    delete[] inputDelta;
+    delete[] inputDeltaW;
+    delete[] lastInputDerivative;
+    delete[] lastInputDelta;
+    delete[] lastInputDeltaW;
+}
+
+void RProp::train(std::vector<Game>& games, int iterations)
+{
+    initializeTrainingParameters();
 ////
+    cleanUpTrainingParameters();
 }
 
 float RProp::test(std::vector<Game>& games) const
@@ -61,7 +103,6 @@ float RProp::test(std::vector<Game>& games) const
     {
         int correctPredictions = 0;
 ////
-
         return correctPredictions / ((float) games.size());
     }
     else
