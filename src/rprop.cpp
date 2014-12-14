@@ -5,26 +5,42 @@ RProp::RProp(void)
     inputSize = 0;
 }
 
+inline
+float randomFloatAroundZero(void)
+{
+    return static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 2.0)) - 1.0;
+}
+
 RProp::RProp(const int& _inputSize, const int& _hiddenSize)
 {
     inputSize = _inputSize;
     hiddenSize = _hiddenSize;
 
-    bottomLayer = new float*[inputSize]();
+    bottomLayer = new float*[hiddenSize]();
 
-    for(int i = 0; i < inputSize; ++i)
+    for(int i = 0; i < hiddenSize; ++i)
     {
-        bottomLayer[i] = new float[hiddenSize]();
+        bottomLayer[i] = new float[inputSize]();
+
+        for(int j = 0; j < inputSize; ++j)
+        {
+            bottomLayer[i][j] = randomFloatAroundZero();
+        }
     }
 
     hiddenLayer = new float[hiddenSize]();
+
+    for(int i = 0; i < hiddenSize; ++i)
+    {
+        hiddenLayer[i] = randomFloatAroundZero();
+    }
 }
 
 RProp::~RProp(void)
 {
     if(inputSize)
     {
-        for(int i = 0; i < inputSize; ++i)
+        for(int i = 0; i < hiddenSize; ++i)
         {
             delete[] bottomLayer[i];
         }

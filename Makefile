@@ -21,6 +21,8 @@ FILES = \
 main: main.o $(FILES)
 	$(CC) -o main $^
 
+all: main generateFeatureFiles reformat
+
 generateFeatureFiles: generateFeatureFiles.o $(FILES)
 	$(CC) -o generateFeatureFiles $^
 
