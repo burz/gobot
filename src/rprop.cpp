@@ -1,5 +1,7 @@
 #include "rprop.h"
 
+#define DELTA0 0.1
+
 RProp::RProp(void)
 {
     inputSize = 0;
@@ -53,11 +55,17 @@ RProp::~RProp(void)
 void RProp::initializeTrainingParameters(void)
 {
     inputDerivative = new float*[hiddenSize]();
+    hiddenDerivative = new float[hiddenSize]();
     inputDelta = new float*[hiddenSize]();
+    hiddenDelta = new float[hiddenSize]();
     inputDeltaW = new float*[hiddenSize]();
+    hiddenDeltaW = new float[hiddenSize]();
     lastInputDerivative = new float*[hiddenSize]();
+    lastHiddenDerivative = new float[hiddenSize]();
     lastInputDelta = new float*[hiddenSize]();
+    lastHiddenDelta = new float[hiddenSize]();
     lastInputDeltaW = new float*[hiddenSize]();
+    lastHiddenDeltaW = new float[hiddenSize]();
 
     for(int i = 0; i < hiddenSize; ++i)
     {
@@ -67,7 +75,23 @@ void RProp::initializeTrainingParameters(void)
         lastInputDerivative[i] = new float[inputSize]();
         lastInputDelta[i] = new float[inputSize]();
         lastInputDeltaW[i] = new float[inputSize]();
+
+        for(int j = 0; j < inputSize; ++j)
+        {
+            lastInputDerivative[i][j] = 1.0;
+            lastInputDelta[i][j] = DELTA0;
+            lastInputDeltaW[i][j] = DELTA0;
+        }
+
+        lastHiddenDerivative[i] = 1.0;
+        lastHiddenDelta[i] = DELTA0;
+        lastHiddenDeltaW[i] = DELTA0;
     }
+
+    inputDeltaMin = DELTA0;
+    inputDeltaMax = DELTA0;
+    hiddenDeltaMin = DELTA0;
+    hiddenDeltaMaX = DELTA0;
 }
 
 void RProp::cleanUpTrainingParameters(void)
@@ -83,11 +107,17 @@ void RProp::cleanUpTrainingParameters(void)
     }
 
     delete[] inputDerivative;
+    delete[] hiddenDerivative;
     delete[] inputDelta;
+    delete[] hiddenDelta;
     delete[] inputDeltaW;
+    delete[] hiddenDeltaW;
     delete[] lastInputDerivative;
+    delete[] lastHiddenDerivative;
     delete[] lastInputDelta;
+    delete[] lastHiddenDelta;
     delete[] lastInputDeltaW;
+    delete[] lastHiddenDeltaW;
 }
 
 void RProp::train(std::vector<Game>& games, int iterations)
