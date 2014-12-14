@@ -3,21 +3,26 @@
 
 #include "model.h"
 
+typedef enum {
+    INPUT,
+    HIDDEN,
+    LASTINPUT,
+    LASTHIDDEN
+} ParameterType;
+
 class RProp : public Model
 {
   private:
     int inputSize;
     int hiddenSize;
-    float** bottomLayer;
+    float** inputLayer;
     float* hiddenLayer;
     float** inputDerivative;
     float* hiddenDerivative;
     float** inputDelta;
     float* hiddenDelta;
-    float inputDeltaMin;
-    float inputDeltaMax;
-    float hiddenDeltaMin;
-    float hiddenDeltaMaX;
+    float deltaMin;
+    float deltaMax;
     float** inputDeltaW;
     float* hiddenDeltaW;
     float** lastInputDerivative;
@@ -29,12 +34,23 @@ class RProp : public Model
 
     void initializeTrainingParameters(void);
     void cleanUpTrainingParameters(void);
+    float derivative(const ParameterType& type, const int& i, const int& j);
+    float delta(const ParameterType& type, const int& i, const int& j);
+    float deltaW(const ParameterType& type, const int& i, const int& j);
+    void setDerivative(const ParameterType& type,
+                       const int& i, const int& j, const float& d);
+    void setDelta(const ParameterType& type,
+                  const int& i, const int& j, const float& d);
+    void setDeltaW(const ParameterType& type,
+                    const int& i, const int& j, const float& d);
+    float w(const ParameterType& type, const int& i, const int& j);
+    float updateWeight(const ParameterType& type, const int& i, const int& j);
   public:
     RProp(void);
     RProp(const int& inputSize, const int& hiddenSize);
     ~RProp(void);
 
-    virtual void train(std::vector<Game>& games, int iterations);
+    virtual void train(std::vector<Game>& games, const int& iterations);
     virtual float test(std::vector<Game>& games) const;
     virtual float run(const Game& game) const;
 

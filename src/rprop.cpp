@@ -1,6 +1,10 @@
 #include "rprop.h"
 
+#include <math.h>
+
 #define DELTA0 0.1
+#define ETAPLUS 1.2
+#define ETAMINUS 0.5
 
 RProp::RProp(void)
 {
@@ -18,15 +22,15 @@ RProp::RProp(const int& _inputSize, const int& _hiddenSize)
     inputSize = _inputSize;
     hiddenSize = _hiddenSize;
 
-    bottomLayer = new float*[hiddenSize]();
+    inputLayer = new float*[hiddenSize]();
 
     for(int i = 0; i < hiddenSize; ++i)
     {
-        bottomLayer[i] = new float[inputSize]();
+        inputLayer[i] = new float[inputSize]();
 
         for(int j = 0; j < inputSize; ++j)
         {
-            bottomLayer[i][j] = randomFloatAroundZero();
+            inputLayer[i][j] = randomFloatAroundZero();
         }
     }
 
@@ -44,10 +48,10 @@ RProp::~RProp(void)
     {
         for(int i = 0; i < hiddenSize; ++i)
         {
-            delete[] bottomLayer[i];
+            delete[] inputLayer[i];
         }
 
-        delete[] bottomLayer;
+        delete[] inputLayer;
         delete[] hiddenLayer;
     }
 }
@@ -88,10 +92,8 @@ void RProp::initializeTrainingParameters(void)
         lastHiddenDeltaW[i] = DELTA0;
     }
 
-    inputDeltaMin = DELTA0;
-    inputDeltaMax = DELTA0;
-    hiddenDeltaMin = DELTA0;
-    hiddenDeltaMaX = DELTA0;
+    deltaMin = DELTA0;
+    deltaMax = DELTA0;
 }
 
 void RProp::cleanUpTrainingParameters(void)
@@ -120,10 +122,196 @@ void RProp::cleanUpTrainingParameters(void)
     delete[] lastHiddenDeltaW;
 }
 
-void RProp::train(std::vector<Game>& games, int iterations)
+inline
+float sign(const float& x)
+{
+    if(x == 0.0)
+    {
+        return 0.0;
+    }
+    else if(x > 0.0)
+    {
+        return 1.0;
+    }
+    else
+    {
+        return -1.0;
+    }
+}
+
+float RProp::derivative(const ParameterType& type, const int& i, const int& j)
+{
+    if(type == INPUT)
+    {
+        return inputDerivative[i][j];
+    }
+    else if(type == HIDDEN)
+    {
+        return hiddenDerivative[i];
+    }
+    else if(type == LASTINPUT)
+    {
+        return lastInputDerivative[i][j];
+    }
+    else
+    {
+        return lastHiddenDerivative[i];
+    }
+}
+
+float RProp::delta(const ParameterType& type, const int& i, const int& j)
+{
+    if(type == INPUT)
+    {
+        return inputDelta[i][j];
+    }
+    else if(type == HIDDEN)
+    {
+        return hiddenDelta[i];
+    }
+    else if(type == LASTINPUT)
+    {
+        return lastInputDelta[i][j];
+    }
+    else
+    {
+        return lastHiddenDelta[i];
+    }
+}
+
+float RProp::deltaW(const ParameterType& type, const int& i, const int& j)
+{
+    if(type == INPUT)
+    {
+        return inputDeltaW[i][j];
+    }
+    else if(type == HIDDEN)
+    {
+        return hiddenDeltaW[i];
+    }
+    else if(type == LASTINPUT)
+    {
+        return lastInputDeltaW[i][j];
+    }
+    else
+    {
+        return lastHiddenDeltaW[i];
+    }
+}
+
+float RProp::w(const ParameterType& type, const int& i, const int& j)
+{
+    if(type == INPUT)
+    {
+        return inputLayer[i][j];
+    }
+    else
+    {
+        return hiddenLayer[i];
+    }
+}
+
+inline
+ParameterType getLastType(const ParameterType& type)
+{
+    if(type == INPUT)
+    {
+        return LASTINPUT;
+    }
+    else
+    {
+        return LASTHIDDEN;
+    }
+}
+
+void RProp::setDerivative(const ParameterType& type, const int& i, const int& j, const float& d)
+{
+    if(type == INPUT)
+    {
+        inputDerivative[i][j] = d;
+    }
+    else
+    {
+        hiddenDerivative[i] = d;
+    }
+}
+
+void RProp::setDelta(const ParameterType& type, const int& i, const int& j, const float& d)
+{
+    if(type == INPUT)
+    {
+        inputDelta[i][j] = d;
+    }
+    else
+    {
+        hiddenDelta[i] = d;
+    }
+}
+
+void RProp::setDeltaW(const ParameterType& type, const int& i, const int& j, const float& d)
+{
+    if(type == INPUT)
+    {
+        inputDeltaW[i][j] = d;
+    }
+    else
+    {
+        hiddenDeltaW[i] = d;
+    }
+}
+
+float RProp::updateWeight(const ParameterType& type, const int& i, const int& j)
+{
+    ParameterType lastType = getLastType(type);
+
+    float d = derivative(type, i, j) * derivative(lastType, i, j);
+
+    if(d > 0.0)
+    {
+        float deltaT = fmin(ETAPLUS * delta(lastType, i, j), deltaMax);
+        setDelta(type, i, j, deltaT);
+
+        float deltaWT = -sign(derivative(type, i, j)) * deltaT;
+        setDeltaW(type, i, j, deltaWT);
+
+        return w(type, i, j) + deltaWT;
+    }
+    else if(d < 0.0)
+    {
+        float deltaT = fmax(ETAMINUS * delta(lastType, i, j), deltaMin);
+        setDelta(type, i, j, deltaT);
+
+        setDerivative(type, i, j, 0.0);
+
+        return w(type, i, j) - w(lastType, i, j);
+    }
+    else
+    {
+        float deltaT = delta(lastType, i, j);
+        setDelta(type, i, j, deltaT);
+
+        float deltaWT = -sign(derivative(type, i, j)) * deltaT;
+        setDeltaW(type, i, j, deltaWT);
+
+        return w(type, i, j) + deltaWT;
+    }
+}
+
+void RProp::train(std::vector<Game>& games, const int& iterations)
 {
     initializeTrainingParameters();
+
+    for(int i = 0; i < iterations; ++i)
+    {
+        std::vector<Game>::iterator itt = games.begin();
+        std::vector<Game>::iterator end = games.end();
+
+        for( ; itt != end; ++itt)
+        {
 ////
+        }
+    }
+
     cleanUpTrainingParameters();
 }
 
@@ -168,7 +356,7 @@ bool RProp::outputToFile(const char* filename) const
     {
         for(int j = 0; j < inputSize; ++j)
         {
-            if(fwrite(&bottomLayer[i][j], sizeof(float), 1, f) != 1)
+            if(fwrite(&inputLayer[i][j], sizeof(float), 1, f) != 1)
             {
                 fclose(f);
 
@@ -213,7 +401,7 @@ bool RProp::readFromFile(const char* filename)
     {
         for(int j = 0; j < inputSize; ++j)
         {
-            if(fread(&bottomLayer[i][j], sizeof(float), 1, f) != 1)
+            if(fread(&inputLayer[i][j], sizeof(float), 1, f) != 1)
             {
                 fclose(f);
 
