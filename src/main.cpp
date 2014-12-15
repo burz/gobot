@@ -8,24 +8,46 @@
 
 #include <stdio.h>
 
+#define HIDDEN_LAYER_SIZE 5
+
+const char usage[] = "Usage: gobot -train modelOutputFile gameDirectory "
+                     "[featureDirectory]\n"
+                     "             -test modelFile gameDirectory [featureDirectory]\n"
+                     "             -predict modelFile gameFile [featureFile]\n"
+                     "             -generateFeatures gameDirectory featureDirectory";
+
 int main(int argc, char *argv[])
 {
-    DirectoryIterator games("gamesReformated");
+    if(argc < 3)
+    {
+        printf("%s\n", usage);
 
-    RProp model(NUMBER_OF_FEATURES, 5);
+        return 1;
+    }
+    else if(!strcmp(argv[1], "-train"))
+    {
+        if(argc == 3)
+        {
+            printf("%s\n", usage);
 
-    model.trainWithFeatures(games, "gamesFeatures");
+            return 1;
+        }
 
-    model.outputToFile("rprop_1_5.model");
+        DirectoryIterator games(argv[3]);
 
-//    std::vector<Game> games;
-//
-//    if(loadDirectory(games, "gamesReformated"))
-//    {
-//        RProp model(NUMBER_OF_FEATURES, 13);
-//
-//        model.train(games, 5);
-//    }
+        RProp model(NUMBER_OF_FEATURES, HIDDEN_LAYER_SIZE);
+
+        if(argc > 4)
+        {
+            model.trainWithFeatures(games, argv[4]);
+        }
+        else
+        {
+            model.train(games);
+        }
+
+        model.outputToFile(argv[2]);
+    }
 
     return 0;
 }

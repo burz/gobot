@@ -931,6 +931,7 @@ void RProp::calculateDerivatives(
     int index = 0;
 
     itt = emptyBlocks.begin();
+    end = emptyBlocks.end();
 
     for( ; itt != end; ++itt)
     {
@@ -1007,16 +1008,6 @@ void RProp::calculateDerivatives(
 }
 
 inline
-void swapPtrs(float**& x, float**& y)
-{
-    float** temp;
-
-    temp = y;
-    y = x;
-    x = temp;
-}
-
-inline
 void adjustBounds(const float& delta, float& deltaMin, float& deltaMax)
 {
     if(delta < deltaMin)
@@ -1027,6 +1018,16 @@ void adjustBounds(const float& delta, float& deltaMin, float& deltaMax)
     {
         deltaMax = delta;
     }
+}
+
+inline
+void swapPtrs(float**& x, float**& y)
+{
+    float** temp;
+
+    temp = y;
+    y = x;
+    x = temp;
 }
 
 inline

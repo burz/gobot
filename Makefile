@@ -19,10 +19,10 @@ FILES = \
     rprop.o \
     rprop.training.o
 
-main: main.o $(FILES)
-	$(CC) -o main $^
+gobot: main.o $(FILES)
+	$(CC) -o gobot $^
 
-all: main generateFeatureFiles reformat
+all: gobot generateFeatureFiles reformat
 
 generateFeatureFiles: generateFeatureFiles.o $(FILES)
 	$(CC) -o generateFeatureFiles $^
