@@ -9,8 +9,12 @@
 typedef enum {
     INPUT,
     HIDDEN,
-    LASTINPUT,
-    LASTHIDDEN
+    INPUT_BIAS,
+    HIDDEN_BIAS,
+    LAST_INPUT,
+    LAST_HIDDEN,
+    LAST_INPUT_BIAS,
+    LAST_HIDDEN_BIAS,
 } ParameterType;
 
 class RProp : public Model
@@ -56,6 +60,34 @@ class RProp : public Model
     float* lastHiddenBiasDerivative;
     float* lastHiddenBiasDelta;
     float* lastHiddenBiasDeltaW;
+
+    float** secondInputDerivative;
+    float** secondInputDelta;
+    float** secondInputDeltaW;
+    float** lastSecondInputDerivative;
+    float** lastSecondInputDelta;
+    float** lastSecondInputDeltaW;
+
+    float* secondHiddenDerivative;
+    float* secondHiddenDelta;
+    float* secondHiddenDeltaW;
+    float* lastSecondHiddenDerivative;
+    float* lastSecondHiddenDelta;
+    float* lastSecondHiddenDeltaW;
+
+    float* secondInputBiasDerivative;
+    float* secondInputBiasDelta;
+    float* secondInputBiasDeltaW;
+    float* lastSecondInputBiasDerivative;
+    float* lastSecondInputBiasDelta;
+    float* lastSecondInputBiasDeltaW;
+
+    float* secondHiddenBiasDerivative;
+    float* secondHiddenBiasDelta;
+    float* secondHiddenBiasDeltaW;
+    float* lastSecondHiddenBiasDerivative;
+    float* lastSecondHiddenBiasDelta;
+    float* lastSecondHiddenBiasDeltaW;
 
     float deltaMin;
     float deltaMax;

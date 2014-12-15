@@ -47,15 +47,24 @@ void RProp::initializeTrainingParameters(void)
 
         for(int j = 0; j < inputSize; ++j)
         {
+            inputDerivative[i][j] = 1.0;
+            inputDelta[i][j] = DELTA0;
+            inputDeltaW[i][j] = DELTA0;
             lastInputDerivative[i][j] = 1.0;
             lastInputDelta[i][j] = DELTA0;
             lastInputDeltaW[i][j] = DELTA0;
         }
 
+        hiddenDerivative[i] = 1.0;
+        hiddenDelta[i] = DELTA0;
+        hiddenDeltaW[i] = DELTA0;
         lastHiddenDerivative[i] = 1.0;
         lastHiddenDelta[i] = DELTA0;
         lastHiddenDeltaW[i] = DELTA0;
 
+        hiddenBiasDerivative[i] = 1.0;
+        hiddenBiasDelta[i] = DELTA0;
+        hiddenBiasDeltaW[i] = DELTA0;
         lastHiddenBiasDerivative[i] = 1.0;
         lastHiddenBiasDelta[i] = DELTA0;
         lastHiddenBiasDeltaW[i] = DELTA0;
@@ -63,9 +72,84 @@ void RProp::initializeTrainingParameters(void)
 
     for(int i = 0; i < inputSize; ++i)
     {
+        inputBiasDerivative[i] = 1.0;
+        inputBiasDelta[i] = DELTA0;
+        inputBiasDeltaW[i] = DELTA0;
         lastInputBiasDerivative[i] = 1.0;
         lastInputBiasDelta[i] = DELTA0;
         lastInputBiasDeltaW[i] = DELTA0;
+    }
+
+    secondInputDerivative = new float*[SECOND_HIDDEN_SIZE]();
+    secondInputDelta = new float*[SECOND_HIDDEN_SIZE]();
+    secondInputDeltaW = new float*[SECOND_HIDDEN_SIZE]();
+    lastSecondInputDerivative = new float*[SECOND_HIDDEN_SIZE]();
+    lastSecondInputDelta = new float*[SECOND_HIDDEN_SIZE]();
+    lastSecondInputDeltaW = new float*[SECOND_HIDDEN_SIZE]();
+
+    secondHiddenDerivative = new float[SECOND_HIDDEN_SIZE]();
+    secondHiddenDelta = new float[SECOND_HIDDEN_SIZE]();
+    secondHiddenDeltaW = new float[SECOND_HIDDEN_SIZE]();
+    lastSecondHiddenDerivative = new float[SECOND_HIDDEN_SIZE]();
+    lastSecondHiddenDelta = new float[SECOND_HIDDEN_SIZE]();
+    lastSecondHiddenDeltaW = new float[SECOND_HIDDEN_SIZE]();
+
+    secondInputBiasDerivative = new float[SECOND_INPUT_SIZE]();
+    secondInputBiasDelta = new float[SECOND_INPUT_SIZE]();
+    secondInputBiasDeltaW = new float[SECOND_INPUT_SIZE]();
+    lastSecondInputBiasDerivative = new float[SECOND_INPUT_SIZE]();
+    lastSecondInputBiasDelta = new float[SECOND_INPUT_SIZE]();
+    lastSecondInputBiasDeltaW = new float[SECOND_INPUT_SIZE]();
+
+    secondHiddenBiasDerivative = new float[SECOND_HIDDEN_SIZE]();
+    secondHiddenBiasDelta = new float[SECOND_HIDDEN_SIZE]();
+    secondHiddenBiasDeltaW = new float[SECOND_HIDDEN_SIZE]();
+    lastSecondHiddenBiasDerivative = new float[SECOND_HIDDEN_SIZE]();
+    lastSecondHiddenBiasDelta = new float[SECOND_HIDDEN_SIZE]();
+    lastSecondHiddenBiasDeltaW = new float[SECOND_HIDDEN_SIZE]();
+
+    for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+    {
+        secondInputDerivative[i] = new float[SECOND_INPUT_SIZE]();
+        secondInputDelta[i] = new float[SECOND_INPUT_SIZE]();
+        secondInputDeltaW[i] = new float[SECOND_INPUT_SIZE]();
+        lastSecondInputDerivative[i] = new float[SECOND_INPUT_SIZE]();
+        lastSecondInputDelta[i] = new float[SECOND_INPUT_SIZE]();
+        lastSecondInputDeltaW[i] = new float[SECOND_INPUT_SIZE]();
+
+        for(int j = 0; j < inputSize; ++j)
+        {
+            secondInputDerivative[i][j] = 1.0;
+            secondInputDelta[i][j] = DELTA0;
+            secondInputDeltaW[i][j] = DELTA0;
+            lastSecondInputDerivative[i][j] = 1.0;
+            lastSecondInputDelta[i][j] = DELTA0;
+            lastSecondInputDeltaW[i][j] = DELTA0;
+        }
+
+        secondHiddenDerivative[i] = 1.0;
+        secondHiddenDelta[i] = DELTA0;
+        secondHiddenDeltaW[i] = DELTA0;
+        lastSecondHiddenDerivative[i] = 1.0;
+        lastSecondHiddenDelta[i] = DELTA0;
+        lastSecondHiddenDeltaW[i] = DELTA0;
+
+        secondHiddenBiasDerivative[i] = 1.0;
+        secondHiddenBiasDelta[i] = DELTA0;
+        secondHiddenBiasDeltaW[i] = DELTA0;
+        lastSecondHiddenBiasDerivative[i] = 1.0;
+        lastSecondHiddenBiasDelta[i] = DELTA0;
+        lastSecondHiddenBiasDeltaW[i] = DELTA0;
+    }
+
+    for(int i = 0; i < inputSize; ++i)
+    {
+        secondInputBiasDerivative[i] = 1.0;
+        secondInputBiasDelta[i] = DELTA0;
+        secondInputBiasDeltaW[i] = DELTA0;
+        lastSecondInputBiasDerivative[i] = 1.0;
+        lastSecondInputBiasDelta[i] = DELTA0;
+        lastSecondInputBiasDeltaW[i] = DELTA0;
     }
 
     deltaMin = DELTA0;
@@ -111,6 +195,44 @@ void RProp::cleanUpTrainingParameters(void)
     delete[] lastHiddenBiasDerivative;
     delete[] lastHiddenBiasDelta;
     delete[] lastHiddenBiasDeltaW;
+
+    for(int i = 0; i < hiddenSize; ++i)
+    {
+        delete[] secondInputDerivative[i];
+        delete[] secondInputDelta[i];
+        delete[] secondInputDeltaW[i];
+        delete[] lastSecondInputDerivative[i];
+        delete[] lastSecondInputDelta[i];
+        delete[] lastSecondInputDeltaW[i];
+    }
+
+    delete[] secondInputDerivative;
+    delete[] secondInputDelta;
+    delete[] secondInputDeltaW;
+    delete[] lastSecondInputDerivative;
+    delete[] lastSecondInputDelta;
+    delete[] lastSecondInputDeltaW;
+
+    delete[] secondHiddenDerivative;
+    delete[] secondHiddenDelta;
+    delete[] secondHiddenDeltaW;
+    delete[] lastSecondHiddenDerivative;
+    delete[] lastSecondHiddenDelta;
+    delete[] lastSecondHiddenDeltaW;
+
+    delete[] secondInputBiasDerivative;
+    delete[] secondInputBiasDelta;
+    delete[] secondInputBiasDeltaW;
+    delete[] lastSecondInputBiasDerivative;
+    delete[] lastSecondInputBiasDelta;
+    delete[] lastSecondInputBiasDeltaW;
+
+    delete[] secondHiddenBiasDerivative;
+    delete[] secondHiddenBiasDelta;
+    delete[] secondHiddenBiasDeltaW;
+    delete[] lastSecondHiddenBiasDerivative;
+    delete[] lastSecondHiddenBiasDelta;
+    delete[] lastSecondHiddenBiasDeltaW;
 }
 
 inline
@@ -140,13 +262,29 @@ float RProp::derivative(const ParameterType& type, const int& i, const int& j)
     {
         return hiddenDerivative[i];
     }
-    else if(type == LASTINPUT)
+    else if(type == INPUT_BIAS)
+    {
+        return inputBiasDerivative[i];
+    }
+    else if(type == HIDDEN_BIAS)
+    {
+        return hiddenBiasDerivative[i];
+    }
+    else if(type == LAST_INPUT)
     {
         return lastInputDerivative[i][j];
     }
-    else
+    else if(type == LAST_HIDDEN)
     {
         return lastHiddenDerivative[i];
+    }
+    else if(type == LAST_INPUT_BIAS)
+    {
+        return lastInputBiasDerivative[i];
+    }
+    else
+    {
+        return lastHiddenBiasDerivative[i];
     }
 }
 
@@ -160,13 +298,29 @@ float RProp::delta(const ParameterType& type, const int& i, const int& j)
     {
         return hiddenDelta[i];
     }
-    else if(type == LASTINPUT)
+    else if(type == INPUT_BIAS)
+    {
+        return inputBiasDelta[i];
+    }
+    else if(type == HIDDEN_BIAS)
+    {
+        return hiddenBiasDelta[i];
+    }
+    else if(type == LAST_INPUT)
     {
         return lastInputDelta[i][j];
     }
-    else
+    else if(type == LAST_HIDDEN)
     {
         return lastHiddenDelta[i];
+    }
+    else if(type == LAST_INPUT_BIAS)
+    {
+        return lastInputBiasDelta[i];
+    }
+    else
+    {
+        return lastHiddenBiasDelta[i];
     }
 }
 
@@ -180,13 +334,29 @@ float RProp::deltaW(const ParameterType& type, const int& i, const int& j)
     {
         return hiddenDeltaW[i];
     }
-    else if(type == LASTINPUT)
+    else if(type == INPUT_BIAS)
+    {
+        return inputBiasDeltaW[i];
+    }
+    else if(type == HIDDEN_BIAS)
+    {
+        return hiddenBiasDeltaW[i];
+    }
+    else if(type == LAST_INPUT)
     {
         return lastInputDeltaW[i][j];
     }
-    else
+    else if(type == LAST_HIDDEN)
     {
         return lastHiddenDeltaW[i];
+    }
+    else if(type == LAST_INPUT_BIAS)
+    {
+        return lastInputBiasDeltaW[i];
+    }
+    else
+    {
+        return lastHiddenBiasDeltaW[i];
     }
 }
 
@@ -207,11 +377,19 @@ ParameterType getLastType(const ParameterType& type)
 {
     if(type == INPUT)
     {
-        return LASTINPUT;
+        return LAST_INPUT;
+    }
+    else if(type == HIDDEN)
+    {
+        return LAST_HIDDEN;
+    }
+    else if(type == INPUT_BIAS)
+    {
+        return LAST_INPUT_BIAS;
     }
     else
     {
-        return LASTHIDDEN;
+        return LAST_HIDDEN_BIAS;
     }
 }
 
@@ -225,9 +403,17 @@ void RProp::setDerivative(
     {
         inputDerivative[i][j] = d;
     }
-    else
+    else if(type == HIDDEN)
     {
         hiddenDerivative[i] = d;
+    }
+    else if(type == INPUT_BIAS)
+    {
+        inputBiasDerivative[i] = d;
+    }
+    else
+    {
+        hiddenBiasDerivative[i] = d;
     }
 }
 
@@ -241,9 +427,17 @@ void RProp::setDelta(
     {
         inputDelta[i][j] = d;
     }
-    else
+    else if(type == HIDDEN)
     {
         hiddenDelta[i] = d;
+    }
+    else if(type == INPUT_BIAS)
+    {
+        inputBiasDelta[i] = d;
+    }
+    else
+    {
+        hiddenBiasDelta[i] = d;
     }
 }
 
@@ -257,9 +451,17 @@ void RProp::setDeltaW(
     {
         inputDeltaW[i][j] = d;
     }
-    else
+    else if(type == HIDDEN)
     {
         hiddenDeltaW[i] = d;
+    }
+    else if(type == INPUT_BIAS)
+    {
+        inputBiasDeltaW[i] = d;
+    }
+    else
+    {
+        hiddenBiasDeltaW[i] = d;
     }
 }
 
