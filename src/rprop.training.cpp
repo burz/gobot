@@ -903,6 +903,7 @@ inline
 void swapPtrs(float**& x, float**& y)
 {
     float** temp;
+
     temp = y;
     y = x;
     x = temp;
@@ -1017,6 +1018,8 @@ void RProp::runUpdates(
 
         adjustBounds(secondHiddenDelta[i], deltaMin, deltaMax);
         adjustBounds(secondHiddenBiasDelta[i], deltaMin, deltaMax);
+
+        delete[] secondInputLayer[i];
     }
 
     for(int i = 0; i < SECOND_INPUT_SIZE; ++i)
@@ -1025,14 +1028,22 @@ void RProp::runUpdates(
     }
 
     delete[] inputLayer;
-    delete[] hiddenLayer;
     delete[] inputBias;
+    delete[] hiddenLayer;
     delete[] hiddenBias;
+    delete[] secondInputLayer;
+    delete[] secondInputBias;
+    delete[] secondHiddenLayer;
+    delete[] secondHiddenBias;
 
     inputLayer = newInputLayer;
-    hiddenLayer = newHiddenLayer;
     inputBias = newInputBias;
+    hiddenLayer = newHiddenLayer;
     hiddenBias = newHiddenBias;
+    secondInputLayer = newSecondInputLayer;
+    secondInputBias = newSecondInputBias;
+    secondHiddenLayer = newSecondHiddenLayer;
+    secondHiddenBias = newSecondHiddenBias;
 
     swapPtrs(inputDerivative, lastInputDerivative);
     swapPtrs(inputDelta, lastInputDelta);
