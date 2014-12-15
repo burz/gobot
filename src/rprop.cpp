@@ -35,6 +35,8 @@ RProp::RProp(const int& _inputSize, const int& _hiddenSize)
     }
 
     hiddenLayer = new float[hiddenSize]();
+    inputBias = new float[inputSize]();
+    hiddenBias = new float[hiddenSize]();
 
     for(int i = 0; i < hiddenSize; ++i)
     {
@@ -53,6 +55,8 @@ RProp::~RProp(void)
 
         delete[] inputLayer;
         delete[] hiddenLayer;
+        delete[] inputBias;
+        delete[] hiddenBias;
     }
 }
 
@@ -297,6 +301,43 @@ float RProp::updateWeight(const ParameterType& type, const int& i, const int& j)
     }
 }
 
+float RProp::calculateR(float* features) const
+{
+    float inputTemp[inputSize];
+    float hiddenTemp[hiddenSize];
+
+    for(int i = 0; i < inputSize; ++i)
+    {
+        inputTemp[i] = features[i] * inputBias[i];
+    }
+
+    for(int i = 0; i < hiddenSize; ++i)
+    {
+        float sum = 0.0;
+
+        for(int j = 0; j < inputSize; ++j)
+        {
+            sum += inputTemp[j] * inputLayer[i][j];
+        }
+
+        hiddenTemp[i] = sum;
+    }
+
+    float result = 0.0;
+
+    for(int i = 0; i < hiddenSize; ++i)
+    {
+        result += (hiddenTemp[i] + hiddenBias[i]) * hiddenLayer[i];
+    }
+
+    return result;
+}
+
+float RProp::energyFunction(const Game& game) const
+{
+    return abs(game.getFinalScore() - run(game));
+}
+
 void RProp::train(std::vector<Game>& games, const int& iterations)
 {
     initializeTrainingParameters();
@@ -329,10 +370,69 @@ float RProp::test(std::vector<Game>& games) const
     }
 }
 
+float RProp::runSecondPart(
+        const Game& game,
+        const Board& board,
+        std::map<Block*, float> resultMap,
+        std::set<Block*> emptyBlocks) const
+{
+    std::set<Block*>::iterator itt = emptyBlocks.begin();
+    std::set<Block*>::iterator end = emptyBlocks.end();
+
+    for( ; itt != end; ++itt)
+    {
+        std::set<Block*> adjacentBlocks;
+
+        board.getAdjacentBlocks(adjacentBlocks, *itt);
+
+        float secondInput[5] = { 0.0, 0.0, 0.0, 0.0, (*itt)->getSize() };
+
+        std::set<Block*>::iterator adjacentItt = adjacentBlocks.begin();
+        std::set<Block*>::iterator adjacentEnd = adjacentBlocks.end();
+
+        for( ; adjacentItt != adjacentEnd; ++adjacentItt)
+        {
+////
+        }
+    }
+
+    return 0.0;
+}
+
 float RProp::run(const Game& game) const
 {
-////
-    return 0.0;
+    Board board = game.playGame();
+
+    std::map<Block*, float> resultMap;
+
+    std::set<Block*> blocks;
+
+    board.getBlocks(blocks);
+
+    std::set<Block*> emptyBlocks;
+
+    std::set<Block*>::const_iterator itt = blocks.begin();
+    std::set<Block*>::const_iterator end = blocks.end();
+
+    for( ; itt != end; ++itt)
+    {
+        if((*itt)->getState() != EMPTY)
+        {
+            float* features = board.generateFinalFeatureVector(*itt);
+
+            std::pair<Block*, float> mapping(*itt, calculateR(features));
+
+            resultMap.insert(mapping);
+
+            delete[] features;
+        }
+        else
+        {
+            emptyBlocks.insert(*itt);
+        }
+    }
+
+    return runSecondPart(game, board, resultMap, emptyBlocks);
 }
 
 bool RProp::outputToFile(const char* filename) const

@@ -102,6 +102,7 @@ class Board
     void splitEmptyBlocks(void);
 
     void getBlocks(std::set<Block*>& blocks) const;
+    void getAdjacentBlocks(std::set<Block*>& blocks, Block* block) const;
 
     void print(void) const;
 

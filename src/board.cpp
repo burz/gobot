@@ -350,6 +350,37 @@ void Board::getBlocks(std::set<Block*>& blocks) const
     }
 }
 
+void Board::getAdjacentBlocks(std::set<Block*>& blocks, Block* block) const
+{
+    std::set<BoardLocation>::iterator itt = block->locationsBegin();
+    std::set<BoardLocation>::iterator end = block->locationsEnd();
+
+    for( ; itt != end; ++itt)
+    {
+        Block* block1 = getBlock(itt->x - 1, itt->y);
+        Block* block2 = getBlock(itt->x, itt->y - 1);
+        Block* block3 = getBlock(itt->x + 1, itt->y);
+        Block* block4 = getBlock(itt->x, itt->y + 1);
+
+        if(block1 && block1 != block)
+        {
+            blocks.insert(block1);
+        }
+        if(block2 && block2 != block)
+        {
+            blocks.insert(block2);
+        }
+        if(block3 && block3 != block)
+        {
+            blocks.insert(block3);
+        }
+        if(block4 && block4 != block)
+        {
+            blocks.insert(block4);
+        }
+    }
+}
+
 void Board::splitEmptyBlocks(void)
 {
     std::set<Block*> oldBlocks;

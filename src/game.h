@@ -21,6 +21,9 @@ class Game
     Game(const int size, const float komi, const float finalScore);
     ~Game(void);
 
+    float getKomi(void) const;
+    float getFinalScore(void) const;
+
     void addMove(const BoardLocation location);
 
     Board playGame(void) const;

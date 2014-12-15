@@ -26,6 +26,16 @@ Game::~Game()
     }
 }
 
+float Game::getKomi(void) const
+{
+    return komi;
+}
+
+float Game::getFinalScore(void) const
+{
+    return finalScore;
+}
+
 void Game::addMove(const BoardLocation location)
 {
     moves.push_back(location);

@@ -17,6 +17,10 @@ class RProp : public Model
     int hiddenSize;
     float** inputLayer;
     float* hiddenLayer;
+    float* inputBias;
+    float* hiddenBias;
+
+    // Learning parameters
     float** inputDerivative;
     float* hiddenDerivative;
     float** inputDelta;
@@ -34,17 +38,29 @@ class RProp : public Model
 
     void initializeTrainingParameters(void);
     void cleanUpTrainingParameters(void);
+
     float derivative(const ParameterType& type, const int& i, const int& j);
     float delta(const ParameterType& type, const int& i, const int& j);
     float deltaW(const ParameterType& type, const int& i, const int& j);
+    float w(const ParameterType& type, const int& i, const int& j);
+
     void setDerivative(const ParameterType& type,
                        const int& i, const int& j, const float& d);
     void setDelta(const ParameterType& type,
                   const int& i, const int& j, const float& d);
     void setDeltaW(const ParameterType& type,
                     const int& i, const int& j, const float& d);
-    float w(const ParameterType& type, const int& i, const int& j);
+
     float updateWeight(const ParameterType& type, const int& i, const int& j);
+
+    float calculateR(float* features) const;
+
+    float energyFunction(const Game& game) const;
+
+    float runSecondPart(const Game& game,
+                        const Board& board,
+                        std::map<Block*, float> resultMap,
+                        std::set<Block*> emptyBlocks) const;
   public:
     RProp(void);
     RProp(const int& inputSize, const int& hiddenSize);
