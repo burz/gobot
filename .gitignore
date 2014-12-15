@@ -8,6 +8,8 @@
 *.sgfo
 *.sgfof
 
+*.model
+
 games/*
 reformatedGames/*
 gameFeatures/*

@@ -12,9 +12,11 @@ int main(int argc, char *argv[])
 {
     DirectoryIterator games("gamesReformated");
 
-    RProp model(NUMBER_OF_FEATURES, 1);
+    RProp model(NUMBER_OF_FEATURES, 5);
 
     model.trainWithFeatures(games, "gamesFeatures");
+
+    model.outputToFile("rprop_1_5.model");
 
 //    std::vector<Game> games;
 //
@@ -23,8 +25,6 @@ int main(int argc, char *argv[])
 //        RProp model(NUMBER_OF_FEATURES, 13);
 //
 //        model.train(games, 5);
-//
-//        model.outputToFile("rprop_13_5.model");
 //    }
 
     return 0;

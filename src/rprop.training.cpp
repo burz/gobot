@@ -670,8 +670,10 @@ float RProp::energyFunction(const Game& game) const
 }
 
 void RProp::calculateDerivatives(
+        const Game& game,
         const Board& board,
         std::vector<Block*>& emptyBlocks,
+        std::vector<Block*>& coloredBlocks,
         std::map<Block*, float*>& featureMap)
 {
     std::vector<float*> rVectors;
@@ -708,6 +710,8 @@ void RProp::calculateDerivatives(
         secondInputBiasDerivative[i] = 0.0;
     }
 
+    float s = 0.0;
+
     std::vector<Block*>::iterator itt = emptyBlocks.begin();
     std::vector<Block*>::iterator end = emptyBlocks.end();
 
@@ -741,6 +745,8 @@ void RProp::calculateDerivatives(
         r[4] = (*itt)->getSize();
 
         rVectors.push_back(r);
+
+        s += calculateS(r);
 
         for(int i = 0; i < hiddenSize; ++i)
         {
@@ -856,6 +862,72 @@ void RProp::calculateDerivatives(
         }
     }
 
+    int Eg = game.getFinalScore() + board.getScore() - s;
+
+    itt = coloredBlocks.begin();
+    end = coloredBlocks.end();
+
+    for( ; itt != end; ++itt)
+    {
+        if(calculateR(featureMap.find(*itt)->second) < 0)
+        {
+            if((*itt)->getState() == BLACK)
+            {
+                Eg += 2.0 * (*itt)->getSize();
+            }
+            else
+            {
+                Eg -= 2.0 * (*itt)->getSize();
+            }
+        }
+    }
+
+    if(Eg == 0)
+    {
+        for(int i = 0; i < hiddenSize; ++i)
+        {
+            for(int j = 0; j < inputSize; ++j)
+            {
+                inputDerivative[i][j] = 0.0;
+            }
+
+            hiddenDerivative[i] = 0.0;
+            hiddenBiasDerivative[i] = 0.0;
+        }
+
+        for(int i = 0; i < inputSize; ++i)
+        {
+            inputBiasDerivative[i] = 0.0;
+        }
+
+        for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+        {
+            for(int j = 0; j < SECOND_INPUT_SIZE; ++j)
+            {
+                secondInputDerivative[i][j] = 0.0;
+            }
+
+            secondHiddenDerivative[i] = 0.0;
+            secondHiddenBiasDerivative[i] = 0.0;
+        }
+
+        for(int i = 0; i < SECOND_INPUT_SIZE; ++i)
+        {
+            secondInputBiasDerivative[i] = 0.0;
+        }
+
+        while(rVectors.size() > 0)
+        {
+            float* toDelete = rVectors.back();
+
+            rVectors.pop_back();
+
+            delete[] toDelete;
+        }
+
+        return;
+    }
+
     int index = 0;
 
     itt = emptyBlocks.begin();
@@ -897,6 +969,41 @@ void RProp::calculateDerivatives(
 
         delete[] toDelete;
     }
+
+    if(Eg < 0)
+    {
+        for(int i = 0; i < hiddenSize; ++i)
+        {
+            for(int j = 0; j < inputSize; ++j)
+            {
+                inputDerivative[i][j] *= -1.0;
+            }
+
+            hiddenDerivative[i] *= -1.0;
+            hiddenBiasDerivative[i] *= -1.0;
+        }
+
+        for(int i = 0; i < inputSize; ++i)
+        {
+            inputBiasDerivative[i] *= -1.0;
+        }
+
+        for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+        {
+            for(int j = 0; j < SECOND_INPUT_SIZE; ++j)
+            {
+                secondInputDerivative[i][j] *= -1.0;
+            }
+
+            secondHiddenDerivative[i] *= -1.0;
+            secondHiddenBiasDerivative[i] *= -1.0;
+        }
+
+        for(int i = 0; i < SECOND_INPUT_SIZE; ++i)
+        {
+            secondInputBiasDerivative[i] *= -1.0;
+        }
+    }
 }
 
 inline
@@ -932,8 +1039,10 @@ void swapPtrs(float*& x, float*& y)
 }
 
 void RProp::runUpdates(
+        const Game& game,
         const Board& board,
         std::vector<Block*>& emptyBlocks,
+        std::vector<Block*>& coloredBlocks,
         std::map<Block*, float*>& featureMap)
 {
     float** newInputLayer = new float*[hiddenSize]();
@@ -955,7 +1064,7 @@ void RProp::runUpdates(
         newSecondInputLayer[i] = new float[SECOND_INPUT_SIZE];
     }
 
-    calculateDerivatives(board, emptyBlocks, featureMap);
+    calculateDerivatives(game, board, emptyBlocks, coloredBlocks, featureMap);
 
     for(int i = 0; i < hiddenSize; ++i)
     {
@@ -1071,6 +1180,148 @@ void RProp::runUpdates(
     swapPtrs(secondHiddenBiasDeltaW, lastSecondHiddenBiasDeltaW);
 }
 
+void RProp::train(DirectoryIterator& gameFiles)
+{
+    initializeTrainingParameters();
+
+    int t = 0;
+    char buffer[100];
+
+    for( ; gameFiles != gameFiles.end(); ++gameFiles)
+    {
+        sprintf(buffer, "%s/%s", gameFiles.getDirectory(), *gameFiles);
+
+        Game game;
+
+        if(!parseFile(&game, buffer))
+        {
+            continue;
+        }
+
+        Board board = game.playGame();
+
+        std::set<Block*> blocks;
+
+        board.getBlocks(blocks);
+
+        std::vector<Block*> emptyBlocks;
+        std::vector<Block*> coloredBlocks;
+        std::map<Block*, float*> featureMap;
+
+        std::set<Block*>::iterator blockItt = blocks.begin();
+        std::set<Block*>::iterator blockEnd = blocks.end();
+
+        for( ; blockItt != blockEnd; ++blockItt)
+        {
+            if((*blockItt)->getState() == EMPTY)
+            {
+                emptyBlocks.push_back(*blockItt);
+            }
+            else
+            {
+                float* features = board.generateFinalFeatureVector(*blockItt);
+
+                std::pair<Block*, float*> mapping(*blockItt, features);
+
+                featureMap.insert(mapping);
+
+                coloredBlocks.push_back(*blockItt);
+            }
+        }
+
+        runUpdates(game, board, emptyBlocks, coloredBlocks, featureMap);
+
+        std::map<Block*, float*>::iterator featureItt = featureMap.begin();
+        std::map<Block*, float*>::iterator featureEnd = featureMap.end();
+
+        for( ; featureItt != featureEnd; ++featureItt)
+        {
+            delete[] featureItt->second;
+        }
+
+        if(t % 10 == 0)
+        {
+            printf(".");
+            fflush(stdout);
+        }
+
+        ++t;
+    }
+
+    printf("\n");
+
+    cleanUpTrainingParameters();
+}
+
+void RProp::train(std::vector<Game>& games, const int& iterations)
+{
+    initializeTrainingParameters();
+
+    int t = 0;
+
+    for(int i = 0; i < iterations; ++i)
+    {
+        std::vector<Game>::iterator itt = games.begin();
+        std::vector<Game>::iterator end = games.end();
+
+        for( ; itt != end; ++itt)
+        {
+            Board board = itt->playGame();
+
+            std::set<Block*> blocks;
+
+            board.getBlocks(blocks);
+
+            std::vector<Block*> emptyBlocks;
+            std::vector<Block*> coloredBlocks;
+            std::map<Block*, float*> featureMap;
+
+            std::set<Block*>::iterator blockItt = blocks.begin();
+            std::set<Block*>::iterator blockEnd = blocks.end();
+
+            for( ; blockItt != blockEnd; ++blockItt)
+            {
+                if((*blockItt)->getState() == EMPTY)
+                {
+                    emptyBlocks.push_back(*blockItt);
+                }
+                else
+                {
+                    float* features = board.generateFinalFeatureVector(*blockItt);
+
+                    std::pair<Block*, float*> mapping(*blockItt, features);
+
+                    featureMap.insert(mapping);
+
+                    coloredBlocks.push_back(*blockItt);
+                }
+            }
+
+            runUpdates(*itt, board, emptyBlocks, coloredBlocks, featureMap);
+
+            std::map<Block*, float*>::iterator featureItt = featureMap.begin();
+            std::map<Block*, float*>::iterator featureEnd = featureMap.end();
+
+            for( ; featureItt != featureEnd; ++featureItt)
+            {
+                delete[] featureItt->second;
+            }
+
+            if(t % 10 == 0)
+            {
+                printf(".");
+                fflush(stdout);
+            }
+
+            ++t;
+        }
+    }
+
+    printf("\n");
+
+    cleanUpTrainingParameters();
+}
+
 void RProp::trainWithFeatures(
         DirectoryIterator& gameFiles,
         const char* featureFileDirectory)
@@ -1078,11 +1329,10 @@ void RProp::trainWithFeatures(
     initializeTrainingParameters();
 
     int t = 0;
+    char buffer[100];
 
     for( ; gameFiles != gameFiles.end(); ++gameFiles)
     {
-        char buffer[100];
-
         sprintf(buffer, "%s/%s", gameFiles.getDirectory(), *gameFiles);
 
         Game game;
@@ -1121,6 +1371,7 @@ void RProp::trainWithFeatures(
         board.getBlocks(blocks);
 
         std::vector<Block*> emptyBlocks;
+        std::vector<Block*> coloredBlocks;
 
         std::set<Block*>::iterator blockItt = blocks.begin();
         std::set<Block*>::iterator blockEnd = blocks.end();
@@ -1131,9 +1382,13 @@ void RProp::trainWithFeatures(
             {
                 emptyBlocks.push_back(*blockItt);
             }
+            else
+            {
+                coloredBlocks.push_back(*blockItt);
+            }
         }
 
-        runUpdates(board, emptyBlocks, featureVectorMap);
+        runUpdates(game, board, emptyBlocks, coloredBlocks, featureVectorMap);
 
         std::map<Block*, float*>::iterator vectorItt = featureVectorMap.begin();
         std::map<Block*, float*>::iterator vectorEnd = featureVectorMap.end();
@@ -1150,72 +1405,6 @@ void RProp::trainWithFeatures(
         }
 
         ++t;
-    }
-
-    printf("\n");
-
-    cleanUpTrainingParameters();
-}
-
-void RProp::train(std::vector<Game>& games, const int& iterations)
-{
-    initializeTrainingParameters();
-
-    int t = 0;
-
-    for(int i = 0; i < iterations; ++i)
-    {
-        std::vector<Game>::iterator itt = games.begin();
-        std::vector<Game>::iterator end = games.end();
-
-        for( ; itt != end; ++itt)
-        {
-            Board board = itt->playGame();
-
-            std::set<Block*> blocks;
-
-            board.getBlocks(blocks);
-
-            std::vector<Block*> emptyBlocks;
-            std::map<Block*, float*> featureMap;
-
-            std::set<Block*>::iterator blockItt = blocks.begin();
-            std::set<Block*>::iterator blockEnd = blocks.end();
-
-            for( ; blockItt != blockEnd; ++blockItt)
-            {
-                if((*blockItt)->getState() == EMPTY)
-                {
-                    emptyBlocks.push_back(*blockItt);
-                }
-                else
-                {
-                    float* features = board.generateFinalFeatureVector(*blockItt);
-
-                    std::pair<Block*, float*> mapping(*blockItt, features);
-
-                    featureMap.insert(mapping);
-                }
-            }
-
-            runUpdates(board, emptyBlocks, featureMap);
-
-            std::map<Block*, float*>::iterator featureItt = featureMap.begin();
-            std::map<Block*, float*>::iterator featureEnd = featureMap.end();
-
-            for( ; featureItt != featureEnd; ++featureItt)
-            {
-                delete[] featureItt->second;
-            }
-
-            if(t % 10 == 0)
-            {
-                printf(".");
-                fflush(stdout);
-            }
-
-            ++t;
-        }
     }
 
     printf("\n");

@@ -125,13 +125,18 @@ class RProp : public Model
     float calculateR(float* features) const;
     float calculateS(float* secondFeatures) const;
 
-    void calculateDerivatives(const Board& board,
+    void calculateDerivatives(const Game& game,
+                              const Board& board,
                               std::vector<Block*>& emptyBlocks,
+                              std::vector<Block*>& coloredBlocks,
                               std::map<Block*, float*>& featureMap);
 
-    void runUpdates(const Board& board,
+    void runUpdates(const Game& game,
+                    const Board& board,
                     std::vector<Block*>& emptyBlocks,
+                    std::vector<Block*>& coloredBlocks,
                     std::map<Block*, float*>& featureMap);
+
     float runSecondPart(const Game& game,
                         const Board& board,
                         std::set<Block*>& blocks,
@@ -144,6 +149,7 @@ class RProp : public Model
 
     float energyFunction(const Game& game) const;
 
+    void train(DirectoryIterator& gameFiles);
     virtual void train(std::vector<Game>& games, const int& iterations);
     void trainWithFeatures(DirectoryIterator& gameFiles,
                            const char* featureFileDirectory);
