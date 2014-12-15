@@ -1,5 +1,8 @@
 *.o
 *.hi
+*.aux
+*.log
+*.backup
 
 *.sgf
 *.sgfo
