@@ -158,8 +158,9 @@ float RProp::calculateS(float* secondFeatures) const
 float RProp::runSecondPart(
         const Game& game,
         const Board& board,
-        std::map<Block*, float> resultMap,
-        std::set<Block*> emptyBlocks) const
+        std::set<Block*>& blocks,
+        std::map<Block*, float>& resultMap,
+        std::set<Block*>& emptyBlocks) const
 {
     float score = board.getScore();
 
@@ -179,7 +180,35 @@ float RProp::runSecondPart(
 
         for( ; adjacentItt != adjacentEnd; ++adjacentItt)
         {
-////
+            if((*adjacentItt)->getState() == BLACK)
+            {
+                ++secondInput[0];
+                secondInput[2] += resultMap.find(*adjacentItt)->second;
+            }
+            else
+            {
+                ++secondInput[1];
+                secondInput[3] += resultMap.find(*adjacentItt)->second;
+            }
+        }
+
+        secondInput[4] = (*itt)->getSize();
+
+        score += calculateS(secondInput);
+    }
+
+    itt = blocks.begin();
+    end = blocks.end();
+
+    for( ; itt != end; ++itt)
+    {
+        if((*itt)->getState() == BLACK && resultMap.find(*itt)->second < 0)
+        {
+            score -= 2.0 * (*itt)->getSize();
+        }
+        else if((*itt)->getState() == WHITE && resultMap.find(*itt)->second < 0)
+        {
+            score += 2.0 * (*itt)->getSize();
         }
     }
 
@@ -219,7 +248,7 @@ float RProp::predict(const Game& game) const
         }
     }
 
-    return runSecondPart(game, board, resultMap, emptyBlocks);
+    return runSecondPart(game, board, blocks, resultMap, emptyBlocks);
 }
 
 float RProp::test(std::vector<Game>& games) const

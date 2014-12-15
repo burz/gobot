@@ -133,8 +133,9 @@ class RProp : public Model
                     std::map<Block*, float*>& featureMap);
     float runSecondPart(const Game& game,
                         const Board& board,
-                        std::map<Block*, float> resultMap,
-                        std::set<Block*> emptyBlocks) const;
+                        std::set<Block*>& blocks,
+                        std::map<Block*, float>& resultMap,
+                        std::set<Block*>& emptyBlocks) const;
   public:
     RProp(void);
     RProp(const int& inputSize, const int& hiddenSize);
