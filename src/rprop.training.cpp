@@ -1062,7 +1062,7 @@ void RProp::runUpdates(
 
 void RProp::trainWithFeatures(
         DirectoryIterator& gameFiles,
-        DirectoryIterator& featureFiles)
+        const char* featureFileDirectory)
 {
     initializeTrainingParameters();
 
@@ -1070,13 +1070,22 @@ void RProp::trainWithFeatures(
 
     for( ; gameFiles != gameFiles.end(); ++gameFiles)
     {
-        ++featureFiles;
+        char buffer[100];
+
+        sprintf(buffer, "%s/%s", gameFiles.getDirectory(), *gameFiles);
 
         Game game;
+
+        if(!parseFile(&game, buffer))
+        {
+            continue;
+        }
+
+        sprintf(buffer, "%s/%sf", featureFileDirectory, *gameFiles);
+
         std::map<BoardLocation, BlockFinalFeatures> featureMap;
 
-        if(!parseFile(&game, *gameFiles) ||
-           !readFeaturesFromFile(featureMap, *featureFiles))
+        if(!readFeaturesFromFile(featureMap, buffer))
         {
             continue;
         }

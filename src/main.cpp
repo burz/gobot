@@ -10,16 +10,22 @@
 
 int main(int argc, char *argv[])
 {
-    std::vector<Game> games;
+    DirectoryIterator games("gamesReformated");
 
-    if(loadDirectory(games, "reformatedGames"))
-    {
-        RProp model(NUMBER_OF_FEATURES, 13);
+    RProp model(NUMBER_OF_FEATURES, 1);
 
-        model.train(games, 5);
+    model.trainWithFeatures(games, "gamesFeatures");
 
-        model.outputToFile("rprop_13_5.model");
-    }
+//    std::vector<Game> games;
+//
+//    if(loadDirectory(games, "gamesReformated"))
+//    {
+//        RProp model(NUMBER_OF_FEATURES, 13);
+//
+//        model.train(games, 5);
+//
+//        model.outputToFile("rprop_13_5.model");
+//    }
 
     return 0;
 }

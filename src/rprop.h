@@ -146,7 +146,7 @@ class RProp : public Model
 
     virtual void train(std::vector<Game>& games, const int& iterations);
     void trainWithFeatures(DirectoryIterator& gameFiles,
-                           DirectoryIterator& featureFiles);
+                           const char* featureFileDirectory);
 
     virtual float predict(const Game& game) const;
     virtual float test(std::vector<Game>& games) const;

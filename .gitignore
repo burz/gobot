@@ -6,6 +6,7 @@
 
 *.sgf
 *.sgfo
+*.sgfof
 
 games/*
 reformatedGames/*

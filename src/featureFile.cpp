@@ -103,6 +103,10 @@ bool readFeaturesFromFile(
 
             return false;
         }
+
+        std::pair<BoardLocation, BlockFinalFeatures> mapping(location, features);
+
+        featureMap.insert(mapping);
     }
 
     fclose(f);
