@@ -131,8 +131,8 @@ class RProp : public Model
     ~RProp(void);
 
     virtual void train(std::vector<Game>& games, const int& iterations);
-    virtual float test(std::vector<Game>& games) const;
     virtual float run(const Game& game) const;
+    virtual float test(std::vector<Game>& games) const;
 
     virtual bool outputToFile(const char* filename) const;
     virtual bool readFromFile(const char* filename);

@@ -91,20 +91,6 @@ RProp::~RProp(void)
     }
 }
 
-float RProp::test(std::vector<Game>& games) const
-{
-    if(games.size() > 0)
-    {
-        int correctPredictions = 0;
-////
-        return correctPredictions / ((float) games.size());
-    }
-    else
-    {
-        return 0.0;
-    }
-}
-
 float RProp::runSecondPart(
         const Game& game,
         const Board& board,
@@ -170,6 +156,31 @@ float RProp::run(const Game& game) const
     return runSecondPart(game, board, resultMap, emptyBlocks);
 }
 
+float RProp::test(std::vector<Game>& games) const
+{
+    if(games.size() > 0)
+    {
+        int correctPredictions = 0;
+
+        std::vector<Game>::iterator itt = games.begin();
+        std::vector<Game>::iterator end = games.end();
+
+        for( ; itt != end; ++itt)
+        {
+            if(run(*itt) != itt->getFinalScore())
+            {
+                ++correctPredictions;
+            }
+        }
+
+        return correctPredictions / ((float) games.size());
+    }
+    else
+    {
+        return 0.0;
+    }
+}
+
 bool RProp::outputToFile(const char* filename) const
 {
     FILE* f = fopen(filename, "wb");
@@ -198,11 +209,50 @@ bool RProp::outputToFile(const char* filename) const
                 return false;
             }
         }
+
+        if(fwrite(&hiddenLayer[i], sizeof(float), 1, f) != 1 ||
+           fwrite(&hiddenBias[i], sizeof(float), 1, f) != 1)
+        {
+            fclose(f);
+
+            return false;
+        }
     }
 
-    for(int i = 0; i < hiddenSize; ++i)
+    for(int i = 0; i < inputSize; ++i)
     {
-        if(fwrite(&hiddenLayer[i], sizeof(float), 1, f) != 1)
+        if(fwrite(&inputBias[i], sizeof(float), 1, f) != 1)
+        {
+            fclose(f);
+
+            return false;
+        }
+    }
+
+    for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+    {
+        for(int j = 0; j < SECOND_INPUT_SIZE; ++j)
+        {
+            if(fwrite(&secondInputLayer[i][j], sizeof(float), 1, f) != 1)
+            {
+                fclose(f);
+
+                return false;
+            }
+        }
+
+        if(fwrite(&secondHiddenLayer[i], sizeof(float), 1, f) != 1 ||
+           fwrite(&secondHiddenBias[i], sizeof(float), 1, f) != 1)
+        {
+            fclose(f);
+
+            return false;
+        }
+    }
+
+    for(int i = 0; i < SECOND_INPUT_SIZE; ++i)
+    {
+        if(fwrite(&secondInputBias[i], sizeof(float), 1, f) != 1)
         {
             fclose(f);
 
@@ -243,11 +293,50 @@ bool RProp::readFromFile(const char* filename)
                 return false;
             }
         }
+
+        if(fread(&hiddenLayer[i], sizeof(float), 1, f) != 1 ||
+           fread(&hiddenBias[i], sizeof(float), 1, f) != 1)
+        {
+            fclose(f);
+
+            return false;
+        }
     }
 
-    for(int i = 0; i < hiddenSize; ++i)
+    for(int i = 0; i < inputSize; ++i)
     {
-        if(fread(&hiddenLayer[i], sizeof(float), 1, f) != 1)
+        if(fread(&inputBias[i], sizeof(float), 1, f) != 1)
+        {
+            fclose(f);
+
+            return false;
+        }
+    }
+
+    for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+    {
+        for(int j = 0; j < SECOND_INPUT_SIZE; ++j)
+        {
+            if(fread(&secondInputLayer[i][j], sizeof(float), 1, f) != 1)
+            {
+                fclose(f);
+
+                return false;
+            }
+        }
+
+        if(fread(&secondHiddenLayer[i], sizeof(float), 1, f) != 1 ||
+           fread(&secondHiddenBias[i], sizeof(float), 1, f) != 1)
+        {
+            fclose(f);
+
+            return false;
+        }
+    }
+
+    for(int i = 0; i < SECOND_INPUT_SIZE; ++i)
+    {
+        if(fread(&secondInputBias[i], sizeof(float), 1, f) != 1)
         {
             fclose(f);
 
