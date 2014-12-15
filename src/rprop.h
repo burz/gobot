@@ -3,6 +3,9 @@
 
 #include "model.h"
 
+#include <vector>
+#include <map>
+
 #define SECOND_INPUT_SIZE 5
 #define SECOND_HIDDEN_SIZE 4
 
@@ -121,9 +124,13 @@ class RProp : public Model
     float calculateR(float* features) const;
     float calculateS(float* secondFeatures) const;
 
-    float energyFunction(const Game& game) const;
+    void calculateDerivatives(const Board& board,
+                              std::vector<Block*>& blocks,
+                              std::map<Block*, float*>& featureMap);
 
-    void runUpdates(const Game& game);
+    void runUpdates(const Board& board,
+                    std::vector<Block*>& blocks,
+                    std::map<Block*, float*>& featureMap);
     float runSecondPart(const Game& game,
                         const Board& board,
                         std::map<Block*, float> resultMap,
@@ -132,6 +139,8 @@ class RProp : public Model
     RProp(void);
     RProp(const int& inputSize, const int& hiddenSize);
     ~RProp(void);
+
+    float energyFunction(const Game& game) const;
 
     virtual void train(std::vector<Game>& games, const int& iterations);
     virtual float predict(const Game& game) const;

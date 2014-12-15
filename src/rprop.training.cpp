@@ -667,6 +667,76 @@ float RProp::energyFunction(const Game& game) const
     return abs(game.getFinalScore() - predict(game));
 }
 
+void RProp::calculateDerivatives(
+        const Board& board,
+        std::vector<Block*>& blocks,
+        std::map<Block*, float*>& featureMap)
+{
+    std::set<Block*> emptyBlocks;
+
+    // set shit to zero
+
+    std::set<Block*>::iterator itt = emptyBlocks.begin();
+    std::set<Block*>::iterator end = emptyBlocks.end();
+
+    for( ; itt != end; ++itt)
+    {
+        std::set<Block*> adjacentBlocks;
+
+        board.getAdjacentBlocks(adjacentBlocks, *itt);
+
+        for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+        {
+            float dEdvNb = 0.0;
+            float dEdvNw = 0.0;
+            float dEdbNb = 0.0;
+            float dEdbNw = 0.0;
+
+            std::set<Block*>::iterator blockItt = adjacentBlocks.begin();
+            std::set<Block*>::iterator blockEnd = adjacentBlocks.end();
+
+            for( ; blockItt != blockEnd; ++blockItt)
+            {
+                float* x = featureMap.find(*blockItt)->second;
+
+                if((*blockItt)->getState() == BLACK)
+                {
+                    for(int j = 0; j < inputSize; ++i)
+                    {
+                        dEdvNb += inputLayer[i][j] * (x[j] + inputBias[j]);
+                    }
+
+                    dEdvNb += hiddenBias[i];
+                    dEdbNb += hiddenLayer[i];
+                }
+                else
+                {
+                    for(int j = 0; j < inputSize; ++i)
+                    {
+                        dEdvNw += inputLayer[i][j] * (x[j] + inputBias[j]);
+                    }
+
+                    dEdvNw += hiddenBias[i];
+                    dEdbNw += hiddenLayer[i];
+                }
+            }
+
+            for(int j = 0; j < SECOND_HIDDEN_SIZE; ++j)
+            {
+                float sum = secondInputLayer[j][2] * dEdbNb +
+                            secondInputLayer[j][3] * dEdbNw;
+
+                hiddenBiasDerivative[i] += secondHiddenLayer[j] * sum;
+
+                sum = secondInputLayer[j][2] * dEdvNb +
+                      secondInputLayer[j][3] * dEdvNw;
+
+                hiddenLayer[i] += secondHiddenLayer[j] * sum;
+            }
+        }
+    }
+}
+
 inline
 void swapPtrs(float**& x, float**& y)
 {
@@ -685,7 +755,10 @@ void swapPtrs(float*& x, float*& y)
     x = temp;
 }
 
-void RProp::runUpdates(const Game& game)
+void RProp::runUpdates(
+        const Board& board,
+        std::vector<Block*>& blocks,
+        std::map<Block*, float*>& featureMap)
 {
     float** newInputLayer = new float*[hiddenSize]();
     float* newHiddenLayer = new float[hiddenSize]();
@@ -705,37 +778,39 @@ void RProp::runUpdates(const Game& game)
     {
         newSecondInputLayer[i] = new float[SECOND_INPUT_SIZE];
     }
-// calculate derivatives
+
+    calculateDerivatives(board, blocks, featureMap);
+
     for(int i = 0; i < hiddenSize; ++i)
     {
         for(int j = 0; j < inputSize; ++j)
         {
-            updateWeight(INPUT, i, j);
+            newInputLayer[i][j] = updateWeight(INPUT, i, j);
         }
 
-        updateWeight(HIDDEN, i);
-        updateWeight(HIDDEN_BIAS, i);
+        newHiddenLayer[i] = updateWeight(HIDDEN, i);
+        newHiddenBias[i] = updateWeight(HIDDEN_BIAS, i);
     }
 
     for(int i = 0; i < inputSize; ++i)
     {
-        updateWeight(INPUT_BIAS, i);
+        newInputBias[i] = updateWeight(INPUT_BIAS, i);
     }
 
     for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
     {
         for(int j = 0; j < SECOND_INPUT_SIZE; ++j)
         {
-            updateWeight(SECOND_INPUT, i, j);
+            newSecondInputLayer[i][j] = updateWeight(SECOND_INPUT, i, j);
         }
 
-        updateWeight(SECOND_HIDDEN, i);
-        updateWeight(SECOND_HIDDEN_BIAS, i);
+        newSecondHiddenLayer[i] = updateWeight(SECOND_HIDDEN, i);
+        newSecondHiddenBias[i] = updateWeight(SECOND_HIDDEN_BIAS, i);
     }
 
     for(int i = 0; i < SECOND_INPUT_SIZE; ++i)
     {
-        updateWeight(SECOND_HIDDEN_BIAS, i);
+        newSecondInputBias[i] = updateWeight(SECOND_INPUT_BIAS, i);
     }
 
     for(int i = 0; i < hiddenSize; ++i)
