@@ -22,19 +22,35 @@ class RProp : public Model
 
     // Learning parameters
     float** inputDerivative;
-    float* hiddenDerivative;
     float** inputDelta;
+    float** inputDeltaW;
+    float** lastInputDerivative;
+    float** lastInputDelta;
+    float** lastInputDeltaW;
+
+    float* hiddenDerivative;
     float* hiddenDelta;
+    float* hiddenDeltaW;
+    float* lastHiddenDerivative;
+    float* lastHiddenDelta;
+    float* lastHiddenDeltaW;
+
+    float* inputBiasDerivative;
+    float* inputBiasDelta;
+    float* inputBiasDeltaW;
+    float* lastInputBiasDerivative;
+    float* lastInputBiasDelta;
+    float* lastInputBiasDeltaW;
+
+    float* hiddenBiasDerivative;
+    float* hiddenBiasDelta;
+    float* hiddenBiasDeltaW;
+    float* lastHiddenBiasDerivative;
+    float* lastHiddenBiasDelta;
+    float* lastHiddenBiasDeltaW;
+
     float deltaMin;
     float deltaMax;
-    float** inputDeltaW;
-    float* hiddenDeltaW;
-    float** lastInputDerivative;
-    float* lastHiddenDerivative;
-    float** lastInputDelta;
-    float* lastHiddenDelta;
-    float** lastInputDeltaW;
-    float* lastHiddenDeltaW;
 
     void initializeTrainingParameters(void);
     void cleanUpTrainingParameters(void);

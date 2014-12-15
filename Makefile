@@ -16,7 +16,8 @@ FILES = \
     features.o \
     featureFile.o \
     board.features.o \
-    rprop.o
+    rprop.o \
+    rprop.training.o
 
 main: main.o $(FILES)
 	$(CC) -o main $^
