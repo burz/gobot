@@ -155,7 +155,14 @@ class RProp : public Model
                            const char* featureFileDirectory);
 
     virtual float predict(const Game& game) const;
+    float predictWithFeatures(
+            const Game& game,
+            std::map<BoardLocation, BlockFinalFeatures>& featureMap) const;
+
+    float test(DirectoryIterator& gameFiles) const;
     virtual float test(std::vector<Game>& games) const;
+    float testWithFeatures(DirectoryIterator& gameFiles,
+                           const char* featureFileDirectory) const;
 
     virtual bool outputToFile(const char* filename) const;
     virtual bool readFromFile(const char* filename);

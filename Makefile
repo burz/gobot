@@ -22,10 +22,7 @@ FILES = \
 gobot: main.o $(FILES)
 	$(CC) -o gobot $^
 
-all: gobot generateFeatureFiles reformat
-
-generateFeatureFiles: generateFeatureFiles.o $(FILES)
-	$(CC) -o generateFeatureFiles $^
+all: gobot reformat
 
 reformat: reformat.hs
 	ghc $^

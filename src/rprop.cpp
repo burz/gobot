@@ -1,4 +1,6 @@
 #include "rprop.h"
+#include "parser.h"
+#include "featureFile.h"
 
 #include <math.h>
 
@@ -215,17 +217,56 @@ float RProp::runSecondPart(
     return score;
 }
 
-float RProp::predict(const Game& game) const
+float RProp::predictWithFeatures(
+        const Game& game,
+        std::map<BoardLocation, BlockFinalFeatures>& featureMap) const
 {
     Board board = game.playGame();
 
     std::map<Block*, float> resultMap;
 
+    std::map<BoardLocation, BlockFinalFeatures>::iterator itt = featureMap.begin();
+    std::map<BoardLocation, BlockFinalFeatures>::iterator end = featureMap.end();
+
+    for( ; itt != end; ++itt)
+    {
+        float* f = getFeatureVector(itt->second);
+
+        std::pair<Block*, float> mapping(board.getBlock(itt->first), calculateR(f));
+
+        resultMap.insert(mapping);
+
+        delete[] f;
+    }
+
     std::set<Block*> blocks;
+    std::set<Block*> emptyBlocks;
 
     board.getBlocks(blocks);
 
+    std::set<Block*>::const_iterator blockItt = blocks.begin();
+    std::set<Block*>::const_iterator blockEnd = blocks.end();
+
+    for( ; blockItt != blockEnd; ++blockItt)
+    {
+        if((*blockItt)->getState() == EMPTY)
+        {
+            emptyBlocks.insert(*blockItt);
+        }
+    }
+
+    return runSecondPart(game, board, blocks, resultMap, emptyBlocks);
+}
+
+float RProp::predict(const Game& game) const
+{
+    Board board = game.playGame();
+
+    std::map<Block*, float> resultMap;
+    std::set<Block*> blocks;
     std::set<Block*> emptyBlocks;
+
+    board.getBlocks(blocks);
 
     std::set<Block*>::const_iterator itt = blocks.begin();
     std::set<Block*>::const_iterator end = blocks.end();
@@ -251,6 +292,36 @@ float RProp::predict(const Game& game) const
     return runSecondPart(game, board, blocks, resultMap, emptyBlocks);
 }
 
+float RProp::test(DirectoryIterator& gameFiles) const
+{
+    int count = 0;
+    int correctPredictions = 0;
+    char buffer[100];
+
+    DirectoryIterator end = DirectoryIterator::end();
+
+    for( ; gameFiles != end; ++gameFiles)
+    {
+        Game game;
+
+        sprintf(buffer, "%s/%s", gameFiles.getDirectory(), *gameFiles);
+
+        if(!parseFile(&game, buffer))
+        {
+            continue;
+        }
+
+        if(predict(game) != game.getFinalScore())
+        {
+            ++correctPredictions;
+        }
+
+        ++count;
+    }
+
+    return static_cast<float>(correctPredictions) / static_cast<float>(count);
+}
+
 float RProp::test(std::vector<Game>& games) const
 {
     if(games.size() > 0)
@@ -268,12 +339,62 @@ float RProp::test(std::vector<Game>& games) const
             }
         }
 
-        return static_cast<float>(correctPredictions) / static_cast<float>(games.size());
+        return static_cast<float>(correctPredictions) /
+               static_cast<float>(games.size());
     }
     else
     {
         return 0.0;
     }
+}
+
+float RProp::testWithFeatures(
+        DirectoryIterator& gameFiles,
+        const char* featureFileDirectory) const
+{
+    int count = 0;
+    int correctPredictions = 0;
+    char buffer[100];
+
+    DirectoryIterator end = DirectoryIterator::end();
+
+    for( ; gameFiles != end; ++gameFiles)
+    {
+        Game game;
+
+        sprintf(buffer, "%s/%s", gameFiles.getDirectory(), *gameFiles);
+
+        if(!parseFile(&game, buffer))
+        {
+            continue;
+        }
+
+        sprintf(buffer, "%s/%sf", featureFileDirectory, *gameFiles);
+
+        std::map<BoardLocation, BlockFinalFeatures> featureMap;
+
+        if(!readFeaturesFromFile(featureMap, buffer))
+        {
+            continue;
+        }
+
+        if(predictWithFeatures(game, featureMap) != game.getFinalScore())
+        {
+            ++correctPredictions;
+        }
+
+        if(count % 10 == 0)
+        {
+            printf(".");
+            fflush(stdout);
+        }
+
+        ++count;
+    }
+
+    printf("\n");
+
+    return static_cast<float>(correctPredictions) / static_cast<float>(count);
 }
 
 bool RProp::outputToFile(const char* filename) const
@@ -375,6 +496,26 @@ bool RProp::readFromFile(const char* filename)
         fclose(f);
 
         return false;
+    }
+
+    inputLayer = new float*[hiddenSize]();
+    hiddenLayer = new float[hiddenSize]();
+    inputBias = new float[inputSize]();
+    hiddenBias = new float[hiddenSize]();
+
+    for(int i = 0; i < hiddenSize; ++i)
+    {
+        inputLayer[i] = new float[inputSize]();
+    }
+
+    secondInputLayer = new float*[SECOND_HIDDEN_SIZE];
+    secondHiddenLayer = new float[SECOND_HIDDEN_SIZE];
+    secondInputBias = new float[SECOND_INPUT_SIZE];
+    secondHiddenBias = new float[SECOND_HIDDEN_SIZE];
+
+    for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+    {
+        secondInputLayer[i] = new float[SECOND_INPUT_SIZE];
     }
 
     for(int i = 0; i < hiddenSize; ++i)
