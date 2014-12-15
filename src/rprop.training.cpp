@@ -907,6 +907,19 @@ void swapPtrs(float**& x, float**& y)
 }
 
 inline
+void adjustBounds(const float& delta, float& deltaMin, float& deltaMax)
+{
+    if(delta < deltaMin)
+    {
+        deltaMin = delta;
+    }
+    else if(delta > deltaMax)
+    {
+        deltaMax = delta;
+    }
+}
+
+inline
 void swapPtrs(float*& x, float*& y)
 {
     float* temp;
@@ -973,9 +986,40 @@ void RProp::runUpdates(
         newSecondInputBias[i] = updateWeight(SECOND_INPUT_BIAS, i);
     }
 
+    deltaMin = deltaMax = hiddenDelta[0];
+
     for(int i = 0; i < hiddenSize; ++i)
     {
+        for(int j = 0; j < inputSize; ++j)
+        {
+            adjustBounds(inputDelta[i][j], deltaMin, deltaMax);
+        }
+
+        adjustBounds(hiddenDelta[i], deltaMin, deltaMax);
+        adjustBounds(hiddenBiasDelta[i], deltaMin, deltaMax);
+
         delete[] inputLayer[i];
+    }
+
+    for(int i = 0; i < inputSize; ++i)
+    {
+        adjustBounds(inputBiasDelta[i], deltaMin, deltaMax);
+    }
+
+    for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+    {
+        for(int j = 0; j < SECOND_INPUT_SIZE; ++j)
+        {
+            adjustBounds(secondInputDelta[i][j], deltaMin, deltaMax);
+        }
+
+        adjustBounds(secondHiddenDelta[i], deltaMin, deltaMax);
+        adjustBounds(secondHiddenBiasDelta[i], deltaMin, deltaMax);
+    }
+
+    for(int i = 0; i < SECOND_INPUT_SIZE; ++i)
+    {
+        adjustBounds(secondInputBiasDelta[i], deltaMin, deltaMax);
     }
 
     delete[] inputLayer;
