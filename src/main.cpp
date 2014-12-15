@@ -10,35 +10,16 @@
 
 int main(int argc, char *argv[])
 {
-    RProp rprop;
-
     std::vector<Game> games;
 
-    rprop.train(games, 4);
+    if(loadDirectory(games, "reformatedGames"))
+    {
+        RProp model(NUMBER_OF_FEATURES, 13);
 
-//    std::vector<Game> games;
-//
-//    loadDirectory(games, "reformatedGames");
-//
-//    int i = 0;
-//
-//    std::vector<Game>::iterator itt = games.begin();
-//    std::vector<Game>::iterator end = games.end();
-//
-//    for( ; itt != end; ++itt)
-//    {
-//        itt->generateFeatureVectors();
-//
-//        if(i % 100 == 0)
-//        {
-//            printf(".");
-//            fflush(stdout);
-//        }
-//
-//        ++i;
-//    }
-//
-//    printf("\n");
+        model.train(games, 5);
+
+        model.outputToFile("rprop_13_5.model");
+    }
 
     return 0;
 }
