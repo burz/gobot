@@ -9,17 +9,32 @@
 void RProp::initializeTrainingParameters(void)
 {
     inputDerivative = new float*[hiddenSize]();
-    hiddenDerivative = new float[hiddenSize]();
     inputDelta = new float*[hiddenSize]();
-    hiddenDelta = new float[hiddenSize]();
     inputDeltaW = new float*[hiddenSize]();
-    hiddenDeltaW = new float[hiddenSize]();
     lastInputDerivative = new float*[hiddenSize]();
-    lastHiddenDerivative = new float[hiddenSize]();
     lastInputDelta = new float*[hiddenSize]();
-    lastHiddenDelta = new float[hiddenSize]();
     lastInputDeltaW = new float*[hiddenSize]();
+
+    hiddenDerivative = new float[hiddenSize]();
+    hiddenDelta = new float[hiddenSize]();
+    hiddenDeltaW = new float[hiddenSize]();
+    lastHiddenDerivative = new float[hiddenSize]();
+    lastHiddenDelta = new float[hiddenSize]();
     lastHiddenDeltaW = new float[hiddenSize]();
+
+    inputBiasDerivative = new float[inputSize]();
+    inputBiasDelta = new float[inputSize]();
+    inputBiasDeltaW = new float[inputSize]();
+    lastInputBiasDerivative = new float[inputSize]();
+    lastInputBiasDelta = new float[inputSize]();
+    lastInputBiasDeltaW = new float[inputSize]();
+
+    hiddenBiasDerivative = new float[hiddenSize]();
+    hiddenBiasDelta = new float[hiddenSize]();
+    hiddenBiasDeltaW = new float[hiddenSize]();
+    lastHiddenBiasDerivative = new float[hiddenSize]();
+    lastHiddenBiasDelta = new float[hiddenSize]();
+    lastHiddenBiasDeltaW = new float[hiddenSize]();
 
     for(int i = 0; i < hiddenSize; ++i)
     {
@@ -40,6 +55,17 @@ void RProp::initializeTrainingParameters(void)
         lastHiddenDerivative[i] = 1.0;
         lastHiddenDelta[i] = DELTA0;
         lastHiddenDeltaW[i] = DELTA0;
+
+        lastHiddenBiasDerivative[i] = 1.0;
+        lastHiddenBiasDelta[i] = DELTA0;
+        lastHiddenBiasDeltaW[i] = DELTA0;
+    }
+
+    for(int i = 0; i < inputSize; ++i)
+    {
+        lastInputBiasDerivative[i] = 1.0;
+        lastInputBiasDelta[i] = DELTA0;
+        lastInputBiasDeltaW[i] = DELTA0;
     }
 
     deltaMin = DELTA0;
@@ -59,17 +85,32 @@ void RProp::cleanUpTrainingParameters(void)
     }
 
     delete[] inputDerivative;
-    delete[] hiddenDerivative;
     delete[] inputDelta;
-    delete[] hiddenDelta;
     delete[] inputDeltaW;
-    delete[] hiddenDeltaW;
     delete[] lastInputDerivative;
-    delete[] lastHiddenDerivative;
     delete[] lastInputDelta;
-    delete[] lastHiddenDelta;
     delete[] lastInputDeltaW;
+
+    delete[] hiddenDerivative;
+    delete[] hiddenDelta;
+    delete[] hiddenDeltaW;
+    delete[] lastHiddenDerivative;
+    delete[] lastHiddenDelta;
     delete[] lastHiddenDeltaW;
+
+    delete[] inputBiasDerivative;
+    delete[] inputBiasDelta;
+    delete[] inputBiasDeltaW;
+    delete[] lastInputBiasDerivative;
+    delete[] lastInputBiasDelta;
+    delete[] lastInputBiasDeltaW;
+
+    delete[] hiddenBiasDerivative;
+    delete[] hiddenBiasDelta;
+    delete[] hiddenBiasDeltaW;
+    delete[] lastHiddenBiasDerivative;
+    delete[] lastHiddenBiasDelta;
+    delete[] lastHiddenBiasDeltaW;
 }
 
 inline
