@@ -669,15 +669,47 @@ float RProp::energyFunction(const Game& game) const
 
 void RProp::calculateDerivatives(
         const Board& board,
-        std::vector<Block*>& blocks,
+        std::vector<Block*>& emptyBlocks,
         std::map<Block*, float*>& featureMap)
 {
-    std::set<Block*> emptyBlocks;
+    std::vector<float*> rVectors;
 
     // set shit to zero
 
-    std::set<Block*>::iterator itt = emptyBlocks.begin();
-    std::set<Block*>::iterator end = emptyBlocks.end();
+    for(int i = 0; i < hiddenSize; ++i)
+    {
+        for(int j = 0; j < inputSize; ++j)
+        {
+            inputDerivative[i][j] = 0.0;
+        }
+
+        hiddenDerivative[i] = 0.0;
+        hiddenBiasDerivative[i] = 0.0;
+    }
+
+    for(int i = 0; i < inputSize; ++i)
+    {
+        inputBiasDerivative[i] = 0.0;
+    }
+
+    for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+    {
+        for(int j = 0; j < SECOND_INPUT_SIZE; ++j)
+        {
+            secondInputDerivative[i][j] = 0.0;
+        }
+
+        secondHiddenDerivative[i] = 0.0;
+        secondHiddenBiasDerivative[i] = 0.0;
+    }
+
+    for(int i = 0; i < SECOND_INPUT_SIZE; ++i)
+    {
+        secondInputBiasDerivative[i] = 0.0;
+    }
+
+    std::vector<Block*>::iterator itt = emptyBlocks.begin();
+    std::vector<Block*>::iterator end = emptyBlocks.end();
 
     for( ; itt != end; ++itt)
     {
@@ -685,15 +717,39 @@ void RProp::calculateDerivatives(
 
         board.getAdjacentBlocks(adjacentBlocks, *itt);
 
-        for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+        float* r = new float[SECOND_INPUT_SIZE]();
+
+        r[0] = r[1] = r[2] = r[3] = 0.0;
+
+        std::set<Block*>::iterator blockItt = adjacentBlocks.begin();
+        std::set<Block*>::iterator blockEnd = adjacentBlocks.end();
+
+        for( ; blockItt != blockEnd; ++blockItt)
+        {
+            if((*blockItt)->getState() == BLACK)
+            {
+                r[0] += 1.0;
+                r[2] += calculateR(featureMap.find(*blockItt)->second);
+            }
+            else
+            {
+                r[1] += 1.0;
+                r[3] += calculateR(featureMap.find(*blockItt)->second);
+            }
+        }
+
+        r[4] = (*itt)->getSize();
+
+        rVectors.push_back(r);
+
+        for(int i = 0; i < hiddenSize; ++i)
         {
             float dEdvNb = 0.0;
             float dEdvNw = 0.0;
             float dEdbNb = 0.0;
             float dEdbNw = 0.0;
 
-            std::set<Block*>::iterator blockItt = adjacentBlocks.begin();
-            std::set<Block*>::iterator blockEnd = adjacentBlocks.end();
+            blockItt = adjacentBlocks.begin();
 
             for( ; blockItt != blockEnd; ++blockItt)
             {
@@ -726,13 +782,114 @@ void RProp::calculateDerivatives(
                 float sum = secondInputLayer[j][2] * dEdbNb +
                             secondInputLayer[j][3] * dEdbNw;
 
-                hiddenBiasDerivative[i] += secondHiddenLayer[j] * sum;
+                hiddenBiasDerivative[i] -= secondHiddenLayer[j] * sum;
 
                 sum = secondInputLayer[j][2] * dEdvNb +
                       secondInputLayer[j][3] * dEdvNw;
 
-                hiddenLayer[i] += secondHiddenLayer[j] * sum;
+                hiddenDerivative[i] -= secondHiddenLayer[j] * sum;
             }
+
+            for(int j = 0; j < inputSize; ++j)
+            {
+                float dEdwNb = 0.0;
+                float dEdwNw = 0.0;
+
+                blockItt = adjacentBlocks.begin();
+
+                for( ; blockItt != blockEnd; ++blockItt)
+                {
+                    float* x = featureMap.find(*blockItt)->second;
+
+                    if((*blockItt)->getState() == BLACK)
+                    {
+                        dEdwNb += hiddenLayer[i] * (x[j] + inputBias[j]);
+                    }
+                    else
+                    {
+                        dEdwNw += hiddenLayer[i] * (x[j] + inputBias[j]);
+                    }
+                }
+
+                for(int k = 0; k < SECOND_HIDDEN_SIZE; ++k)
+                {
+                    float sum = secondInputLayer[k][2] * dEdwNb +
+                                secondInputLayer[k][3] * dEdwNw;
+
+                    inputDerivative[i][j] -= secondHiddenLayer[k] * sum;
+                }
+            }
+        }
+
+        for(int i = 0; i < inputSize; ++i)
+        {
+            float dEdaNb = 0.0;
+            float dEdaNw = 0.0;
+
+            blockItt = adjacentBlocks.begin();
+
+            for( ; blockItt != blockEnd; ++blockItt)
+            {
+                if((*blockItt)->getState() == BLACK)
+                {
+                    for(int j = 0; j < hiddenSize; ++j)
+                    {
+                        dEdaNb += hiddenLayer[j] * inputLayer[j][i];
+                    }
+                }
+                else
+                {
+                    for(int j = 0; j < hiddenSize; ++j)
+                    {
+                        dEdaNw += hiddenLayer[j] * inputLayer[j][i];
+                    }
+                }
+            }
+
+            for(int j = 0; j < SECOND_HIDDEN_SIZE; ++j)
+            {
+                float sum = secondInputLayer[j][2] * dEdaNb +
+                            secondInputLayer[j][3] * dEdaNw;
+
+                inputBiasDerivative[i] -= secondHiddenLayer[j] * sum;
+            }
+        }
+    }
+
+    itt = emptyBlocks.begin();
+
+    for( ; itt != end; ++itt)
+    {
+        for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+        {
+            secondHiddenBiasDerivative[i] -= secondHiddenLayer[i];
+
+            for(int j = 0; j < SECOND_INPUT_SIZE; ++i)
+            {
+                float rc = rVectors[i][j] + secondInputBias[j];
+
+                secondHiddenDerivative[i] -= secondInputLayer[i][j] * rc;
+                secondInputDerivative[i][j] -= secondHiddenLayer[i] * rc;
+            }
+
+            secondHiddenDerivative[i] -= hiddenBias[i];
+        }
+
+        for(int i = 0; i < SECOND_INPUT_SIZE; ++i)
+        {
+            for(int j = 0; i < SECOND_HIDDEN_SIZE; ++j)
+            {
+                secondInputBiasDerivative[i] = secondHiddenLayer[j] *
+                                               secondInputLayer[j][i];
+            }
+        }
+
+        std::vector<float*>::iterator rItt = rVectors.begin();
+        std::vector<float*>::iterator rEnd = rVectors.end();
+
+        for( ; rItt != rEnd; ++rItt)
+        {
+            delete[] *rItt;
         }
     }
 }
@@ -757,7 +914,7 @@ void swapPtrs(float*& x, float*& y)
 
 void RProp::runUpdates(
         const Board& board,
-        std::vector<Block*>& blocks,
+        std::vector<Block*>& emptyBlocks,
         std::map<Block*, float*>& featureMap)
 {
     float** newInputLayer = new float*[hiddenSize]();
@@ -779,7 +936,7 @@ void RProp::runUpdates(
         newSecondInputLayer[i] = new float[SECOND_INPUT_SIZE];
     }
 
-    calculateDerivatives(board, blocks, featureMap);
+    calculateDerivatives(board, emptyBlocks, featureMap);
 
     for(int i = 0; i < hiddenSize; ++i)
     {
@@ -865,7 +1022,35 @@ void RProp::train(std::vector<Game>& games, const int& iterations)
 
         for( ; itt != end; ++itt)
         {
-////
+            Board board = itt->playGame();
+
+            std::set<Block*> blocks;
+
+            board.getBlocks(blocks);
+
+            std::vector<Block*> emptyBlocks;
+            std::map<Block*, float*> featureMap;
+
+            std::set<Block*>::iterator blockItt = blocks.begin();
+            std::set<Block*>::iterator blockEnd = blocks.end();
+
+            for( ; blockItt != blockEnd; ++blockItt)
+            {
+                if((*blockItt)->getState() == EMPTY)
+                {
+                    emptyBlocks.push_back(*blockItt);
+                }
+                else
+                {
+                    float* features = board.generateFinalFeatureVector(*blockItt);
+
+                    std::pair<Block*, float*> mapping(*blockItt, features);
+
+                    featureMap.insert(mapping);
+                }
+            }
+
+            runUpdates(board, emptyBlocks, featureMap);
         }
     }
 

@@ -125,11 +125,11 @@ class RProp : public Model
     float calculateS(float* secondFeatures) const;
 
     void calculateDerivatives(const Board& board,
-                              std::vector<Block*>& blocks,
+                              std::vector<Block*>& emptyBlocks,
                               std::map<Block*, float*>& featureMap);
 
     void runUpdates(const Board& board,
-                    std::vector<Block*>& blocks,
+                    std::vector<Block*>& emptyBlocks,
                     std::map<Block*, float*>& featureMap);
     float runSecondPart(const Game& game,
                         const Board& board,
