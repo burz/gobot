@@ -30,6 +30,7 @@ class RProp : public Model
   private:
     int inputSize;
     int hiddenSize;
+
     float** inputLayer;
     float* hiddenLayer;
     float* inputBias;
@@ -118,6 +119,7 @@ class RProp : public Model
     float updateWeight(const ParameterType& type, const int& i, const int& j = 0);
 
     float calculateR(float* features) const;
+    float calculateS(float* secondFeatures) const;
 
     float energyFunction(const Game& game) const;
 

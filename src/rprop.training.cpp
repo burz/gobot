@@ -667,8 +667,44 @@ float RProp::energyFunction(const Game& game) const
     return abs(game.getFinalScore() - predict(game));
 }
 
+inline
+void swapPtrs(float**& x, float**& y)
+{
+    float** temp;
+    temp = y;
+    y = x;
+    x = temp;
+}
+
+inline
+void swapPtrs(float*& x, float*& y)
+{
+    float* temp;
+    temp = y;
+    y = x;
+    x = temp;
+}
+
 void RProp::runUpdates(const Game& game)
 {
+    float** newInputLayer = new float*[hiddenSize]();
+    float* newHiddenLayer = new float[hiddenSize]();
+    float* newInputBias = new float[inputSize]();
+    float* newHiddenBias = new float[hiddenSize]();
+    float** newSecondInputLayer = new float*[SECOND_HIDDEN_SIZE]();
+    float* newSecondHiddenLayer = new float[SECOND_HIDDEN_SIZE]();
+    float* newSecondInputBias = new float[SECOND_INPUT_SIZE]();
+    float* newSecondHiddenBias = new float[SECOND_HIDDEN_SIZE]();
+
+    for(int i = 0; i < hiddenSize; ++i)
+    {
+        newInputLayer[i] = new float[inputSize];
+    }
+
+    for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+    {
+        newSecondInputLayer[i] = new float[SECOND_INPUT_SIZE];
+    }
 // calculate derivatives
     for(int i = 0; i < hiddenSize; ++i)
     {
@@ -701,16 +737,51 @@ void RProp::runUpdates(const Game& game)
     {
         updateWeight(SECOND_HIDDEN_BIAS, i);
     }
+
+    for(int i = 0; i < hiddenSize; ++i)
+    {
+        delete[] inputLayer[i];
+    }
+
+    delete[] inputLayer;
+    delete[] hiddenLayer;
+    delete[] inputBias;
+    delete[] hiddenBias;
+
+    inputLayer = newInputLayer;
+    hiddenLayer = newHiddenLayer;
+    inputBias = newInputBias;
+    hiddenBias = newHiddenBias;
+
+    swapPtrs(inputDerivative, lastInputDerivative);
+    swapPtrs(inputDelta, lastInputDelta);
+    swapPtrs(inputDelta, lastInputDeltaW);
+    swapPtrs(hiddenDerivative, lastHiddenDerivative);
+    swapPtrs(hiddenDelta, lastHiddenDelta);
+    swapPtrs(hiddenDeltaW, lastHiddenDeltaW);
+    swapPtrs(inputBiasDerivative, lastInputBiasDerivative);
+    swapPtrs(inputBiasDelta, lastInputBiasDelta);
+    swapPtrs(inputBiasDeltaW, lastInputBiasDeltaW);
+    swapPtrs(hiddenBiasDerivative, lastHiddenBiasDerivative);
+    swapPtrs(hiddenBiasDelta, lastHiddenBiasDelta);
+    swapPtrs(hiddenBiasDeltaW, lastHiddenBiasDeltaW);
+    swapPtrs(secondInputDerivative, lastSecondInputDerivative);
+    swapPtrs(secondInputDelta, lastSecondInputDelta);
+    swapPtrs(secondInputDelta, lastSecondInputDeltaW);
+    swapPtrs(secondHiddenDerivative, lastSecondHiddenDerivative);
+    swapPtrs(secondHiddenDelta, lastSecondHiddenDelta);
+    swapPtrs(secondHiddenDeltaW, lastSecondHiddenDeltaW);
+    swapPtrs(secondInputBiasDerivative, lastSecondInputBiasDerivative);
+    swapPtrs(secondInputBiasDelta, lastSecondInputBiasDelta);
+    swapPtrs(secondInputBiasDeltaW, lastSecondInputBiasDeltaW);
+    swapPtrs(secondHiddenBiasDerivative, lastSecondHiddenBiasDerivative);
+    swapPtrs(secondHiddenBiasDelta, lastSecondHiddenBiasDelta);
+    swapPtrs(secondHiddenBiasDeltaW, lastSecondHiddenBiasDeltaW);
 }
 
 void RProp::train(std::vector<Game>& games, const int& iterations)
 {
     initializeTrainingParameters();
-
-    float** newInputLayer = new float*[hiddenSize]();
-    float* newHiddenLayer = new float[hiddenSize]();
-    float* newInputBias = new float[inputSize]();
-    float* newHiddenBias = new float[hiddenSize]();
 
     for(int i = 0; i < iterations; ++i)
     {
@@ -722,11 +793,6 @@ void RProp::train(std::vector<Game>& games, const int& iterations)
 ////
         }
     }
-
-    delete[] newInputLayer;
-    delete[] newHiddenLayer;
-    delete[] newInputBias;
-    delete[] newHiddenBias;
 
     cleanUpTrainingParameters();
 }

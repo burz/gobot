@@ -98,7 +98,7 @@ float RProp::calculateR(float* features) const
 
     for(int i = 0; i < inputSize; ++i)
     {
-        inputTemp[i] = features[i] * inputBias[i];
+        inputTemp[i] = features[i] + inputBias[i];
     }
 
     for(int i = 0; i < hiddenSize; ++i)
@@ -107,7 +107,7 @@ float RProp::calculateR(float* features) const
 
         for(int j = 0; j < inputSize; ++j)
         {
-            sum += inputTemp[j] * inputLayer[i][j];
+            sum += inputLayer[i][j] * inputTemp[j];
         }
 
         hiddenTemp[i] = sum;
@@ -117,7 +117,39 @@ float RProp::calculateR(float* features) const
 
     for(int i = 0; i < hiddenSize; ++i)
     {
-        result += (hiddenTemp[i] + hiddenBias[i]) * hiddenLayer[i];
+        result += hiddenLayer[i] * (hiddenTemp[i] + hiddenBias[i]);
+    }
+
+    return result;
+}
+
+float RProp::calculateS(float* secondFeatures) const
+{
+    float inputTemp[SECOND_INPUT_SIZE];
+    float hiddenTemp[SECOND_HIDDEN_SIZE];
+
+    for(int i = 0; i < SECOND_INPUT_SIZE; ++i)
+    {
+        inputTemp[i] = secondFeatures[i] + secondInputBias[i];
+    }
+
+    for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+    {
+        float sum = 0.0;
+
+        for(int j = 0; j < SECOND_INPUT_SIZE; ++j)
+        {
+            sum += secondInputLayer[i][j] * inputTemp[i];
+        }
+
+        hiddenTemp[i] = sum;
+    }
+
+    float result = 0.0;
+
+    for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+    {
+        result += secondHiddenLayer[i] * (hiddenTemp[i] + secondHiddenBias[i]);
     }
 
     return result;
@@ -129,6 +161,8 @@ float RProp::runSecondPart(
         std::map<Block*, float> resultMap,
         std::set<Block*> emptyBlocks) const
 {
+    float score = board.getScore();
+
     std::set<Block*>::iterator itt = emptyBlocks.begin();
     std::set<Block*>::iterator end = emptyBlocks.end();
 
@@ -149,7 +183,7 @@ float RProp::runSecondPart(
         }
     }
 
-    return 0.0;
+    return score;
 }
 
 float RProp::predict(const Game& game) const
