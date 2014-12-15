@@ -3,6 +3,9 @@
 
 #include "model.h"
 
+#define SECOND_INPUT_SIZE 5
+#define SECOND_HIDDEN_SIZE 4
+
 typedef enum {
     INPUT,
     HIDDEN,
@@ -19,6 +22,11 @@ class RProp : public Model
     float* hiddenLayer;
     float* inputBias;
     float* hiddenBias;
+
+    float** secondInputLayer;
+    float* secondHiddenLayer;
+    float* secondInputBias;
+    float* secondHiddenBias;
 
     // Learning parameters
     float** inputDerivative;

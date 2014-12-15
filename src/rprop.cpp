@@ -19,6 +19,9 @@ RProp::RProp(const int& _inputSize, const int& _hiddenSize)
     hiddenSize = _hiddenSize;
 
     inputLayer = new float*[hiddenSize]();
+    hiddenLayer = new float[hiddenSize]();
+    inputBias = new float[inputSize]();
+    hiddenBias = new float[hiddenSize]();
 
     for(int i = 0; i < hiddenSize; ++i)
     {
@@ -28,15 +31,37 @@ RProp::RProp(const int& _inputSize, const int& _hiddenSize)
         {
             inputLayer[i][j] = randomFloatAroundZero();
         }
+
+        hiddenLayer[i] = randomFloatAroundZero();
+        hiddenBias[i] = randomFloatAroundZero();
     }
 
-    hiddenLayer = new float[hiddenSize]();
-    inputBias = new float[inputSize]();
-    hiddenBias = new float[hiddenSize]();
-
-    for(int i = 0; i < hiddenSize; ++i)
+    for(int i = 0; i < inputSize; ++i)
     {
-        hiddenLayer[i] = randomFloatAroundZero();
+        inputBias[i] = randomFloatAroundZero();
+    }
+
+    secondInputLayer = new float*[SECOND_HIDDEN_SIZE];
+    secondHiddenLayer = new float[SECOND_HIDDEN_SIZE];
+    secondInputBias = new float[SECOND_INPUT_SIZE];
+    secondHiddenBias = new float[SECOND_HIDDEN_SIZE];
+
+    for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+    {
+        secondInputLayer[i] = new float[SECOND_INPUT_SIZE];
+
+        for(int j = 0; j < SECOND_INPUT_SIZE; ++j)
+        {
+            secondInputLayer[i][j] = randomFloatAroundZero();
+        }
+
+        secondHiddenLayer[i] = randomFloatAroundZero();
+        secondHiddenBias[i] = randomFloatAroundZero();
+    }
+
+    for(int i = 0; i < SECOND_INPUT_SIZE; ++i)
+    {
+        secondInputBias[i] = randomFloatAroundZero();
     }
 }
 
@@ -53,6 +78,16 @@ RProp::~RProp(void)
         delete[] hiddenLayer;
         delete[] inputBias;
         delete[] hiddenBias;
+
+        for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+        {
+            delete[] secondInputLayer[i];
+        }
+
+        delete[] secondInputLayer;
+        delete[] secondHiddenLayer;
+        delete[] secondInputBias;
+        delete[] secondHiddenBias;
     }
 }
 
