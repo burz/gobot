@@ -95,6 +95,10 @@ class Board
     void playMove(const int x, const int y, const SpaceState state);
 
     Block* getBlock(const int x, const int y) const;
+
+    inline Block* getBlock(const BoardLocation& location)
+        { return getBlock(location.x, location.y); }
+
     void setBlock(const int x, const int y, Block* block);
     void setBlock(const BoardLocation& location, Block* block) const;
     void changeBlocks(Block* from, Block* to);

@@ -2,6 +2,7 @@
 #define _RPROP_H_
 
 #include "model.h"
+#include "directoryLoader.h"
 
 #include <vector>
 #include <map>
@@ -144,6 +145,9 @@ class RProp : public Model
     float energyFunction(const Game& game) const;
 
     virtual void train(std::vector<Game>& games, const int& iterations);
+    void trainWithFeatures(DirectoryIterator& gameFiles,
+                           DirectoryIterator& featureFiles);
+
     virtual float predict(const Game& game) const;
     virtual float test(std::vector<Game>& games) const;
 

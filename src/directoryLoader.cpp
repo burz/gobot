@@ -45,8 +45,12 @@ DirectoryIterator::DirectoryIterator(void)
     dir = 0;
 }
 
-DirectoryIterator::DirectoryIterator(const char* directory)
+DirectoryIterator::DirectoryIterator(const char* _directory, const int& _maxLoops)
 {
+    directory = _directory;
+    maxLoops = _maxLoops;
+    currentLoop = 0;
+
     dir = opendir(directory);
 
     if(dir == 0)
@@ -80,6 +84,11 @@ DirectoryIterator::~DirectoryIterator()
     }
 }
 
+const char* DirectoryIterator::getDirectory(void) const
+{
+    return directory;
+}
+
 const char* DirectoryIterator::operator*(void)
 {
     if(dir && ent)
@@ -103,7 +112,38 @@ DirectoryIterator& DirectoryIterator::operator++(void)
     {
         closedir(dir);
 
-        dir = 0;
+        if(currentLoop < maxLoops)
+        {
+            dir = opendir(directory);
+
+            if(dir == 0)
+            {
+                printf("Could not open directory: %s\n", directory);
+            }
+
+            ent = readdir(dir);
+
+            if(ent && !strcmp(ent->d_name, "."))
+            {
+                ent = readdir(dir);
+            }
+            if(ent && !strcmp(ent->d_name, ".."))
+            {
+                ent = readdir(dir);
+            }
+            if(!ent)
+            {
+                closedir(dir);
+
+                dir = 0;
+            }
+
+            ++currentLoop;
+        }
+        else
+        {
+            dir = 0;
+        }
     }
 
     return *this;

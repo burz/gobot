@@ -1,4 +1,6 @@
 #include "rprop.h"
+#include "parser.h"
+#include "featureFile.h"
 
 #include <math.h>
 
@@ -1058,6 +1060,83 @@ void RProp::runUpdates(
     swapPtrs(secondHiddenBiasDeltaW, lastSecondHiddenBiasDeltaW);
 }
 
+void RProp::trainWithFeatures(
+        DirectoryIterator& gameFiles,
+        DirectoryIterator& featureFiles)
+{
+    initializeTrainingParameters();
+
+    int t = 0;
+
+    for( ; gameFiles != gameFiles.end(); ++gameFiles)
+    {
+        ++featureFiles;
+
+        Game game;
+        std::map<BoardLocation, BlockFinalFeatures> featureMap;
+
+        if(!parseFile(&game, *gameFiles) ||
+           !readFeaturesFromFile(featureMap, *featureFiles))
+        {
+            continue;
+        }
+
+        Board board = game.playGame();
+
+        std::map<Block*, float*> featureVectorMap;
+
+        std::map<BoardLocation, BlockFinalFeatures>::iterator itt = featureMap.begin();
+        std::map<BoardLocation, BlockFinalFeatures>::iterator end = featureMap.end();
+
+        for( ; itt != end; ++itt)
+        {
+            std::pair<Block*, float*> mapping(board.getBlock(itt->first),
+                                              getFeatureVector(itt->second));
+
+            featureVectorMap.insert(mapping);
+        }
+
+        std::set<Block*> blocks;
+
+        board.getBlocks(blocks);
+
+        std::vector<Block*> emptyBlocks;
+
+        std::set<Block*>::iterator blockItt = blocks.begin();
+        std::set<Block*>::iterator blockEnd = blocks.end();
+
+        for( ; blockItt != blockEnd; ++blockItt)
+        {
+            if((*blockItt)->getState() == EMPTY)
+            {
+                emptyBlocks.push_back(*blockItt);
+            }
+        }
+
+        runUpdates(board, emptyBlocks, featureVectorMap);
+
+        std::map<Block*, float*>::iterator vectorItt = featureVectorMap.begin();
+        std::map<Block*, float*>::iterator vectorEnd = featureVectorMap.end();
+
+        for( ; vectorItt != vectorEnd; ++vectorItt)
+        {
+            delete[] vectorItt->second;
+        }
+
+        if(t % 10 == 0)
+        {
+            printf(".");
+            fflush(stdout);
+        }
+
+        ++t;
+    }
+
+    printf("\n");
+
+    cleanUpTrainingParameters();
+}
+
 void RProp::train(std::vector<Game>& games, const int& iterations)
 {
     initializeTrainingParameters();
@@ -1100,6 +1179,14 @@ void RProp::train(std::vector<Game>& games, const int& iterations)
             }
 
             runUpdates(board, emptyBlocks, featureMap);
+
+            std::map<Block*, float*>::iterator featureItt = featureMap.begin();
+            std::map<Block*, float*>::iterator featureEnd = featureMap.end();
+
+            for( ; featureItt != featureEnd; ++featureItt)
+            {
+                delete[] featureItt->second;
+            }
 
             if(t % 10 == 0)
             {
