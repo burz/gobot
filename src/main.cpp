@@ -4,51 +4,17 @@
 #include "parser.h"
 #include "directoryLoader.h"
 #include "featureFile.h"
+#include "rprop.h"
 
 #include <stdio.h>
 
 int main(int argc, char *argv[])
 {
-    char buffer[100];
-    int i = 0;
+    RProp rprop;
 
-    DirectoryIterator itt("reformatedGames");
-    DirectoryIterator end = DirectoryIterator::end();
+    std::vector<Game> games;
 
-    for( ; itt != end; ++itt)
-    {
-        sprintf(buffer, "reformatedGames/%s", *itt);
-
-        Game game;
-
-        if(!parseFile(&game, buffer))
-        {
-            printf("Couldn't parse %s\n", buffer);
-
-            return 1;
-        }
-
-        Board finalBoard = game.playGame();
-
-        sprintf(buffer, "gameFeatures/%sf", *itt);
-
-        if(!writeFeaturesToFile(finalBoard, buffer))
-        {
-            printf("Couldn't write the features of %s to a file\n", buffer);
-
-            return 1;
-        }
-
-        if(i % 100 == 0)
-        {
-            printf(".");
-            fflush(stdout);
-        }
-
-        ++i;
-    }
-
-    printf("\n");
+    rprop.train(games, 4);
 
 //    std::vector<Game> games;
 //

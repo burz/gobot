@@ -91,6 +91,38 @@ RProp::~RProp(void)
     }
 }
 
+float RProp::calculateR(float* features) const
+{
+    float inputTemp[inputSize];
+    float hiddenTemp[hiddenSize];
+
+    for(int i = 0; i < inputSize; ++i)
+    {
+        inputTemp[i] = features[i] * inputBias[i];
+    }
+
+    for(int i = 0; i < hiddenSize; ++i)
+    {
+        float sum = 0.0;
+
+        for(int j = 0; j < inputSize; ++j)
+        {
+            sum += inputTemp[j] * inputLayer[i][j];
+        }
+
+        hiddenTemp[i] = sum;
+    }
+
+    float result = 0.0;
+
+    for(int i = 0; i < hiddenSize; ++i)
+    {
+        result += (hiddenTemp[i] + hiddenBias[i]) * hiddenLayer[i];
+    }
+
+    return result;
+}
+
 float RProp::runSecondPart(
         const Game& game,
         const Board& board,
@@ -120,7 +152,7 @@ float RProp::runSecondPart(
     return 0.0;
 }
 
-float RProp::run(const Game& game) const
+float RProp::predict(const Game& game) const
 {
     Board board = game.playGame();
 
@@ -167,13 +199,13 @@ float RProp::test(std::vector<Game>& games) const
 
         for( ; itt != end; ++itt)
         {
-            if(run(*itt) != itt->getFinalScore())
+            if(predict(*itt) != itt->getFinalScore())
             {
                 ++correctPredictions;
             }
         }
 
-        return correctPredictions / ((float) games.size());
+        return static_cast<float>(correctPredictions) / static_cast<float>(games.size());
     }
     else
     {

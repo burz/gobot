@@ -115,12 +115,13 @@ class RProp : public Model
     void setDeltaW(const ParameterType& type,
                     const int& i, const int& j, const float& d);
 
-    float updateWeight(const ParameterType& type, const int& i, const int& j);
+    float updateWeight(const ParameterType& type, const int& i, const int& j = 0);
 
     float calculateR(float* features) const;
 
     float energyFunction(const Game& game) const;
 
+    void runUpdates(const Game& game);
     float runSecondPart(const Game& game,
                         const Board& board,
                         std::map<Block*, float> resultMap,
@@ -131,7 +132,7 @@ class RProp : public Model
     ~RProp(void);
 
     virtual void train(std::vector<Game>& games, const int& iterations);
-    virtual float run(const Game& game) const;
+    virtual float predict(const Game& game) const;
     virtual float test(std::vector<Game>& games) const;
 
     virtual bool outputToFile(const char* filename) const;

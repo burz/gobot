@@ -662,46 +662,55 @@ float RProp::updateWeight(const ParameterType& type, const int& i, const int& j)
     }
 }
 
-float RProp::calculateR(float* features) const
+float RProp::energyFunction(const Game& game) const
 {
-    float inputTemp[inputSize];
-    float hiddenTemp[hiddenSize];
+    return abs(game.getFinalScore() - predict(game));
+}
+
+void RProp::runUpdates(const Game& game)
+{
+// calculate derivatives
+    for(int i = 0; i < hiddenSize; ++i)
+    {
+        for(int j = 0; j < inputSize; ++j)
+        {
+            updateWeight(INPUT, i, j);
+        }
+
+        updateWeight(HIDDEN, i);
+        updateWeight(HIDDEN_BIAS, i);
+    }
 
     for(int i = 0; i < inputSize; ++i)
     {
-        inputTemp[i] = features[i] * inputBias[i];
+        updateWeight(INPUT_BIAS, i);
     }
 
-    for(int i = 0; i < hiddenSize; ++i)
+    for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
     {
-        float sum = 0.0;
-
-        for(int j = 0; j < inputSize; ++j)
+        for(int j = 0; j < SECOND_INPUT_SIZE; ++j)
         {
-            sum += inputTemp[j] * inputLayer[i][j];
+            updateWeight(SECOND_INPUT, i, j);
         }
 
-        hiddenTemp[i] = sum;
+        updateWeight(SECOND_HIDDEN, i);
+        updateWeight(SECOND_HIDDEN_BIAS, i);
     }
 
-    float result = 0.0;
-
-    for(int i = 0; i < hiddenSize; ++i)
+    for(int i = 0; i < SECOND_INPUT_SIZE; ++i)
     {
-        result += (hiddenTemp[i] + hiddenBias[i]) * hiddenLayer[i];
+        updateWeight(SECOND_HIDDEN_BIAS, i);
     }
-
-    return result;
-}
-
-float RProp::energyFunction(const Game& game) const
-{
-    return abs(game.getFinalScore() - run(game));
 }
 
 void RProp::train(std::vector<Game>& games, const int& iterations)
 {
     initializeTrainingParameters();
+
+    float** newInputLayer = new float*[hiddenSize]();
+    float* newHiddenLayer = new float[hiddenSize]();
+    float* newInputBias = new float[inputSize]();
+    float* newHiddenBias = new float[hiddenSize]();
 
     for(int i = 0; i < iterations; ++i)
     {
@@ -713,6 +722,11 @@ void RProp::train(std::vector<Game>& games, const int& iterations)
 ////
         }
     }
+
+    delete[] newInputLayer;
+    delete[] newHiddenLayer;
+    delete[] newInputBias;
+    delete[] newHiddenBias;
 
     cleanUpTrainingParameters();
 }
