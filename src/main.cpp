@@ -35,6 +35,11 @@ int main(int argc, char *argv[])
 
         int iterations = atoi(argv[3]);
 
+        if(iterations < 1)
+        {
+            iterations = 1;
+        }
+
         DirectoryIterator games(argv[4], iterations);
 
         RProp model(NUMBER_OF_FEATURES, HIDDEN_LAYER_SIZE);
