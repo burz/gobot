@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 
-#define HIDDEN_LAYER_SIZE 5
+#define HIDDEN_LAYER_SIZE 20
 
 const char usage[] = "Usage: gobot -train modelOutputFile iterations gameDirectory "
                      "[featureDirectory]\n"
