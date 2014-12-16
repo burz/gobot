@@ -1,8 +1,8 @@
 #include "directoryLoader.h"
 #include "parser.h"
 
-#include <stdio.h>
-#include <dirent.h>
+#include <cstdio>
+#include <cstring>
 
 bool loadDirectory(std::vector<Game>& games, const char* directory)
 {

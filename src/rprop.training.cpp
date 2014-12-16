@@ -2,7 +2,8 @@
 #include "parser.h"
 #include "featureFile.h"
 
-#include <math.h>
+#include <cmath>
+#include <cstdio>
 
 #define DELTA0 0.1
 #define ETAPLUS 1.2
@@ -666,7 +667,7 @@ float RProp::updateWeight(const ParameterType& type, const int& i, const int& j)
 
 float RProp::energyFunction(const Game& game) const
 {
-    return abs(game.getFinalScore() - predict(game));
+    return std::abs(game.getFinalScore() - predict(game));
 }
 
 void RProp::calculateDerivatives(

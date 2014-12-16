@@ -2,7 +2,9 @@
 #include "parser.h"
 #include "featureFile.h"
 
-#include <math.h>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 
 RProp::RProp(void)
 {

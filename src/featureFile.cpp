@@ -1,5 +1,7 @@
 #include "featureFile.h"
 
+#include <cstdio>
+
 bool writeFeaturesToFile(Board& board, const char* destination)
 {
     FILE* f = fopen(destination, "wb");
