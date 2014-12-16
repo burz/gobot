@@ -56,6 +56,10 @@ DirectoryIterator::DirectoryIterator(const char* _directory, const int& _maxLoop
     if(dir == 0)
     {
         printf("Could not open directory: %s\n", directory);
+
+        ent = 0;
+
+        return;
     }
 
     ent = readdir(dir);
