@@ -6,7 +6,9 @@
 #include "featureFile.h"
 #include "rprop.h"
 
-#include <stdio.h>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
 
 #define HIDDEN_LAYER_SIZE 20
 

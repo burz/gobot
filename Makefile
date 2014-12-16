@@ -13,7 +13,7 @@ FILES = \
     game.o \
     parser.o \
     directoryLoader.o \
-    features.o \
+    blockFeatures.o \
     featureFile.o \
     board.features.o \
     rprop.o \

@@ -1,6 +1,7 @@
 #include "block.h"
 
-#include <math.h>
+#include <cmath>
+#include <cstdio>
 
 Block::Block(void)
 {
@@ -85,8 +86,8 @@ bool Block::touches(const int x, const int y) const
     {
         BoardLocation blockMember = *itt;
 
-        if(abs(blockMember.x - x) +
-           abs(blockMember.y - y) == 1)
+        if(std::abs(blockMember.x - x) +
+           std::abs(blockMember.y - y) == 1)
         {
             return true;
         }
@@ -103,8 +104,8 @@ bool Block::touches(const BoardLocation& location) const
     {
         BoardLocation blockMember = *itt;
 
-        if(abs(blockMember.x - location.x) +
-           abs(blockMember.y - location.y) == 1)
+        if(std::abs(blockMember.x - location.x) +
+           std::abs(blockMember.y - location.y) == 1)
         {
             return true;
         }

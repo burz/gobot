@@ -1,6 +1,6 @@
 #include "parser.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 bool parseFile(Game* game, const char *filename, const int size)
 {

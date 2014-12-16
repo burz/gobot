@@ -1,6 +1,6 @@
-#include "features.h"
+#include "blockFeatures.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 void printFeatures(const BlockFinalFeatures& features)
 {
