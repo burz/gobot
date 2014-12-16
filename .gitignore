@@ -3,6 +3,8 @@
 *.aux
 *.log
 *.backup
+*.zip
+*.tgz
 
 *.sgf
 *.sgfo

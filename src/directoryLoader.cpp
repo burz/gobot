@@ -116,6 +116,8 @@ DirectoryIterator& DirectoryIterator::operator++(void)
     {
         closedir(dir);
 
+        ++currentLoop;
+
         if(currentLoop < maxLoops)
         {
             dir = opendir(directory);
@@ -141,8 +143,6 @@ DirectoryIterator& DirectoryIterator::operator++(void)
 
                 dir = 0;
             }
-
-            ++currentLoop;
         }
         else
         {

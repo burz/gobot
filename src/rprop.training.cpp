@@ -1331,8 +1331,9 @@ void RProp::trainWithFeatures(
 
     int t = 0;
     char buffer[100];
+    DirectoryIterator end = gameFiles.end();
 
-    for( ; gameFiles != gameFiles.end(); ++gameFiles)
+    for( ; gameFiles != end; ++gameFiles)
     {
         sprintf(buffer, "%s/%s", gameFiles.getDirectory(), *gameFiles);
 
