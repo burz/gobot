@@ -10,7 +10,7 @@
 
 #define HIDDEN_LAYER_SIZE 5
 
-const char usage[] = "Usage: gobot -train modelOutputFile gameDirectory "
+const char usage[] = "Usage: gobot -train modelOutputFile iterations gameDirectory "
                      "[featureDirectory]\n"
                      "             -test modelFile gameDirectory [featureDirectory]\n"
                      "             -predict modelFile gameFile [featureFile]\n"
@@ -26,13 +26,22 @@ int main(int argc, char *argv[])
     }
     else if(!strcmp(argv[1], "-train"))
     {
-        DirectoryIterator games(argv[3]);
+        if(argc < 5)
+        {
+            printf("%s\n", usage);
+
+            return 1;
+        }
+
+        int iterations = atoi(argv[3]);
+
+        DirectoryIterator games(argv[4], iterations);
 
         RProp model(NUMBER_OF_FEATURES, HIDDEN_LAYER_SIZE);
 
-        if(argc > 4)
+        if(argc > 5)
         {
-            model.trainWithFeatures(games, argv[4]);
+            model.trainWithFeatures(games, argv[5]);
         }
         else
         {

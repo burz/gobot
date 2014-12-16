@@ -458,8 +458,6 @@ void Board::generateOptimisticChain(
 {
     features->OCSize = 0;
 
-    state->weakestAdjacentChainedBlock = 0;
-
     std::set<BoardLocation> perimeter;
 
     while(optimisticList.size() > 0)
@@ -827,6 +825,8 @@ void calculateLocalMajority(
 void Board::generateLocalFeatures(BlockFinalFeatures *features, Block* block)
 {
     LocalFeatureState state;
+
+    state.weakestAdjacentChainedBlock = 0;
 
     std::set<BoardLocation>::const_iterator itt = block->locationsBegin();
     std::set<BoardLocation>::const_iterator end = block->locationsEnd();

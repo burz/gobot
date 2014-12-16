@@ -26,7 +26,7 @@ echo Step 1: Complete
 echo 
 echo -n Step 2: Calculating block features for each game...
 
-./generateFeatureFiles $2 $3
+./gobot -generateFeatures $2 $3
 
 echo Step 2: Complete
 echo
