@@ -335,7 +335,7 @@ float RProp::test(std::vector<Game>& games) const
 
         for( ; itt != end; ++itt)
         {
-            if(predict(*itt) != itt->getFinalScore())
+            if(predict(*itt) == itt->getFinalScore())
             {
                 ++correctPredictions;
             }
@@ -380,7 +380,7 @@ float RProp::testWithFeatures(
             continue;
         }
 
-        if(predictWithFeatures(game, featureMap) != game.getFinalScore())
+        if(predictWithFeatures(game, featureMap) == game.getFinalScore())
         {
             ++correctPredictions;
         }
