@@ -14,6 +14,7 @@ class Game
     int size;
     float komi;
     float finalScore;
+    std::vector<BoardLocation> handicap;
     std::vector<BoardLocation> moves;
     std::map<Block*, float*> featureMap;
   public:
@@ -24,7 +25,8 @@ class Game
     float getKomi(void) const;
     float getFinalScore(void) const;
 
-    void addMove(const BoardLocation location);
+    void addHandicap(const BoardLocation& location);
+    void addMove(const BoardLocation& location);
 
     Board playGame(void) const;
 

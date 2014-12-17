@@ -36,7 +36,12 @@ float Game::getFinalScore(void) const
     return finalScore;
 }
 
-void Game::addMove(const BoardLocation location)
+void Game::addHandicap(const BoardLocation& location)
+{
+    handicap.push_back(location);
+}
+
+void Game::addMove(const BoardLocation& location)
 {
     moves.push_back(location);
 }
@@ -45,11 +50,25 @@ Board Game::playGame(void) const
 {
     Board board(size, komi);
 
-    std::vector<BoardLocation>::const_iterator itt = moves.begin();
-
     int i = 1;
 
-    for( ; itt != moves.end(); ++itt)
+    if(handicap.size() > 0)
+    {
+        std::vector<BoardLocation>::const_iterator handicapItt = handicap.begin();
+        std::vector<BoardLocation>::const_iterator handicapEnd = handicap.end();
+
+        for( ; handicapItt != handicapEnd; ++handicapItt)
+        {
+            board.playMove(handicapItt->x, handicapItt->y, BLACK);
+        }
+
+        ++i;
+    }
+
+    std::vector<BoardLocation>::const_iterator itt = moves.begin();
+    std::vector<BoardLocation>::const_iterator end = moves.end();
+
+    for( ; itt != end; ++itt)
     {
         SpaceState state = i % 2 == 1 ? BLACK : WHITE;
 

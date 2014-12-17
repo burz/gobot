@@ -13,8 +13,9 @@ bool parseFile(Game* game, const char *filename, const int size)
 
     float komi;
     float finalScore;
+    int handicapStones;
 
-    if(fscanf(file, "%f %f", &komi, &finalScore) == EOF)
+    if(fscanf(file, "%f %f %i", &komi, &finalScore, &handicapStones) == EOF)
     {
         fclose(file);
 
@@ -25,6 +26,20 @@ bool parseFile(Game* game, const char *filename, const int size)
 
     int x;
     int y;
+
+    for(int i = 0; i < handicapStones; ++i)
+    {
+        if(fscanf(file, "%i %i", &x, &y) == EOF)
+        {
+            fclose(file);
+
+            return false;
+        }
+
+        BoardLocation location(x, y);
+
+        result.addHandicap(location);
+    }
 
     while(fscanf(file, "%i %i", &x, &y) != EOF)
     {
