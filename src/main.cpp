@@ -56,6 +56,8 @@ int main(int argc, char *argv[])
         }
 
         model.outputToFile(argv[2]);
+
+        model.print();
     }
     else if(!strcmp(argv[1], "-test"))
     {

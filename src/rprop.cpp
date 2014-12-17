@@ -313,7 +313,7 @@ float RProp::test(DirectoryIterator& gameFiles) const
             continue;
         }
 
-        if(predict(game) != game.getFinalScore())
+        if(predict(game) == game.getFinalScore())
         {
             ++correctPredictions;
         }
@@ -585,4 +585,55 @@ bool RProp::readFromFile(const char* filename)
     fclose(f);
 
     return true;
+}
+
+void RProp::print(void) const
+{
+    printf("Input Size: %d\nHidden Size: %d\n", inputSize, hiddenSize);
+
+    for(int i = 0; i < hiddenSize; ++i)
+    {
+        for(int j = 0; j < inputSize; ++j)
+        {
+            printf("IL(%2d, %2d) = %f\n", i, j, inputLayer[i][j]);
+        }
+    }
+
+    for(int i = 0; i < hiddenSize; ++i)
+    {
+        printf("HL(%2d) = %f\n", i, hiddenLayer[i]);
+    }
+
+    for(int i = 0; i < inputSize; ++i)
+    {
+        printf("IB(%2d) = %f\n", i, inputBias[i]);
+    }
+
+    for(int i = 0; i < hiddenSize; ++i)
+    {
+        printf("HB(%2d) = %f\n", i, hiddenBias[i]);
+    }
+
+    for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+    {
+        for(int j = 0; j < SECOND_INPUT_SIZE; ++j)
+        {
+            printf("SIL(%d, %d) = %f\n", i, j, secondInputLayer[i][j]);
+        }
+    }
+
+    for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+    {
+        printf("SHL(%d) = %f\n", i, secondHiddenLayer[i]);
+    }
+
+    for(int i = 0; i < SECOND_INPUT_SIZE; ++i)
+    {
+        printf("SIB(%d) = %f\n", i, secondInputBias[i]);
+    }
+
+    for(int i = 0; i < SECOND_HIDDEN_SIZE; ++i)
+    {
+        printf("SHB(%d) = %f\n", i, secondHiddenBias[i]);
+    }
 }

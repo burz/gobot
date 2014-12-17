@@ -465,9 +465,33 @@ float RProp::w(const ParameterType& type, const int& i, const int& j)
     {
         return inputLayer[i][j];
     }
-    else
+    else if(type == HIDDEN)
     {
         return hiddenLayer[i];
+    }
+    else if(type == INPUT_BIAS)
+    {
+        return inputBias[i];
+    }
+    else if(type == HIDDEN_BIAS)
+    {
+        return hiddenBias[i];
+    }
+    else if(type == SECOND_INPUT)
+    {
+        return secondInputLayer[i][j];
+    }
+    else if(type == SECOND_HIDDEN)
+    {
+        return secondHiddenLayer[i];
+    }
+    else if(type == SECOND_INPUT_BIAS)
+    {
+        return secondInputBias[i];
+    }
+    else
+    {
+        return secondHiddenBias[i];
     }
 }
 
@@ -651,7 +675,7 @@ float RProp::updateWeight(const ParameterType& type, const int& i, const int& j)
 
         setDerivative(type, i, j, 0.0);
 
-        return w(type, i, j) - w(lastType, i, j);
+        return w(type, i, j) - deltaW(lastType, i, j);
     }
     else
     {

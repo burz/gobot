@@ -166,6 +166,8 @@ class RProp : public Model
 
     virtual bool outputToFile(const char* filename) const;
     virtual bool readFromFile(const char* filename);
+
+    void print(void) const;
 };
 
 #endif
