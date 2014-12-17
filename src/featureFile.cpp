@@ -44,7 +44,8 @@ bool writeFeaturesToFile(Board& board, const char* destination)
     {
         BoardLocation location = *(*itt)->locationsBegin();
 
-        if(fwrite(&location, sizeof(BoardLocation), 1, f) != 1)
+        if(fwrite(&location.x, sizeof(int), 1, f) != 1 ||
+           fwrite(&location.y, sizeof(int), 1, f) != 1)
         {
             fclose(f);
 
@@ -90,7 +91,8 @@ bool readFeaturesFromFile(
     {
         BoardLocation location(0, 0);
 
-        if(fread(&location, sizeof(BoardLocation), 1, f) != 1)
+        if(fread(&location.x, sizeof(int), 1, f) != 1 ||
+           fread(&location.y, sizeof(int), 1, f) != 1)
         {
             fclose(f);
 
