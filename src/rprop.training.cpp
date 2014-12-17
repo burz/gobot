@@ -788,23 +788,43 @@ void RProp::calculateDerivatives(
 
                 if((*blockItt)->getState() == BLACK)
                 {
+                    float vResult = 0.0;
+
                     for(int j = 0; j < inputSize; ++j)
                     {
-                        dEdvNb += inputLayer[i][j] * (x[j] + inputBias[j]);
+                        vResult += inputLayer[i][j] * (x[j] + inputBias[j]);
                     }
 
-                    dEdvNb += hiddenBias[i];
+                    vResult += hiddenBias[i];
+
+                    dEdvNb += vResult;
+
+                    hiddenDerivative[i] -= 2.0 * (*blockItt)->getSize() * vResult;
+
                     dEdbNb += hiddenLayer[i];
+
+                    hiddenBiasDerivative[i] -= 2.0 *
+                        (*blockItt)->getSize() * hiddenLayer[i];
                 }
                 else
                 {
+                    float vResult = 0.0;
+
                     for(int j = 0; j < inputSize; ++j)
                     {
-                        dEdvNw += inputLayer[i][j] * (x[j] + inputBias[j]);
+                        vResult += inputLayer[i][j] * (x[j] + inputBias[j]);
                     }
 
-                    dEdvNw += hiddenBias[i];
+                    vResult += hiddenBias[i];
+
+                    dEdvNw += vResult;
+
+                    hiddenDerivative[i] += 2.0 * (*blockItt)->getSize() * vResult;
+
                     dEdbNw += hiddenLayer[i];
+
+                    hiddenBiasDerivative[i] += 2.0 *
+                        (*blockItt)->getSize() * hiddenLayer[i];
                 }
             }
 
@@ -834,11 +854,19 @@ void RProp::calculateDerivatives(
 
                     if((*blockItt)->getState() == BLACK)
                     {
-                        dEdwNb += hiddenLayer[i] * (x[j] + inputBias[j]);
+                        float wResult = hiddenLayer[i] * (x[j] + inputBias[j]);
+
+                        dEdwNb += wResult;
+
+                        inputDerivative[i][j] -= 2.0 * (*blockItt)->getSize() * wResult;
                     }
                     else
                     {
-                        dEdwNw += hiddenLayer[i] * (x[j] + inputBias[j]);
+                        float wResult = hiddenLayer[i] * (x[j] + inputBias[j]);
+
+                        dEdwNw += wResult;
+
+                        inputDerivative[i][j] += 2.0 * (*blockItt)->getSize() * wResult;
                     }
                 }
 
@@ -863,17 +891,29 @@ void RProp::calculateDerivatives(
             {
                 if((*blockItt)->getState() == BLACK)
                 {
+                    float aResult = 0.0;
+
                     for(int j = 0; j < hiddenSize; ++j)
                     {
-                        dEdaNb += hiddenLayer[j] * inputLayer[j][i];
+                        aResult += hiddenLayer[j] * inputLayer[j][i];
                     }
+
+                    dEdaNb += aResult;
+
+                    inputBiasDerivative[i] -= 2.0 * (*blockItt)->getSize() * aResult;
                 }
                 else
                 {
+                    float aResult = 0.0;
+
                     for(int j = 0; j < hiddenSize; ++j)
                     {
-                        dEdaNw += hiddenLayer[j] * inputLayer[j][i];
+                        aResult += hiddenLayer[j] * inputLayer[j][i];
                     }
+
+                    dEdaNw += aResult;
+
+                    inputBiasDerivative[i] += 2.0 * (*blockItt)->getSize() * aResult;
                 }
             }
 
@@ -894,16 +934,15 @@ void RProp::calculateDerivatives(
 
     for( ; itt != end; ++itt)
     {
-        if(calculateR(featureMap.find(*itt)->second) < 0)
+        int r = calculateR(featureMap.find(*itt)->second);
+
+        if((*itt)->getState() == BLACK)
         {
-            if((*itt)->getState() == BLACK)
-            {
-                Eg += 2.0 * (*itt)->getSize();
-            }
-            else
-            {
-                Eg -= 2.0 * (*itt)->getSize();
-            }
+            Eg -= 2.0 * (*itt)->getSize() * r;
+        }
+        else
+        {
+            Eg += 2.0 * (*itt)->getSize() * r;
         }
     }
 
