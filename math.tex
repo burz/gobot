@@ -27,6 +27,7 @@
 
 \def\touches#1#2{\mbox{touches}_{#1}{\left(#2\right)}}
 \def\color#1{\mbox{color}{\left(#1\right)}}
+\def\colorp#1{\mbox{color}^*{\left(#1\right)}}
 \def\size#1{\mbox{size}{\left(#1\right)}}
 
 We will define our energy function $E$. Suppose that we have a game with blocks $b_1, \ldots, b_n$, and empty territories
@@ -115,6 +116,86 @@ Therefore,
   \v{ v } \frac{ \partial }{ \partial \v{ b }_i } \v{ b },\right.\\
   \left.\sum_{ j = 1 }^n \color{ b_j } \touches{ e_i }{ b_j }
   \v{ v } \frac{ \partial }{ \partial \v{ b }_i } \v{ b }, 0 \right\}
+\end{gather*}
+Therefore, we can easily compute the same for $E(G)$ knowing that $d |x| / dx = x / |x|$.
+
+************
+
+Suppose we have a game $G$ for which we would like to determine $E(G)$. Let $k$ be the komi, $p_b$ and $p_w$ the prisoners
+held by black and white, respectively, and the true final score $S$. Define $\touches{ e }{ b }$ to be the indicator function
+taking the value 1 when the territory $e$ touches the block $b$. Define $\color{ b }$ to be the indicator function taking the
+value 1 when the block $b$ is white. Similarly, define $\colorp{ b }$ to be the function taking the value -1 when $b$ is black and
+1 when $b$ is white. Let $\size{ e }$ return the size of the territory or block $e$. The energy function runs algorithmically as follows:
+\begin{enumerate}
+  \item For each block $b_i$ calculate a feature vector $\v{ x }_i \in \mathbb{ R }^n$.
+  \item Calculate $r_i = \v{ v } [W(\v{ x }_i + \v{ a }) + \v{ b }]$ for each $i$.
+  \item For each territory $e_i$ compute
+    \begin{align*}
+      &N_b^{ (i) } = \sum_{ j = 1 }^n (1 - \color{ b_j }) \touches{ e_i }{ b_j }
+      &N_w^{ (i) } = \sum_{ j = 1 }^n \color{ b_j } \touches{ e_i }{ b_j }\\
+      &R_b^{ (i) } = \sum_{ j = 1 }^n (1 - \color{ b_j }) \touches{ e_i }{ b_j } r_j
+      &R_w^{ (i) } = \sum_{ j = 1 }^n \color{ b_j } \touches{ e_i }{ b_j } r_j
+    \end{align*}
+  \item Construct the vector $\v{ r }_i = \{ N_b^{ (i) }, N_w^{ (i) }, R_b^{ (i) }, R_w^{ (i) }, \size{ e_i } \}$.
+  \item Compute $s_i = \v{ g } [V(\v{ r }_i + \v{ c }) + \v{ d }]$.
+  \item Compute $S^* = k - c_b + c_w + \sum_{ i = 1 }^t s_i$.
+  \item We will assume that $r_i \neq 0$. Compute
+    $$D = 2 \cdot \sum_{ i = 1 }^n \size{ b_i } \colorp{ b_i } r_i$$
+  \item Output the energy $|S - (S^* + D)|$.
+\end{enumerate}
+We can write it out algebraically as
+\begin{align*}
+E(G) &= |E^*(G)| = |S - (S^* + D)|\\
+  &= \left|S - \left(k - c_b + c_w + \sum_{ i = 1 }^t s_i
+  + 2 \cdot \sum_{ i = 1 }^n \size{ b_i } \colorp{ b_i } r_i\right)\right|\\
+  &= \left|S - k + c_b - c_w - \sum_{ i = 1 }^t \v{ g }[V(\v{ r }_i + \v{ c }) + \v{ d }]
+  + 2 \cdot \sum_{ i = 1 }^n \size{ b_i } \colorp{ b_i } r_i\right|
+\end{align*}
+Therefore,
+\begin{gather*}
+\frac{ \partial E^*(G) }{ \partial \v{ g }_i }
+  = -\sum_{ i = 1 }^t [V(\v{ r }_i + \v{ c }) + \v{ d }] \frac{ \partial }{ \partial \v{ g }_i } \v{ g }\\
+\frac{ \partial E^*(G) }{ \partial V_{ i j } }
+  = -\sum_{ i = 1 }^t \v{ g } \left(\frac{ \partial }{ \partial V_{ i j } } V\right)(\v{ r }_i + \v{ c })\\
+\frac{ \partial E^*(G) }{ \partial \v{ c }_i }
+  = - \sum_{ i = 1 }^t \v{ g } V \frac{ \partial }{ \partial \v{ c }_i } \v{ c }\\
+\frac{ \partial E^*(G) }{ \partial \v{ d }_i } = \v{ g } \frac{ \partial }{ \partial \v{ d }_i } \v{ d }
+\end{gather*}
+Furthermore,
+\begin{align*}
+\frac{ \partial E^*(G) }{ \partial r_i }
+  &= \sum_{ i = 1 }^t \v{ g } V \frac{ \partial }{ \partial r_i } \v{ r }_i
+  + 2 \cdot \sum_{ i = 1 }^n \size{ b_i } \colorp{ b_i } \frac{ \partial }{ \partial r_i }  r_i\\
+  &= \sum_{ i = 1 }^t \v{ g } V \left\{ 0, 0, \frac{ \partial }{ \partial r_i } R_b^{ (i) }, \frac{ \partial }{ \partial r_i } R_w^{ (i) }, 0 \right\}
+  + 2 \cdot \sum_{ i = 1 }^n \size{ b_i } \colorp{ b_i } \frac{ \partial }{ \partial r_i }  r_i
+\end{align*}
+So then
+\begin{gather*}
+\frac{ \partial E^*(G) }{ \partial \v{ v }_i } = \sum_{ i = 1 }^t \v{ g } V
+  \left\{ 0, 0, \sum_{ j = 1 }^n (1 - \color{ b_j }) \touches{ e_i }{ b_j } [W(\v{ x }_j + \v{ a }) + \v{ b }]
+  \frac{ \partial }{ \partial \v{ v }_i } \v{ v },\right.\\
+  \left.\sum_{ j = 1 }^n \color{ b_j } \touches{ e_i }{ b_j } [W(\v{ x }_j + \v{ a }) + \v{ b }]
+  \frac{ \partial }{ \partial \v{ v }_i } \v{ v }, 0 \right\}\\
+  + 2 \cdot \sum_{ i = 1 }^n \size{ b_i } \colorp{ b_i }  [W(\v{ x }_j + \v{ a }) + \v{ b }] \frac{ \partial }{ \partial \v{ v }_i } \v{ v }\\
+\frac{ \partial E^*(G) }{ \partial W_{ i j } }  = \sum_{ i = 1 }^t \v{ g } V
+  \left\{ 0, 0, \sum_{ j = 1 }^n (1 - \color{ b_j }) \touches{ e_i }{ b_j } \v{ v }
+  \left(\frac{ \partial }{ \partial W_{ i j } } W\right) (\v{ x }_j + \v{ a }),\right.\\
+  \left.\sum_{ j = 1 }^n \color{ b_j } \touches{ e_i }{ b_j } \v{ v }
+  \left(\frac{ \partial }{ \partial W_{ i j } } W\right) (\v{ x }_j + \v{ a }), 0 \right\}\\
+  + 2 \cdot \sum_{ i = 1 }^n \size{ b_i } \colorp{ b_i }  \v{ v }
+  \left(\frac{ \partial }{ \partial W_{ i j } } W\right) (\v{ x }_j + \v{ a })\\
+\frac{ \partial E^*(G) }{ \partial \v{ a }_i } = \sum_{ i = 1 }^t \v{ g } V
+  \left\{ 0, 0, \sum_{ j = 1 }^n (1 - \color{ b_j }) \touches{ e_i }{ b_j }
+  \v{ v } W \frac{ \partial }{ \partial \v{ a }_i } \v{ a },\right.\\
+  \left.\sum_{ j = 1 }^n \color{ b_j } \touches{ e_i }{ b_j }
+  \v{ v } W \frac{ \partial }{ \partial \v{ a }_i } \v{ a }, 0 \right\}\\
+  + 2 \cdot \sum_{ i = 1 }^n \size{ b_i } \colorp{ b_i } \v{ v } W \frac{ \partial }{ \partial \v{ a }_i } \v{ a }\\
+\frac{ \partial E^*(G) }{ \partial \v{ b }_i } = \sum_{ i = 1 }^t \v{ g } V
+  \left\{ 0, 0, \sum_{ j = 1 }^n (1 - \color{ b_j }) \touches{ e_i }{ b_j }
+  \v{ v } \frac{ \partial }{ \partial \v{ b }_i } \v{ b },\right.\\
+  \left.\sum_{ j = 1 }^n \color{ b_j } \touches{ e_i }{ b_j }
+  \v{ v } \frac{ \partial }{ \partial \v{ b }_i } \v{ b }, 0 \right\}\\
+  + 2 \cdot \sum_{ i = 1 }^n \size{ b_i } \colorp{ b_i } \v{ v } \frac{ \partial }{ \partial \v{ b }_i } \v{ b }
 \end{gather*}
 Therefore, we can easily compute the same for $E(G)$ knowing that $d |x| / dx = x / |x|$.
 

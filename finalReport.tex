@@ -6,10 +6,11 @@
 \documentclass[11pt,letterpaper]{article}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{hyperref}
 \usepackage{naaclhlt2010}
 \usepackage{times}
 \usepackage{latexsym}
-\setlength\titlebox{6.5cm}    % Expanding the titlebox
+\setlength\titlebox{6.5cm}
 
 \title{Attempting a Machine Learning Solution for Scoring the Game of Go}
 
@@ -26,66 +27,126 @@
 \maketitle
 
 \begin{abstract}
-  This document explains how the author generated features and designed a learning algorithm to score the final board in the
-  game of Go. Furthermore, the reader will observe that the algorithm was inadequate to solve the scoring problem.
+  This document explains how the author generated features and designed a learning algorithm to score the final
+  board in the game of Go using the RPROP update method described in \cite{RB:93}. Furthermore, the reader
+  will observe that the algorithm was inadequate to solve the scoring problem.
 \end{abstract}
 
 \section{Introduction}
 
-Go is a board game typically played on a $19 \times 19$ board between two players, white and black. Each player, starting with
-black, successively places stones on the intersections of the board until either both of the players agree that the game is over
-or until one player resigns. The outcome of the game is determined by the number of empty intersections that each player has
-surrounded. These empty intersections are known as the territory surrounded by the player.
+Go is a board game typically played on a $19 \times 19$ board between two players, white and black. Each player,
+starting with black, successively places stones on the intersections of the board until either both of the players
+agree that the game is over or until one player resigns. The outcome of the game is determined by the number of
+empty intersections that each player has surrounded. These empty intersections are known as the territory
+surrounded by the player.
 
-Because of the grid each stone, except possibly on the edge of the board, has 4 intersections that it connects to. We call these
-intersections liberties. When for any stone all liberties are covered by opponent stones then we say that the stone is captured and
-it is removed from the board and counted as a point for the opponent. If two or more stones are connected, they can be captured
-only by covering all of the liberties of the collective group by opponent stones. Due to this fact, each player can construct groups
-that cannot be captured by surrounding two non-connected territories within the group. Then the opponent cannot possibly cover
-the liberties in both territories without committing suicide, which is not allowed. We call each of these non-connected territories
-eyes and any group with two or more alive, a group with fewer than two eyes is dead.
+Because of the grid each stone, except possibly on the edge of the board, has 4 intersections that it connects to. We
+call nonempty intersections next to blocks liberties. When for any stone all liberties are covered by opponent stones
+then we say that the stone is captured and it is removed from the board and counted as a point for the opponent. If
+two or more stones are connected, they can be captured only by covering all of the liberties of the collective group by
+opponent stones.
 
-The main problem of scoring is determining the life and death of groups of stones on the board. This is a nontrivial problem
-because the life and death of groups is not always obvious. For instance one position that can occur is when two groups of
-different colors each have only two liberties but they are shared between the group. Then if one player were to play in one of
-those liberties the other player would be able to immediately capture that player's stones. This situation is called a seki, and
-commonly occurs in games. The problem that this example shows is that the question of life and death is not local, instead it
-depends largely on the area around the group. If either player were able to capture one of the groups around his stones stuck in
-seki he will be able to capture his opponents stones.
+No player is allowed to commit suicide, i.e. placing a stone such that it's block would have no liberties, unless the
+move would cause some opponents stones to have no liberties, in which case the opponents stones would be
+captured. Due to this fact, each player can construct groups that cannot be captured by surrounding two
+unconnected territories within the group. Then the opponent cannot possibly cover the liberties in both territories
+without committing suicide. We call each of these non-connected territories eyes and any group with two or more
+eyes is alive while a group with fewer than two eyes is dead.
 
-To actually score a board all that is needed to do is to (1) determine life and death of all groups, (2) remove dead groups from
-the board, (3) sum up all territory that is completely surrounded by each player, (4) add the points from captured stones to each
-players score, and (5) add to white's score the komi, i.e. the points awarded to him for having to take the second turn. This
-problem is hard to do with a deterministic algorithm constructed by a human, so therefore it naturally lends itself to a machine
-learning solution.
+The main problem of scoring is determining the life and death of groups of stones on the board. This is a nontrivial
+problem because the life and death of groups is not always obvious. For instance one position that can occur is
+when two groups of different colors each have only two liberties but they are shared between the group. Then if one
+player were to play in one of those liberties the other player would be able to immediately capture that player's
+stones. This situation is called a seki, and commonly occurs in games. The problem that this example shows is that
+the question of life and death is not local, instead it depends largely on the area around the group. If either player
+were able to capture one of the groups around his stones stuck in seki he will be able to capture his opponents
+stones.
 
-In the paper \emph{Learning to score final positions in the game of Go} \cite{vdW:04}, the authors describe how they were able
-to craft an accurate scorer for go using manually labeled life and death information for groups in final positions. This is tedious
-since the lack of an accurate scorer disallows easy labeling. Therefore, in this project the author tried to develop a scorer that
-did not rely on this specific to group labeling but instead depend only on the labeling of the final score. Then an energy function
-could be created which determined the accuracy of the estimator versus the actual final score.
+To actually score a board all that is needed to do is to (1) determine life and death of all groups, (2) remove dead
+groups from the board, (3) sum up all territory that is completely surrounded by each player, (4) add the points from
+captured stones to each players score, and (5) add to white's score the komi, i.e. the points awarded to him for
+having to take the second turn. This problem is hard to do with a deterministic algorithm constructed by a human,
+so therefore it naturally lends itself to a machine learning solution.
 
-\section{Board Representation}
 
-In order to obtain the final board that we need to score the game we must run through 
+\section{Background}
 
-\section{Feature Generation}
+Go has been studied in the computer science field since at least 1964 when \emph{A partial analysis of Go}
+\cite{TW:64} proved that it is impossible for white to force black to lose. Since then it has remained popular in the
+AI community especially now as chess has been solved, but computers still cannot win against reasonably strong
+amateur players.
 
-Feature generation turns out to be a costly process for this application. We need to generate features for each block of stones in
-the final position. A block is a group of stones that are directly connected, i.e. each stone in the block is on an intersection directly
-next to another stone in the block. Since we know that the life of any group depends not only on the state of the block but also
-the state of the board surrounding the stone, we must make sure to include features that describe both states. In this program
-we chose to use a slightly different feature set then that in \cite{vdW:04}. Specifically we include 46 features for each block:
-First the local features
+The study of of life and death for groups has been around since at least 1976 when \emph{Life in the Game of Go}
+\cite{B:76} derived rules to determine whether a group has unconditional life. Examples of algorithms that determine
+the life of a group can be found in \emph{Static analysis of life and death in the game of Go} \cite{CC:99} and 
+\emph{Search versus Knowledge for Solving Life and Death Problems in Go} \cite{KM:05}.
+In fact, there is even a paper on sekis, \emph{Recognizing Seki in Computer Go} \cite{NKM:06}.
+
+Machine learning has been used in many Go related applications.
+\emph{Reinforcement Learning of Local Shape in the Game of Go} \cite{SSM:07}  attemps to study the local shapes
+of blocks to determine the best move to play when encountering certian position.
+\emph{Learning to score final positions in the game of Go} \cite{WHU:04} describes an algorithm to learn to score
+the final board in Go. Finally, \emph{Learning to predict life and death from Go game records} \cite{WWHU:05}
+describes an algorithm to learn to determine the life or death of blocks during the execution of the game.
+
+\section{Implementation Details}
+
+In the paper \emph{Learning to score final positions in the game of Go} \cite{WHU:04}, the authors describe how they
+were able to craft an accurate scorer for go using manually labeled life and death information for groups in final
+positions. This is tedious since the lack of an accurate scorer disallows easy labeling. Therefore, in this project the
+author tried to develop a scorer that did not rely on this specific to group labeling but instead depend only on the
+labeling of the final score. Then an energy function could be created which determined the accuracy of the estimator
+versus the actual final score. This implementation is an attemp to do just that.
+
+\subsection{Board Representation}
+
+The standard record for electronic Go records is the {\tt sgf} file. This file is formatted in a specific way that allows
+various information such as location, final score, and handicap as well as the moves played in the game. Because
+of the diversity of possible game files we determined that the easiest way to read these into C++ was in a more
+constant format. Therefore we created a parser in Haskell using the Parsec parser combinator library to convert the
+file to a constant header of pertinent information and then the integer locations of moves.
+
+It is important to note that since games are stored as a sequence of moves and since groups of stones can be
+killed and then removed from the board allowing play in a previously occupied position, that the entire game must be
+played in order to create the final board. Therefore it was necessary to create a program that could run a Go game
+itself. To this pursuit a good representation of the board was necessary.
+
+In order to create a good representation, we must be able to preserve the block membership of locations. To this
+end, we represented a board as a two dimensional array of pointers to blocks, and then pointed all locations to
+an initial block to which we set the state to {\tt EMPTY}. The blocks themselves are just sets of locations, since
+they take up relatively small space and allow faster to iteration through the block than a similar way through the
+array.
+
+We assume that game locations are correct, i.e. that the {\tt sgf} files do not place stones on top of already placed
+stones. Therefore, to place a stone, we simply lookup the locations current block and remove the location from
+that block and create a new block for the stone. Then for each location directly adjacent to the stone, we lookup the
+blocks and check if they are an friendly stone. If so we combine the stones current block and the adjacent block.
+Finally each nonempty block touched in this way, we update the liberties. If in this process a block has zero liberties,
+the block is set to be empty and the size of the block is added to the opponent's score.
+
+The final step is to recombine the locations empty blocks into new empty blocks. This is needed becuase the
+algorithm never splits up an empty block when stones are placed within its borders such that the block's locations
+are physically split, so without this step there is possibly an empty block with only the locations $0 \times 0$ and
+$0 \times 19$ which violates the definition of a block.
+
+\subsection{Feature Generation}
+
+Feature generation turns out to be a costly process for this application. We need to generate features for each block
+of stones in the final position. A block is a group of stones that are directly connected, i.e. each stone in the block is
+on an intersection directly next to another stone in the block. Since we know that the life of any group depends not
+only on the state of the block but also the state of the board surrounding the stone, we must make sure to include
+features that describe both states. In this program we chose to use a slightly different feature set then that in
+\cite{WHU:04}. Specifically we include 46 features for each block. First the local features
 \begin{itemize}
   \item The size of the block.
   \item The perimeter of the block, i.e. the number of intersections directly next to but not in the block.
   \item The number of opponent stones in the perimeter of the block.
   \item The liberties of the block.
-  \item The liberties of the block that the opponent should not play, i.e. liberties which if played by the opponent would cause his
-    stones to have only 1 liberty or would be suicide.
+  \item The liberties of the block that the opponent should not play, i.e. liberties which if played by the opponent would
+    cause his stones to have only 1 liberty or would be suicide.
   \item The liberties of the block that, if played by the player, would cause the block to have 1 liberty.
-  \item The number of second-order liberties, i.e. empty intersections directly next to the liberties of the block that are not liberties.
+  \item The number of second-order liberties, i.e. empty intersections directly next to the liberties of the block that
+    are not liberties.
   \item The number of third-order liberties, i.e. liberties of second order liberties.
   \item The number of opponent blocks that are adjacent to the block.
   \item The center of mass, i.e. the average distance of stones from the first and second closest edge of the board.
@@ -98,21 +159,23 @@ Then features for color enclosed territories, i.e. territories surrounded by all
   \item The perimeter of the color enclosed territories.
   \item The center of mass of the color enclosed territories.
 \end{itemize}
-Then features for eyespace adjacent to the block, which we define to be a color enclosed regions with a size less than 5
+Then features for eyespace adjacent to the block, which we define to be a color enclosed regions with a size less
+than 5
 \begin{itemize}
   \item The number of eyespace blocks.
   \item The size of the eyespace.
   \item The perimeter of the eyespace.
 \end{itemize}
-Next we include features for disputed territories adjacent to the block, i.e. territories that are adjacent to blocks of both colors.
+Next we include features for disputed territories adjacent to the block, i.e. territories that are adjacent to blocks of
+both colors.
 \begin{itemize}
   \item The number of disputed territories.
   \item The liberties touching the block in the disputed territories.
   \item The liberties of all friendly blocks in the territories.
   \item The liberties of all enemy blocks in the territories.
 \end{itemize}
-Then features for the optimistic chain of the block. An optimistic chain is a group of blocks that share liberties with each other.
-These chains represent what blocks a player could potentially connect if needed.
+Then features for the optimistic chain of the block. An optimistic chain is a group of blocks that share liberties with
+each other. These chains represent what blocks a player could potentially connect if needed.
 \begin{itemize}
   \item Number of blocks in the optimistic chain.
   \item Size of the optimistic chain.
@@ -129,7 +192,8 @@ These chains represent what blocks a player could potentially connect if needed.
   \item The liberties of all friendly blocks in the territories.
   \item The liberties of all enemy blocks in the territories.
 \end{itemize}
-Finally we include the following features for each of the weakest and second-weakest enemy blocks adjacent to the block and
+Finally we include the following features for each of the weakest and second-weakest enemy blocks adjacent to
+the block and
 the weakest enemy block adjacent to or sharing a liberty with the optimistic chain
 \begin{itemize}
   \item The perimeter of the enemy block.
@@ -137,19 +201,20 @@ the weakest enemy block adjacent to or sharing a liberty with the optimistic cha
   \item The shared liberties of the block and enemy block (or the chain and the enemy block).
 \end{itemize}
 
-Although our algorithm could certainly be optimized further, we were able to rather efficiently compute the features. For instance,
-when computing the perimeter we were able to also compute the opponents, liberties, adjacent enemy blocks, center of mass,
-and the bounding box size. Furthermore, we cached the features for chains so that the features would only need to be computed
-once per chain.
+Although our algorithm could certainly be optimized further, we were able to rather efficiently compute the features.
+For instance, when computing the perimeter we were able to also compute the opponents, liberties, adjacent enemy
+blocks, center of mass, and the bounding box size. Furthermore, we cached the features for chains so that the
+chain specific features would only need to be computed once per chain.
 
-\section{Machine Learning}
+\subsection{Machine Learning}
 
-For the machine learning portion of the program we decided to use the RPROP gradient descent algorithm as recommended
-by \cite{vdW:04}. This turned out to be a poor choice because of the way we defined the scoring and energy functions. Due to
-the fact that we did not have enough time to manually a reasonable size of games with labeled blocks, i.e. alive or dead, we
-attempted to define a scoring and energy function that depended only on the game itself and a known final score.
+For the machine learning portion of the program we decided to use the RPROP gradient descent algorithm as
+recommended by \cite{WHU:04}. This turned out to be a poor choice because of the way we defined the scoring and
+energy functions. Due to the fact that we did not have enough time to manually label the blocks of a large number
+of games with labeled blocks, i.e. alive or dead, we attempted to define a scoring and energy function that
+depended only on the game itself and a known final score.
 
-\subsection{The Energy Function}
+\subsubsection{The Energy Function}
 
 \def\v#1{\mathbf{#1}}
 \def\touches#1#2{\mbox{tchs}_{#1}{\left(#2\right)}}
@@ -157,19 +222,20 @@ attempted to define a scoring and energy function that depended only on the game
 \def\colorp#1{\mbox{clr}^*{\left(#1\right)}}
 \def\size#1{\mbox{size}{\left(#1\right)}}
 
-We will define our energy function $E$. Suppose that we have a game with blocks $b_1, \ldots, b_n$, and empty territories
-$e_1, \ldots, e_t$ at the end of the game.  and our network's hidden layer has $m$ nodes. Our learning algorithm uses a
-hidden layer of size $m$, a matrix of input layer weights $W$ of size $m \times n$, a vector of hidden layer weights
-$\v{ v } \in \mathbb{ R }^m$, and two vector biases $\v{ a } \in \mathbb{ R }^n$ and $\v{ b } \in \mathbb{ R }^m$.
-Furthermore, for the second half of the algorithm, we use a matrix of weights $V$ of size $4 \times 5$, a vector of hidden
-weights $\v{ g } \in \mathbb{ R }^4$, and two bias vectors $\v{ c } \in \mathbb{ R }^5$ and $\v{ d } \in \mathbb{ R }^4$.
+We will define our energy function $E$. Suppose that we have a game with blocks $b_1, \ldots, b_n$, and empty
+territories $e_1, \ldots, e_t$ at the end of the game.  and our network's hidden layer has $m$ nodes. Our learning
+algorithm uses a hidden layer of size $m$, a matrix of input layer weights $W$ of size $m \times n$, a vector of
+hidden layer weights $\v{ v } \in \mathbb{ R }^m$, and two vector biases $\v{ a } \in \mathbb{ R }^n$ and
+$\v{ b } \in \mathbb{ R }^m$. Furthermore, for the second half of the algorithm, we use a matrix of weights $V$ of size
+$4 \times 5$, a vector of hidden weights $\v{ g } \in \mathbb{ R }^4$, and two bias vectors $\v{ c } \in \mathbb{ R }^5$
+and $\v{ d } \in \mathbb{ R }^4$.
 
-Suppose we have a game $G$ for which we would like to determine $E(G)$. Let $k$ be the komi, $p_b$ and $p_w$ the prisoners
-held by black and white, respectively, and the true final score $S$. Define $\touches{ e }{ b }$ to be the indicator function
-taking the value 1 when the territory $e$ touches the block $b$. Define $\color{ b }$ to be the indicator function taking the
-value 1 when the block $b$ is white. Let $\size{ e }$ return the size of the territory $e$. Let $G(x)$ be the
-indicator function that returns 1 when $x$ is greater than $x$. Note that when $x \neq 0$,  $G(x) = (|x| + x) / 2x$. The energy
-function runs algorithmically as follows:
+Suppose we have a game $G$ for which we would like to determine $E(G)$. Let $k$ be the komi, $p_b$ and $p_w$
+the prisoners held by black and white, respectively, and the true final score $S$. Define $\touches{ e }{ b }$ to be the
+indicator function taking the value 1 when the territory $e$ touches the block $b$. Define $\color{ b }$ to be the
+indicator function taking the value 1 when the block $b$ is white. Let $\size{ e }$ return the size of the territory $e$.
+Let $G(x)$ be the indicator function that returns 1 when $x$ is greater than $x$. Note that when $x \neq 0$, 
+$G(x) = (|x| + x) / 2x$. The energy function runs algorithmically as follows:
 \begin{enumerate}
   \item For each block $b_i$ calculate a feature vector $\v{ x }_i \in \mathbb{ R }^n$.
   \item Calculate $r_i = \v{ v }[W(\v{ x }_i + \v{ a }) + \v{ b }]$ for each $i$.
@@ -191,7 +257,8 @@ function runs algorithmically as follows:
     \end{gather*}
   \item Output the energy $|S - (S^* + D_b - D_w)|$.
 \end{enumerate}
-We can write it out algebraically as
+We define the scoring function to be $S^* + D_b - D_w$. Note that we can write out the energy function
+algebraically as
 \begin{align*}
 E(G) &= |E^*(G)| = |S - (S^* + D_b - D_w)|\\
   &= \left|S - \left(k - c_b + c_w + \sum_{ i = 1 }^t s_i\right.\right.\\
@@ -222,8 +289,10 @@ Furthermore, since $d G(x) / d x = 0$ then when $r_i \neq 0$
 Therefore,
 \begin{gather*}
 \frac{ \partial E^*(G) }{ \partial \v{ v }_i } = \sum_{ k = 1 }^t \v{ g } V \{ 0, 0,\\
-  \sum_{ j = 1 }^n (1 - \color{ b_j }) \touches{ e_k }{ b_j } [W(\v{ x }_j + \v{ a }) + \v{ b }] \frac{ \partial }{ \partial \v{ v }_i } \v{ v },\\
-  \sum_{ j = 1 }^n \color{ b_j } \touches{ e_k }{ b_j } [W(\v{ x }_j + \v{ a }) + \v{ b }]  \frac{ \partial }{ \partial \v{ v }_i } \v{ v }, 0 \}
+  \sum_{ j = 1 }^n (1 - \color{ b_j }) \touches{ e_k }{ b_j } [W(\v{ x }_j + \v{ a }) + \v{ b }]
+  \frac{ \partial }{ \partial \v{ v }_i } \v{ v },\\
+  \sum_{ j = 1 }^n \color{ b_j } \touches{ e_k }{ b_j } [W(\v{ x }_j + \v{ a }) + \v{ b }] 
+  \frac{ \partial }{ \partial \v{ v }_i } \v{ v }, 0 \}
 \end{gather*}
 \begin{gather*}
 \frac{ \partial E^*(G) }{ \partial W_{ i j } }  = \sum_{ k = 1 }^t \v{ g } V \{ 0, 0,\\
@@ -246,8 +315,8 @@ Therefore,
   \sum_{ j = 1 }^n \color{ b_j } \touches{ e_k }{ b_j }
   \v{ v } \frac{ \partial }{ \partial \v{ b }_i } \v{ b }, 0 \}
 \end{gather*}
-Therefore, we can easily compute the same for $E(G)$ knowing that $d |x| / dx = x / |x|$, i.e. flop signs if $E^*(G) < 0$.
-When $E^*(G) = 0$ we set the derivative equal to 0.
+Therefore, we can easily compute the same for $E(G)$ knowing that $d |x| / dx = x / |x|$, i.e. flop signs if
+$E^*(G) < 0$. When $E^*(G) = 0$ we set the derivative equal to 0.
 
 The idea behind this algorithm is to first determine an estimate, the $r_i$, as to whether blocks are alive or dead.
 Add to the score two times the value of the dead groups (empty territory gained by opponent and capture points).
@@ -261,11 +330,13 @@ where $\colorp{ b }$ returns -1 if $b$ is white and 1 otherwise, but obtained si
 
 \section{Details of Work}
 
-For our program we have programed 5,325 lines of C++. By running {\tt make} one obtains the main program
-{\tt gobot}. This program takes in reformatted games in a specific format. This format can be created from {\tt *.sgf}
-files by running the Haskell program {\tt reformat} (created by {\tt make reformat} if {\tt ghc} is installed) on individual
-files or by running {\tt  reformatGames.sh} on a directory. In case {\tt ghc} is not available we have included
-reformatted programs in {\tt reformattedGames.tgz}.
+For this project we have programed 5,325 lines of C++, using only the standard libraries. By running {\tt make}
+one obtains the main program {\tt gobot}. This program takes as input reformatted games in a specific format.
+This format can be created from {\tt *.sgf} files by running the Haskell program {\tt reformat}\footnote{if {\tt ghc} is
+installed this is created by running {\tt make reformat}} on individual files or by running {\tt  reformatGames.sh} on
+a directory. In case {\tt ghc} is not available we have included reformatted programs in
+{\tt reformattedGames.tgz}\footnote{Created from a small subset of the collection of games at
+\url{https://badukmovies.com/pro_games}}.
 
 Using {\tt gobot -generate inputDirectory outputDirectory} feature files can be generated for all games in
 {\tt inputDirectory} in {\tt outputDirectory}. Or alternatively one can simply run the script
@@ -280,9 +351,12 @@ if a game is named {\tt game.sgfo} then the feature file must be named {\tt game
 A model can be tested over a data set using {\tt gobot -test modelFile gameDirectory [featureDirectory]}, whereas
 model can predict the score of a single game using {\tt gobot -predict modelFile gameFile [featureFile]}.
 
-Overall in terms of time use the most taxing parts of creating this program were in order feature generation and then
+Overall in terms of time use the most taxing parts of creating this program were, in order, feature generation and then
 RPROP training. This can be seen just from their files, {\tt src/board.features.cpp} is 1,125 lines long and
-{\tt src/rprop.training.cpp} is 1,440 lines long.
+{\tt src/rprop.training.cpp} is 1,440 lines long. However, the debugging process was much harder for the training as
+opposed to feature generation since we had to make sure that the problems in our algorithm were not code related
+but rather model related, i.e. relating to our energy and scoring functions. All in all, we spent well over 100 hours on
+this project.
 
 \section{Results}
 
@@ -291,23 +365,98 @@ massive datasets in while using a small amount of memory (under 800kb). Unfortun
 nature of the game, specifically the fact that the moves in a game can overlap in the case where a dead group has
 previously been removed from the board, it takes a long time to train and test data.
 
+\section{Future Directions}
+
+First of all, there are many ways to speed up the algorithm. For instance one could write the final board, i.e. current
+score (komi plus captured stones), to a file and then read it during training, thereby skipping the necessity of having
+to internally play the game each time you want to test, train, or predict a game.
+
+Clearly, though, there is a huge problem with the scoring and energy functions as is. Since we already have the
+ability to generate a large subset of the features used by the algorithm in \cite{WHU:04}, it would be simple to adjust
+the code to run the paper's model. Still, to use this model, we need to generate labels for a good number of games.
+Fortunately there is a easy bootstrapping method that works as follows:
+\begin{enumerate}
+  \item Manually label a small dataset $\mathcal{ G }$ of around 20 games.
+  \item Choose a much larger dataset $\mathcal{ G }^*$ that needs to be labeled.
+  \item Train the model on $\mathcal{ G }$.
+  \item For each game $G \in \mathcal{ G }^*$, estimate the score for the game. If the estimated score equals the
+    true final score save the labels of the blocks in $G$, remove $G$ from $\mathcal{ G }^*$ and add $G$ to
+    $G$ to $\mathcal{ G }$.
+  \item If $\mathcal{ G }^* \neq \varnothing$ go to (3).
+\end{enumerate}
+At termination $\mathcal{ G } = \mathcal{ G } \cup \mathcal{ G }^*$ and each game $G \in \mathcal{ G }$ has labels.
+
 \section{Comparison to Proposal}
+
+In the project proposal I said that I would:
+\begin{enumerate}
+  \item Provide details of the internal representation of the board
+  \item Describe algorithms implemented to calculate nontrivial features.
+  \item Provide implementation notes on RPNC and GDXNC.
+  \item Detail the performance of both algorithms.
+  \item Provide a detailed description of the final scoring algorithm.
+  \item Propose further ways of improving the algorithm using machine learning.
+  \item Provide C++ code.
+\end{enumerate}
+
+We have completed points 1, 2, 5, and 6. But due to time constraints and the poor choice of a learning algorithm
+we were only able to complete the RPNC portions of 3, 4, and 7 do to time constraints.
 
 \begin{thebibliography}{}
 
-\bibitem[\protect\citename{van der Werf et. al.}2004]{vdW:04}
+\bibitem[\protect\citename{{Benson}}1976]{B:76}
+David B. Benson.
+\newblock {\em Life in the Game of Go}.
+\newblock Information Sciences, 10, pages 17-29.
+\newblock 1976.
+
+\bibitem[\protect\citename{{Chen and Chen}}1999]{CC:99}
+K. Chen and Z. Chen.
+\newblock {\em Static analysis of life and death in the game of Go}.
+\newblock Information Sciences, 121, pages 113-134.
+\newblock 1999.
+
+\bibitem[\protect\citename{{Kishimoto and M\"uller}}2005]{KM:05}
+A. Kishimoto and M. M\"uller.
+\newblock {\em Search versus Knowledge for Solving Life and Death Problems in Go}.
+\newblock Twentieth National Conference on Artificial Intelligence (AAAI-05), pages 1374-1379.
+\newblock 2005.
+
+\bibitem[\protect\citename{{Niu et. al.}}2006]{NKM:06}
+X. Niu, A. Kishimoto, and M. M\"uller.
+\newblock {\em Recognizing Seki in Computer Go}.
+\newblock Lecture Notes in Computer Science, pages 225-238.
+\newblock Springer, 2006.
+
+\bibitem[\protect\citename{{Riedmiller and Braun}}1993]{RB:93}
+M. Riedmiller and H. Braun.
+\newblock {\em A Direct Adaptive Method for Faster Backpropagation Learning: The RPROP Algorithm}.
+\newblock IEEE Int. Conf. on Neural Networks, pages 586-591.
+\newblock San Francisco, 1993.
+
+\bibitem[\protect\citename{{Silver et. al.}}2007]{SSM:07}
+R. Silver, R. Sutton, and M. M\"uller.
+\newblock {\em Reinforcement Learning of Local Shape in the Game of Go}.
+\newblock Twentieth International Joint Conference on Artificial Intelligence (IJCAI), pages 1053-1058.
+\newblock Hyderabad, India. 2007.
+
+\bibitem[\protect\citename{{Thorpe and Walden}}1964]{TW:64}
+E. Thorpe and W. Walden.
+\newblock {\em A partial analysis of Go}.
+\newblock Computer Journal, 7, No. 3, pages 203-207.
+\newblock 1964.
+
+\bibitem[\protect\citename{van der Werf et. al.}2004]{WHU:04}
 E.C.D. van der Werf, J. van den Herik, and J.W.H.M. Uiterwijk.
-\newblock 2004.
 \newblock {\em Learning to score final positions in the game of Go}.
 \newblock Advances in Computer Games 10, pages 143-158.
 \newblock Kluwer, 2004.
 
-\bibitem[\protect\citename{{Riedmiller and Braun}}1983]{RB:93}
-M. Riedmiller and H. Braun.
-\newblock 1993.
-\newblock {\em A Direct Adaptive Method for Faster Backpropagation Learning: The RPROP Algorithm}.
-\newblock IEEE Int. Conf. on Neural Networks, pages 586-591.
-\newblock San Francisco, 1993.
+\bibitem[\protect\citename{van der Werf et. al.}2005]{WWHU:05}
+E.C.D. van der Werf, M.H.M. Winands, and H.J. van den Herik, J.W.H.M. Uiterwijk.
+\newblock {\em Learning to predict life and death from Go game records}.
+\newblock Information Sciences, 175, pages 258-272.
+\newblock 2005.
 
 \end{thebibliography}
 
