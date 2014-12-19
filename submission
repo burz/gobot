@@ -1,0 +1,12 @@
+#!/bin/bash
+
+FILES="
+    Makefile
+    src
+    reformat.hs
+    reformatGames.sh
+    reformatAndGenerateFeatureFiles.sh
+    reformattedGames.tgz
+    "
+
+tar -czf code.tgz $FILES
