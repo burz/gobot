@@ -4,6 +4,8 @@
 *.log
 *.backup
 *.synctex.gz
+*.out
+*.pdf
 *.zip
 *.tgz
 
