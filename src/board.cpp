@@ -483,9 +483,16 @@ bool Board::writeToFile(const char* filename)
         return false;
     }
 
+    std::set<Block*> blocks;
+
+    getBlocks(blocks);
+
+    int numberOfBlocks = blocks.size();
+
     if(fwrite(&size, sizeof(int), 1, f) != 1 ||
        fwrite(&score, sizeof(float), 1, f) != 1 ||
-       fwrite(&finalScore, sizeof(float), 1, f) != 1)
+       fwrite(&finalScore, sizeof(float), 1, f) != 1 ||
+       fwrite(&numberOfBlocks, sizeof(int), 1, f) != 1)
     {
         fclose(f);
 
@@ -493,10 +500,6 @@ bool Board::writeToFile(const char* filename)
 
         return false;
     }
-
-    std::set<Block*> blocks;
-
-    getBlocks(blocks);
 
     std::set<Block*>::iterator itt = blocks.begin();
     std::set<Block*>::iterator end = blocks.end();
@@ -556,16 +559,19 @@ bool Board::readFromFile(
         return false;
     }
 
+    int numberOfBlocks;
+
     if(fread(&size, sizeof(int), 1, f) != 1 ||
        fread(&score, sizeof(float), 1, f) != 1 ||
-       fread(&finalScore, sizeof(float), 1, f) != 1)
+       fread(&finalScore, sizeof(float), 1, f) != 1 ||
+       fread(&numberOfBlocks, sizeof(int), 1, f) != 1)
     {
         fclose(f);
 
         return false;
     }
 
-    for(int i = 0; i < size; ++i)
+    for(int i = 0; i < numberOfBlocks; ++i)
     {
         int blockSize;
         SpaceState state;

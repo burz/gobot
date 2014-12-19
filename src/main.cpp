@@ -25,6 +25,47 @@ int main(int argc, char *argv[])
 
         return 1;
     }
+    else if(!strcmp(argv[1], "-generateBoards"))
+    {
+        char buffer[100];
+        int i = 0;
+        DirectoryIterator games(argv[2]);
+
+        for( ; games != games.end(); ++games)
+        {
+            Game game;
+
+            sprintf(buffer, "%s/%s", argv[2], *games);
+
+            if(!parseFile(&game, buffer))
+            {
+                printf("\nERROR: Couldn't read game file: %s\n", buffer);
+
+                return 1;
+            }
+
+            Board board = game.playGame();
+
+            sprintf(buffer, "%s/%sb", argv[3], *games);
+
+            if(!board.writeToFile(buffer))
+            {
+                printf("\nERROR: Could not write the board to: %s\n", buffer);
+
+                return 1;
+            }
+
+            if(i % 100 == 0)
+            {
+                printf(".");
+                fflush(stdout);
+            }
+
+            ++i;
+        }
+
+        printf("\n");
+    }
 //    else if(!strcmp(argv[1], "-train"))
 //    {
 //        if(argc < 5)
@@ -118,47 +159,6 @@ int main(int argc, char *argv[])
 //            printf("Estimate: %f\n", model.predict(game));
 //        }
 //    }
-    else if(!strcmp(argv[1], "-generateBoards"))
-    {
-        char buffer[100];
-        int i = 0;
-        DirectoryIterator games(argv[2]);
-
-        for( ; games != games.end(); ++games)
-        {
-            Game game;
-
-            sprintf(buffer, "%s/%s", argv[2], *games);
-
-            if(!parseFile(&game, buffer))
-            {
-                printf("\nERROR: Couldn't read game file: %s\n", buffer);
-
-                return 1;
-            }
-
-            Board board = game.playGame();
-
-            sprintf(buffer, "%s/%sb", argv[3], *games);
-
-            if(!board.writeToFile(buffer))
-            {
-                printf("\nERROR: Could not write the board to: %s\n", buffer);
-
-                return 1;
-            }
-
-            if(i % 100 == 0)
-            {
-                printf(".");
-                fflush(stdout);
-            }
-
-            ++i;
-        }
-
-        printf("\n");
-    }
     else
     {
         printf("%s\n", usage);
