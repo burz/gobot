@@ -30,6 +30,11 @@ Weights::~Weights(void)
     delete weights;
 }
 
+int Weights::getWidth(void) const
+{
+    return width;
+}
+
 int Weights::getHeight(void) const
 {
     return height;

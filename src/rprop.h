@@ -13,6 +13,8 @@ class RProp : public Model
     Weights* hiddenLayer;
     Weights* hiddenBias;
 
+    float calculateR(const float* features) const;
+
     float predict(const Board& board,
                   const std::map<Block*, BlockFinalFeatures>& featureMap) const;
   public:

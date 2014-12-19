@@ -9,8 +9,8 @@ then
     exit 1
 fi
 
-echo Generating games and features for the *.sgf files in $1,
-echo placing the outputing *.sgfo games in $2 and *.sgfob
+echo -n Generating games and features for the *.sgf files in $1,
+echo -n placing the outputing *.sgfo games in $2 and *.sgfob
 echo board files in $3...
 echo
 echo -n Step 1: Outputting simplified game records...

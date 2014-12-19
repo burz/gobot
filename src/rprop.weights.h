@@ -29,7 +29,9 @@ class Weights
     ~Weights(void);
 
     int getHeight(void) const;
-    float getWeight(const int& i, const int& j) const;
+    int getWidth(void) const;
+
+    float getWeight(const int& i, const int& j = 0) const;
 
     void initializeForTraining(void);
     void cleanUpAfterTraining(void);

@@ -57,6 +57,35 @@ void RProp::train(DirectoryIterator& boardFiles)
     hiddenBias->cleanUpAfterTraining();
 }
 
+float RProp::calculateR(const float* features) const
+{
+    int inputSize = inputLayer->getWidth();
+    int hiddenSize = hiddenLayer->getHeight();
+
+    float inputTemp[inputSize];
+
+    for(int i = 0; i < inputSize; ++i)
+    {
+        inputTemp[i] = features[i] + inputBias->getWeight(i);
+    }
+
+    float result = 0.0;
+
+    for(int i = 0; i < hiddenSize; ++i)
+    {
+        float sum = 0.0;
+
+        for(int j = 0; j < inputSize; ++j)
+        {
+            sum += inputLayer->getWeight(i, j) * inputTemp[j];
+        }
+
+        result += hiddenLayer->getWeight(i) * (sum + hiddenBias->getWeight(i));
+    }
+
+    return result;
+}
+
 float RProp::predict(
         const Board& board,
         const std::map<Block*, BlockFinalFeatures>& featureMap) const
