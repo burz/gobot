@@ -14,10 +14,9 @@ FILES = \
     parser.o \
     directoryLoader.o \
     blockFeatures.o \
-    featureFile.o \
     board.features.o \
-    rprop.o \
-    rprop.training.o
+    rprop.weights.o \
+    rprop.o
 
 gobot: main.o $(FILES)
 	$(CC) -o gobot $^

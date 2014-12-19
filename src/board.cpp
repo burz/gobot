@@ -5,10 +5,11 @@
 #include <cassert>
 #include <set>
 
-Board::Board(const int _size, const float komi)
+Board::Board(const int _size, const float komi, const float _finalScore)
 {
     size = _size;
     score = komi;
+    finalScore = _finalScore;
 
     modified = true;
 
@@ -68,6 +69,11 @@ int Board::getSize(void) const
 float Board::getScore(void) const
 {
     return score;
+}
+
+float Board::getFinalScore(void) const
+{
+    return finalScore;
 }
 
 SpaceState Board::getState(const int x, const int y) const
@@ -478,7 +484,8 @@ bool Board::writeToFile(const char* filename)
     }
 
     if(fwrite(&size, sizeof(int), 1, f) != 1 ||
-       fwrite(&score, sizeof(float), 1, f))
+       fwrite(&score, sizeof(float), 1, f) ||
+       fwrite(&finalScore, sizeof(float), 1, f))
     {
         fclose(f);
 
@@ -548,7 +555,8 @@ bool Board::readFromFile(
     }
 
     if(fread(&size, sizeof(int), 1, f) != 1 ||
-       fread(&score, sizeof(float), 1, f))
+       fread(&score, sizeof(float), 1, f) ||
+       fread(&finalScore, sizeof(float), 1, f))
     {
         fclose(f);
 

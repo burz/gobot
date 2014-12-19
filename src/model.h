@@ -2,6 +2,7 @@
 #define _MODEL_H_
 
 #include "game.h"
+#include "directoryLoader.h"
 
 #include <vector>
 
@@ -9,9 +10,9 @@ class Model
 {
   private:
   public:
-    virtual void train(std::vector<Game>& games, const int& iterations) = 0;
-    virtual float predict(const Game& game) const = 0;
-    virtual float test(std::vector<Game>& games) const = 0;
+    virtual void train(DirectoryIterator& boardFiles) = 0;
+    virtual float predict(const char* boardFile) const = 0;
+    virtual float test(DirectoryIterator& boardFiles) const = 0;
 
     virtual bool outputToFile(const char* filename) const = 0;
     virtual bool readFromFile(const char* filename) = 0;

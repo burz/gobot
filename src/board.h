@@ -27,6 +27,7 @@ class Board
   private:
     int size;
     float score;
+    float finalScore;
     Space** spaces;
     bool modified;
     std::vector<std::set<Block*> > optimisticChains;
@@ -84,12 +85,13 @@ class Board
                                       Block* block) const;
     void generateLocalFeatures(BlockFinalFeatures *features, Block* block);
   public:
-    Board(const int size, const float komi);
+    Board(void) {}
+    Board(const int size, const float komi, const float finalScore = 0.0);
     ~Board(void);
 
     int getSize(void) const;
-
     float getScore(void) const;
+    float getFinalScore(void) const;
 
     SpaceState getState(const int x, const int y) const;
 
