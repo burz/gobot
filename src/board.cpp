@@ -6,8 +6,8 @@
 #include <set>
 
 Board::Board(const int _size, const float komi)
-    : size(_size)
 {
+    size = _size;
     score = komi;
 
     modified = true;
@@ -466,4 +466,146 @@ void Board::print(void) const
 
         printf("\b\b \n");
     }
+}
+
+bool Board::writeToFile(const char* filename)
+{
+    FILE *f = fopen(filename, "wb");
+
+    if(!f)
+    {
+        return false;
+    }
+
+    if(fwrite(&size, sizeof(int), 1, f) != 1 ||
+       fwrite(&score, sizeof(float), 1, f))
+    {
+        fclose(f);
+
+        return false;
+    }
+
+    std::set<Block*> blocks;
+
+    getBlocks(blocks);
+
+    std::set<Block*>::iterator itt = blocks.begin();
+    std::set<Block*>::iterator end = blocks.end();
+
+    for( ; itt != end; ++itt)
+    {
+        int blockSize = (*itt)->getSize();
+        SpaceState state = (*itt)->getState();
+        int liberties = (*itt)->getLiberties();
+
+        if(fwrite(&blockSize, sizeof(int), 1, f) != 1 ||
+           fwrite(&state, sizeof(SpaceState), 1, f) != 1 ||
+           fwrite(&liberties, sizeof(int), 1, f) != 1)
+        {
+            fclose(f);
+
+            return false;
+        }
+
+        std::set<BoardLocation>::const_iterator locationItt = (*itt)->locationsBegin();
+        std::set<BoardLocation>::const_iterator locationEnd = (*itt)->locationsEnd();
+
+        for( ; locationItt != locationEnd; ++locationItt)
+        {
+            if(fwrite(&locationItt->x, sizeof(int), 1, f) != 1 ||
+               fwrite(&locationItt->y, sizeof(int), 1, f) != 1)
+            {
+                fclose(f);
+
+                return false;
+            }
+        }
+
+        BlockFinalFeatures features = generateFinalFeatures(*itt);
+
+        if(fwrite(&features, sizeof(BlockFinalFeatures), 1, f) != 1)
+        {
+            fclose(f);
+
+            return false;
+        }
+    }
+
+    fclose(f);
+
+    return true;
+}
+
+bool Board::readFromFile(
+        const char* filename,
+        std::map<Block*, BlockFinalFeatures>& featureMap)
+{
+    FILE *f = fopen(filename, "rb");
+
+    if(!f)
+    {
+        return false;
+    }
+
+    if(fread(&size, sizeof(int), 1, f) != 1 ||
+       fread(&score, sizeof(float), 1, f))
+    {
+        fclose(f);
+
+        return false;
+    }
+
+    for(int i = 0; i < size; ++i)
+    {
+        int blockSize;
+        SpaceState state;
+        int liberties;
+
+        if(fread(&blockSize, sizeof(int), 1, f) != 1 ||
+           fread(&state, sizeof(SpaceState), 1, f) != 1 ||
+           fread(&liberties, sizeof(int), 1, f) != 1)
+        {
+            fclose(f);
+
+            return false;
+        }
+
+        Block* block = new Block(state);
+
+        block->setLiberties(liberties);
+
+        for(int j = 0; j < blockSize; ++j)
+        {
+            BoardLocation location(0, 0);
+
+            if(fread(&location.x, sizeof(int), 1, f) != 1 ||
+               fread(&location.y, sizeof(int), 1, f) != 1)
+            {
+                fclose(f);
+
+                return false;
+            }
+
+            block->add(location);
+
+            setBlock(location, block);
+        }
+
+        BlockFinalFeatures features;
+
+        if(fread(&features, sizeof(BlockFinalFeatures), 1, f) != 1)
+        {
+            fclose(f);
+
+            return false;
+        }
+
+        std::pair<Block*, BlockFinalFeatures> mapping(block, features);
+
+        featureMap.insert(mapping);
+    }
+
+    fclose(f);
+
+    return true;
 }

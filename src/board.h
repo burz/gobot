@@ -5,6 +5,7 @@
 #include "block.h"
 
 #include <vector>
+#include <map>
 
 typedef struct {
     std::set<BoardLocation> perimeter;
@@ -24,7 +25,7 @@ typedef struct {
 class Board
 {
   private:
-    const int size;
+    int size;
     float score;
     Space** spaces;
     bool modified;
@@ -112,6 +113,10 @@ class Board
 
     BlockFinalFeatures generateFinalFeatures(Block* block);
     float* generateFinalFeatureVector(Block* block);
+
+    bool writeToFile(const char* filename);
+    bool readFromFile(const char* filename,
+                      std::map<Block*, BlockFinalFeatures>& featureMap);
 };
 
 #endif
