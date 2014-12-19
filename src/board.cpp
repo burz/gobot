@@ -484,10 +484,12 @@ bool Board::writeToFile(const char* filename)
     }
 
     if(fwrite(&size, sizeof(int), 1, f) != 1 ||
-       fwrite(&score, sizeof(float), 1, f) ||
-       fwrite(&finalScore, sizeof(float), 1, f))
+       fwrite(&score, sizeof(float), 1, f) != 1 ||
+       fwrite(&finalScore, sizeof(float), 1, f) != 1)
     {
         fclose(f);
+
+        printf("lolol\n");
 
         return false;
     }
@@ -555,8 +557,8 @@ bool Board::readFromFile(
     }
 
     if(fread(&size, sizeof(int), 1, f) != 1 ||
-       fread(&score, sizeof(float), 1, f) ||
-       fread(&finalScore, sizeof(float), 1, f))
+       fread(&score, sizeof(float), 1, f) != 1 ||
+       fread(&finalScore, sizeof(float), 1, f) != 1)
     {
         fclose(f);
 
