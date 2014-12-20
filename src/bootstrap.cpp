@@ -328,6 +328,10 @@ void Bootstrap::run(RProp& model) const
 
     while(numberOfFilesIn(sourceDirectory) > 0)
     {
+        DirectoryIterator genItt(destinationDirectory);
+
+        model.train(genItt, labelDirectory);
+
         bool changed = false;
 
         toMove.clear();
