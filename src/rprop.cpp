@@ -87,11 +87,111 @@ float RProp::calculateR(const float* features) const
 }
 
 float RProp::predict(
-        const Board& board,
+        const Board& board0,
         const std::map<Block*, BlockFinalFeatures>& featureMap) const
 {
-////
-    return 0.0;
+    Board board = board0;
+
+    std::set<Block*> blocks;
+    float result = board.getScore();
+
+    board.getBlocks(blocks);
+
+    std::set<Block*>::iterator itt = blocks.begin();
+    std::set<Block*>::iterator end = blocks.end();
+
+    for( ; itt != end; ++itt)
+    {
+        if((*itt)->getState() != EMPTY)
+        {
+            float* features = getFeatureVector(featureMap.find(*itt)->second);
+
+            float r = calculateR(features);
+
+            delete[] features;
+
+            if(r < 0.0)
+            {
+                if((*itt)->getState() == BLACK)
+                {
+                    result += (*itt)->getSize();
+                }
+                else
+                {
+                    result -= (*itt)->getSize();
+                }
+
+                (*itt)->setState(EMPTY);
+            }
+        }
+    }
+
+    board.splitEmptyBlocks();
+
+    board.getBlocks(blocks);
+
+    itt = blocks.begin();
+    end = blocks.end();
+
+    for( ; itt != end; ++itt)
+    {
+        if((*itt)->getState() == EMPTY)
+        {
+            SpaceState adjacent = EMPTY;
+            bool disputed = false;
+
+            std::set<Block*> adjacentBlocks;
+
+            board.getAdjacentBlocks(adjacentBlocks, *itt);
+
+            std::set<Block*>::iterator blockItt = adjacentBlocks.begin();
+            std::set<Block*>::iterator blockEnd = adjacentBlocks.end();
+
+            for( ; blockItt != blockEnd; ++blockItt)
+            {
+                if((*blockItt)->getState() == BLACK)
+                {
+                    if(adjacent == WHITE)
+                    {
+                        disputed = true;
+
+                        break;
+                    }
+                    else
+                    {
+                        adjacent = BLACK;
+                    }
+                }
+                else
+                {
+                    if(adjacent == BLACK)
+                    {
+                        disputed = true;
+
+                        break;
+                    }
+                    else
+                    {
+                        adjacent = WHITE;
+                    }
+                }
+            }
+
+            if(!disputed)
+            {
+                if(adjacent == BLACK)
+                {
+                    result -= (*itt)->getSize();
+                }
+                else
+                {
+                    result += (*itt)->getSize();
+                }
+            }
+        }
+    }
+
+    return result;
 }
 
 float RProp::predict(const char* boardFile) const
