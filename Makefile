@@ -17,7 +17,8 @@ FILES = \
     lifeFile.o \
     rprop.weights.o \
     rprop.layers.o \
-    rprop.o
+    rprop.o \
+    bootstrap.o
 
 gobot: main.o $(FILES)
 	$(CC) -o gobot $^

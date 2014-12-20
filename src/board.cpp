@@ -21,7 +21,7 @@ Board::Board(const int _size, const float komi, const float _finalScore)
 
     for(int i = 0; i < size; ++i)
     {
-        spaces[i] = (Space*) malloc(sizeof(Space) * size);
+        spaces[i] = new Space[size];
 
         assert(spaces[i] != 0);
 
@@ -55,7 +55,7 @@ Board::~Board(void)
 
     for(int i = 0; i < size; ++i)
     {
-        free(spaces[i]);
+        delete[] spaces[i];
     }
 
     delete[] spaces;
@@ -496,8 +496,6 @@ bool Board::writeToFile(const char* filename)
     {
         fclose(f);
 
-        printf("lolol\n");
-
         return false;
     }
 
@@ -569,6 +567,13 @@ bool Board::readFromFile(
         fclose(f);
 
         return false;
+    }
+
+    spaces = new Space*[size]();
+
+    for(int i = 0; i < size; ++i)
+    {
+        spaces[i] = new Space[size]();
     }
 
     for(int i = 0; i < numberOfBlocks; ++i)

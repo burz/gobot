@@ -1,5 +1,7 @@
 #include "rprop.layers.h"
 
+// TODO: fill out functions
+
 void InputLayer::calculateDerivatives(float* features, const bool& alive)
 {
 }

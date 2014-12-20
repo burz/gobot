@@ -9,6 +9,7 @@ class Space
   private:
     Block* block;
   public:
+    Space(void) {}
     Space(Block* block);
 
     SpaceState getState(void) const;

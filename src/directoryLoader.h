@@ -5,6 +5,8 @@
 
 #include <dirent.h>
 
+int numberOfFilesIn(const char* directory);
+
 bool loadDirectory(std::vector<Game>& games, const char* directory);
 
 class DirectoryIterator

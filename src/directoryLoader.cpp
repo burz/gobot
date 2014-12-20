@@ -3,6 +3,35 @@
 #include <cstdio>
 #include <cstring>
 
+int numberOfFilesIn(const char* directory)
+{
+    DIR* dir = opendir(directory);
+
+    if(dir == 0)
+    {
+        printf("Could not open directory: %s\n", directory);
+
+        return 0;
+    }
+
+    int count = 0;
+    struct dirent *ent;
+
+    while((ent = readdir(dir)) != 0)
+    {
+        if(!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, ".."))
+        {
+            continue;
+        }
+
+        ++count;
+    }
+
+    closedir(dir);
+
+    return count;
+}
+
 bool loadDirectory(std::vector<Game>& games, const char* directory)
 {
     DIR* dir = opendir(directory);

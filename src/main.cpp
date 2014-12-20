@@ -3,6 +3,7 @@
 #include "game.h"
 #include "directoryLoader.h"
 #include "rprop.h"
+#include "bootstrap.h"
 
 #include <cstdio>
 #include <cstring>
@@ -17,6 +18,12 @@ const char usage[] = "Usage: gobot -generateBoards gameDirectory boardDirectory\
 
 int main(int argc, char *argv[])
 {
+    Bootstrap boot("lol", "lolB", "lolL");
+
+    RProp m;
+
+    boot.run(m);
+
     if(argc < 4)
     {
         printf("%s\n", usage);
