@@ -1,5 +1,5 @@
 #include "directoryLoader.h"
-#include "parser.h"
+#include "gameParser.h"
 
 #include <cstdio>
 #include <cstring>

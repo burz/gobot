@@ -1,4 +1,4 @@
-#include "parser.h"
+#include "gameParser.h"
 
 #include <cstdio>
 

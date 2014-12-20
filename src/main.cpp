@@ -1,7 +1,7 @@
 #include "block.h"
 #include "board.h"
 #include "game.h"
-#include "parser.h"
+#include "gameParser.h"
 #include "directoryLoader.h"
 #include "rprop.h"
 

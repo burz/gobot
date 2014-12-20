@@ -11,7 +11,7 @@ FILES = \
     block.o \
     board.o \
     game.o \
-    parser.o \
+    gameParser.o \
     directoryLoader.o \
     blockFeatures.o \
     board.features.o \
