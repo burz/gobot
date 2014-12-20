@@ -50,7 +50,7 @@ void Game::addMove(const BoardLocation& location)
 
 Board Game::playGame(void) const
 {
-    Board board(size, komi);
+    Board board(size, komi, finalScore);
 
     int i = 1;
 
