@@ -1,6 +1,8 @@
 #include "game.h"
 #include "board.h"
 
+#include <cstdio>
+
 Game::Game(void)
 {
     size = 19;
@@ -126,4 +128,53 @@ void Game::generateFeatureVectors(void)
             featureMap.insert(mapping);
         }
     }
+}
+
+bool Game::parseFile(const char *filename, const int _size)
+{
+    FILE *file = fopen(filename, "r");
+
+    if(file == 0)
+    {
+        return false;
+    }
+
+    size = _size;
+
+    int handicapStones;
+
+    if(fscanf(file, "%f %f %i", &komi, &finalScore, &handicapStones) == EOF)
+    {
+        fclose(file);
+
+        return false;
+    }
+
+    int x;
+    int y;
+
+    for(int i = 0; i < handicapStones; ++i)
+    {
+        if(fscanf(file, "%i %i", &x, &y) == EOF)
+        {
+            fclose(file);
+
+            return false;
+        }
+
+        BoardLocation location(x, y);
+
+        handicap.push_back(location);
+    }
+
+    while(fscanf(file, "%i %i", &x, &y) != EOF)
+    {
+        BoardLocation location(x, y);
+
+        moves.push_back(location);
+    }
+
+    fclose(file);
+
+    return true;
 }

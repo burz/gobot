@@ -1,5 +1,4 @@
 #include "directoryLoader.h"
-#include "gameParser.h"
 
 #include <cstdio>
 #include <cstring>
@@ -30,9 +29,10 @@ bool loadDirectory(std::vector<Game>& games, const char* directory)
 
         Game game;
 
-        parseFile(&game, filePath);
-
-        games.push_back(game);
+        if(game.parseFile(filePath))
+        {
+            games.push_back(game);
+        }
     }
 
     closedir(dir);

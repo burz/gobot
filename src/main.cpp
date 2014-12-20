@@ -1,7 +1,6 @@
 #include "block.h"
 #include "board.h"
 #include "game.h"
-#include "gameParser.h"
 #include "directoryLoader.h"
 #include "rprop.h"
 
@@ -36,7 +35,7 @@ int main(int argc, char *argv[])
 
             sprintf(buffer, "%s/%s", argv[2], *games);
 
-            if(!parseFile(&game, buffer))
+            if(!game.parseFile(buffer))
             {
                 printf("\nERROR: Couldn't read game file: %s\n", buffer);
 

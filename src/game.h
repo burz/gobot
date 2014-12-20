@@ -31,6 +31,8 @@ class Game
     Board playGame(void) const;
 
     void generateFeatureVectors(void);
+
+    bool parseFile(const char *filename, const int size = 19);
 };
 
 #endif
