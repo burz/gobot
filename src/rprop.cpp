@@ -1,4 +1,5 @@
 #include "rprop.h"
+#include "lifeFile.h"
 
 #include <cmath>
 #include <cstdio>
@@ -12,7 +13,7 @@ RProp::RProp(const int& _inputSize, const int& _hiddenSize)
     hiddenSize = _hiddenSize;
 }
 
-void RProp::train(DirectoryIterator& boardFiles)
+void RProp::train(DirectoryIterator& boardFiles, const char* lifeDirectory)
 {
     char buffer[100];
 
@@ -30,7 +31,33 @@ void RProp::train(DirectoryIterator& boardFiles)
         Board board;
         std::map<Block*, BlockFinalFeatures> featureMap;
 
-        board.readFromFile(buffer, featureMap);
+        if(!board.readFromFile(buffer, featureMap))
+        {
+            continue;
+        }
+
+        sprintf(buffer, "%s/%sl", boardFiles.getDirectory(), *boardFiles);
+
+        std::map<BoardLocation, bool> locationLifeMap;
+
+        if(!readLifeFile(locationLifeMap, buffer))
+        {
+            continue;
+        }
+
+        std::map<Block*, bool> lifeMap;
+
+        std::map<BoardLocation, bool>::iterator lifeItt = locationLifeMap.begin();
+        std::map<BoardLocation, bool>::iterator lifeEnd = locationLifeMap.end();
+
+        for( ; lifeItt != lifeEnd; ++lifeItt)
+        {
+            Block* block = board.getBlock(lifeItt->first);
+
+            std::pair<Block*, bool> mapping(block, lifeItt->second);
+
+            lifeMap.insert(mapping);
+        }
 
         std::map<Block*, BlockFinalFeatures>::iterator itt = featureMap.begin();
         std::map<Block*, BlockFinalFeatures>::iterator end = featureMap.end();
@@ -39,8 +66,7 @@ void RProp::train(DirectoryIterator& boardFiles)
         {
             float* features = getFeatureVector(itt->second);
 
-// TODO:
-            bool alive = true;
+            bool alive = lifeMap.find(itt->first)->second;
 
             inputLayer.update(features, alive);
             inputBias.update(features, alive);

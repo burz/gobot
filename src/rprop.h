@@ -24,7 +24,7 @@ class RProp : public Model
     RProp(void) {}
     RProp(const int& inputSize, const int& hiddenSize);
 
-    virtual void train(DirectoryIterator& boardFiles);
+    virtual void train(DirectoryIterator& boardFiles, const char* lifeDirectory);
     virtual float predict(const char* boardFile) const;
     virtual float test(DirectoryIterator& boardFiles) const;
 

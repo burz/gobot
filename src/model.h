@@ -10,7 +10,7 @@ class Model
 {
   private:
   public:
-    virtual void train(DirectoryIterator& boardFiles) = 0;
+    virtual void train(DirectoryIterator& boardFiles, const char* lifeDirectory) = 0;
     virtual float predict(const char* boardFile) const = 0;
     virtual float test(DirectoryIterator& boardFiles) const = 0;
 

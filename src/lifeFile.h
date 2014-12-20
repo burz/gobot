@@ -5,7 +5,7 @@
 
 #include <map>
 
-bool writeLifeFile(std::map<Block*, bool>& lifeMap);
-bool readLifeFile(std::map<BoardLocation, bool>& lifeMap);
+bool writeLifeFile(std::map<Block*, bool>& lifeMap, const char* filename);
+bool readLifeFile(std::map<BoardLocation, bool>& lifeMap, const char* filename);
 
 #endif
