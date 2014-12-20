@@ -14,6 +14,7 @@ FILES = \
     directoryLoader.o \
     blockFeatures.o \
     board.features.o \
+    lifeFile.o \
     rprop.weights.o \
     rprop.layers.o \
     rprop.o
