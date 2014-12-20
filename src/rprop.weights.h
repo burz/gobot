@@ -21,7 +21,7 @@ class Weights
     float** lastDelta;
     float** lastDeltaW;
 
-    virtual void calculateDerivatives(float* features) = 0;
+    virtual void calculateDerivatives(float* features, const bool& alive) = 0;
 
     float updateElement(const int& i, const int& j);
   public:
@@ -36,7 +36,7 @@ class Weights
     void initializeForTraining(void);
     void cleanUpAfterTraining(void);
 
-    void update(float* features);
+    void update(float* features, const bool& alive);
 
     bool writeToFile(FILE* file) const;
     bool readFromFile(FILE* file);

@@ -39,10 +39,13 @@ void RProp::train(DirectoryIterator& boardFiles)
         {
             float* features = getFeatureVector(itt->second);
 
-            inputLayer.update(features);
-            inputBias.update(features);
-            hiddenLayer.update(features);
-            hiddenBias.update(features);
+// TODO:
+            bool alive = true;
+
+            inputLayer.update(features, alive);
+            inputBias.update(features, alive);
+            hiddenLayer.update(features, alive);
+            hiddenBias.update(features, alive);
 
             delete[] features;
         }

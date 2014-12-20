@@ -162,13 +162,13 @@ void swapPointers(float**& x, float**& y)
     x = t;
 }
 
-void Weights::update(float* features)
+void Weights::update(float* features, const bool& alive)
 {
     swapPointers(derivative, lastDerivative);
     swapPointers(delta, lastDelta);
     swapPointers(deltaW, lastDeltaW);
 
-    calculateDerivatives(features);
+    calculateDerivatives(features, alive);
 
     for(int i = 0; i < height; ++i)
     {
