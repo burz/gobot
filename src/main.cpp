@@ -11,11 +11,10 @@
 
 #define HIDDEN_LAYER_SIZE 20
 
-const char usage[] = "Usage: gobot "
-//                     "-train modelOutputFile iterations gameDirectory [featureDirectory]\n"
-//                     "             -test modelFile gameDirectory [featureDirectory]\n"
-//                     "             -predict modelFile gameFile [featureFile]\n"
-                     "             -generateBoards gameDirectory boardDirectory";
+const char usage[] = "Usage: gobot -generateBoards gameDirectory boardDirectory\n"
+                     "             -test modelFile boardDirectory\n"
+                     "             -predict modelFile boardFile";
+//                     "-train modelOutputFile iterations gameDirectory [featureDirectory]"
 
 int main(int argc, char *argv[])
 {
@@ -99,66 +98,34 @@ int main(int argc, char *argv[])
 //
 //        model.print();
 //    }
-//    else if(!strcmp(argv[1], "-test"))
-//    {
-//        DirectoryIterator games(argv[3]);
-//
-//        RProp model;
-//
-//        if(!model.readFromFile(argv[2]))
-//        {
-//            printf("Couldn't read model from: %s\n", argv[2]);
-//
-//            return 1;
-//        }
-//
-//        if(argc > 4)
-//        {
-//            printf("Accuracy: %f%%\n", model.testWithFeatures(games, argv[4]));
-//        }
-//        else
-//        {
-//            printf("Accuracy: %f%%\n", model.test(games));
-//        }
-//    }
-//    else if(!strcmp(argv[1], "-predict"))
-//    {
-//        Game game;
-//
-//        if(!parseFile(&game, argv[3]))
-//        {
-//            printf("Couldn't read game file: %s\n", argv[3]);
-//
-//            return 1;
-//        }
-//
-//        RProp model;
-//
-//        if(!model.readFromFile(argv[2]))
-//        {
-//            printf("Couldn't read model from: %s\n", argv[2]);
-//
-//            return 1;
-//        }
-//
-//        if(argc > 4)
-//        {
-//            std::map<BoardLocation, BlockFinalFeatures> featureMap;
-//
-//            if(!readFeaturesFromFile(featureMap, argv[4]))
-//            {
-//                printf("Couldn't read feature file: %s\n", argv[4]);
-//
-//                return 1;
-//            }
-//
-//            printf("Estimate: %f\n", model.predictWithFeatures(game, featureMap));
-//        }
-//        else
-//        {
-//            printf("Estimate: %f\n", model.predict(game));
-//        }
-//    }
+    else if(!strcmp(argv[1], "-test"))
+    {
+        DirectoryIterator games(argv[3]);
+
+        RProp model;
+
+        if(!model.readFromFile(argv[2]))
+        {
+            printf("Couldn't read model from: %s\n", argv[2]);
+
+            return 1;
+        }
+
+        printf("Accuracy: %f%%\n", model.test(games));
+    }
+    else if(!strcmp(argv[1], "-predict"))
+    {
+        RProp model;
+
+        if(!model.readFromFile(argv[2]))
+        {
+            printf("Couldn't read model from: %s\n", argv[2]);
+
+            return 1;
+        }
+
+        printf("Estimate: %f\n", model.predict(argv[3]));
+    }
     else
     {
         printf("%s\n", usage);
