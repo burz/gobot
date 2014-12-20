@@ -12,22 +12,28 @@ Weights::Weights(const int& _height, const int& _width)
     height = _height;
     width = _width;
 
-    float** weights = new float*[height];
-
-    for(int i = 0; i < height; ++i)
+    if(height)
     {
-        weights[i] = new float[width];
+        float** weights = new float*[height];
+
+        for(int i = 0; i < height; ++i)
+        {
+            weights[i] = new float[width];
+        }
     }
 }
 
 Weights::~Weights(void)
 {
-    for(int i = 0; i < height; ++i)
+    if(height)
     {
-        delete[] weights[i];
-    }
+        for(int i = 0; i < height; ++i)
+        {
+            delete[] weights[i];
+        }
 
-    delete weights;
+        delete weights;
+    }
 }
 
 int Weights::getWidth(void) const

@@ -5,7 +5,7 @@
 
 class Weights
 {
-  private:
+  protected:
     int height;
     int width;
     float** weights;

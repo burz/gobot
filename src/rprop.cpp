@@ -4,25 +4,22 @@
 #include <cstdio>
 #include <cstdlib>
 
-RProp::RProp(Weights* _inputLayer,
-             Weights* _inputBias,
-             Weights* _hiddenLayer,
-             Weights* _hiddenBias)
+RProp::RProp(const int& _inputSize, const int& _hiddenSize)
+  : inputLayer(_hiddenSize, _inputSize), inputBias(_inputSize, 1),
+    hiddenLayer(_hiddenSize, 1), hiddenBias(_hiddenSize, 1)
 {
-    inputLayer = _inputLayer;
-    inputBias = _inputBias;
-    hiddenLayer = _hiddenLayer;
-    hiddenBias = _hiddenBias;
+    inputSize = _inputSize;
+    hiddenSize = _hiddenSize;
 }
 
 void RProp::train(DirectoryIterator& boardFiles)
 {
     char buffer[100];
 
-    inputLayer->initializeForTraining();
-    inputBias->initializeForTraining();
-    hiddenLayer->initializeForTraining();
-    hiddenBias->initializeForTraining();
+    inputLayer.initializeForTraining();
+    inputBias.initializeForTraining();
+    hiddenLayer.initializeForTraining();
+    hiddenBias.initializeForTraining();
 
     DirectoryIterator boardEnd = DirectoryIterator::end();
 
@@ -42,31 +39,28 @@ void RProp::train(DirectoryIterator& boardFiles)
         {
             float* features = getFeatureVector(itt->second);
 
-            inputLayer->update(features);
-            inputBias->update(features);
-            hiddenLayer->update(features);
-            hiddenBias->update(features);
+            inputLayer.update(features);
+            inputBias.update(features);
+            hiddenLayer.update(features);
+            hiddenBias.update(features);
 
             delete[] features;
         }
     }
 
-    inputLayer->cleanUpAfterTraining();
-    inputBias->cleanUpAfterTraining();
-    hiddenLayer->cleanUpAfterTraining();
-    hiddenBias->cleanUpAfterTraining();
+    inputLayer.cleanUpAfterTraining();
+    inputBias.cleanUpAfterTraining();
+    hiddenLayer.cleanUpAfterTraining();
+    hiddenBias.cleanUpAfterTraining();
 }
 
 float RProp::calculateR(const float* features) const
 {
-    int inputSize = inputLayer->getWidth();
-    int hiddenSize = hiddenLayer->getHeight();
-
     float inputTemp[inputSize];
 
     for(int i = 0; i < inputSize; ++i)
     {
-        inputTemp[i] = features[i] + inputBias->getWeight(i);
+        inputTemp[i] = features[i] + inputBias.getWeight(i);
     }
 
     float result = 0.0;
@@ -77,10 +71,10 @@ float RProp::calculateR(const float* features) const
 
         for(int j = 0; j < inputSize; ++j)
         {
-            sum += inputLayer->getWeight(i, j) * inputTemp[j];
+            sum += inputLayer.getWeight(i, j) * inputTemp[j];
         }
 
-        result += hiddenLayer->getWeight(i) * (sum + hiddenBias->getWeight(i));
+        result += hiddenLayer.getWeight(i) * (sum + hiddenBias.getWeight(i));
     }
 
     return result;
@@ -241,10 +235,10 @@ bool RProp::writeToFile(const char* filename) const
         return false;
     }
 
-    if(!inputLayer->writeToFile(f) ||
-       !inputBias->writeToFile(f) ||
-       !hiddenLayer->writeToFile(f) ||
-       !hiddenBias->writeToFile(f))
+    if(!inputLayer.writeToFile(f) ||
+       !inputBias.writeToFile(f) ||
+       !hiddenLayer.writeToFile(f) ||
+       !hiddenBias.writeToFile(f))
     {
         fclose(f);
 
@@ -265,15 +259,18 @@ bool RProp::readFromFile(const char* filename)
         return false;
     }
 
-    if(!inputLayer->readFromFile(f) ||
-       !inputBias->readFromFile(f) ||
-       !hiddenLayer->readFromFile(f) ||
-       !hiddenBias->readFromFile(f))
+    if(!inputLayer.readFromFile(f) ||
+       !inputBias.readFromFile(f) ||
+       !hiddenLayer.readFromFile(f) ||
+       !hiddenBias.readFromFile(f))
     {
         fclose(f);
 
         return false;
     }
+
+    inputSize = inputLayer.getWidth();
+    hiddenSize = inputLayer.getHeight();
 
     fclose(f);
 

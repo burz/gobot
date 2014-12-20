@@ -16,6 +16,7 @@ FILES = \
     blockFeatures.o \
     board.features.o \
     rprop.weights.o \
+    rprop.layers.o \
     rprop.o
 
 gobot: main.o $(FILES)

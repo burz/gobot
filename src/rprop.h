@@ -2,16 +2,19 @@
 #define _RPROP_H_
 
 #include "model.h"
-#include "rprop.weights.h"
+#include "rprop.layers.h"
 #include "directoryLoader.h"
 
 class RProp : public Model
 {
   private:
-    Weights* inputLayer;
-    Weights* inputBias;
-    Weights* hiddenLayer;
-    Weights* hiddenBias;
+    int inputSize;
+    int hiddenSize;
+
+    InputLayer inputLayer;
+    InputBias inputBias;
+    HiddenLayer hiddenLayer;
+    HiddenBias hiddenBias;
 
     float calculateR(const float* features) const;
 
@@ -19,10 +22,7 @@ class RProp : public Model
                   const std::map<Block*, BlockFinalFeatures>& featureMap) const;
   public:
     RProp(void) {}
-    RProp(Weights* inputLayer,
-          Weights* inputBias,
-          Weights* hiddenLayer,
-          Weights* hiddenBias);
+    RProp(const int& inputSize, const int& hiddenSize);
 
     virtual void train(DirectoryIterator& boardFiles);
     virtual float predict(const char* boardFile) const;
