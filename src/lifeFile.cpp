@@ -23,7 +23,7 @@ bool writeLifeFile(std::map<Block*, bool>& lifeMap, const char* filename)
     std::map<Block*, bool>::iterator itt = lifeMap.begin();
     std::map<Block*, bool>::iterator end = lifeMap.end();
 
-    for( ; itt != end; ++end)
+    for( ; itt != end; ++itt)
     {
         BoardLocation location = *itt->first->locationsBegin();
 
