@@ -116,6 +116,7 @@ class Board
     BlockFinalFeatures generateFinalFeatures(Block* block);
     float* generateFinalFeatureVector(Block* block);
 
+    int getCountableTerritory(Block* block, const SpaceState& state) const;
     float calculateFinalScore(std::map<Block*, bool>& lifeMap);
 
     bool writeToFile(const char* filename);

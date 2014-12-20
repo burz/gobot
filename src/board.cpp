@@ -285,11 +285,6 @@ void Board::playMove(const int x, const int y, const SpaceState state)
     Block* block3 = getBlock(x + 1, y);
     Block* block4 = getBlock(x, y + 1);
 
-    if(!block0)
-    {
-        printf("(%d, %d)\n", x, y);
-    }
-
     assert(block0);
 
     block0->removeLocation(location);
@@ -483,6 +478,24 @@ void Board::print(void) const
     }
 }
 
+int Board::getCountableTerritory(Block* block, const SpaceState& state) const
+{
+    int count = 0;
+
+    std::set<BoardLocation>::iterator itt = block->locationsBegin();
+    std::set<BoardLocation>::iterator end = block->locationsEnd();
+
+    for( ; itt != end; ++itt)
+    {
+        if(!isFalseEyeFor(*itt, state))
+        {
+            ++count;
+        }
+    }
+
+    return count;
+}
+
 float Board::calculateFinalScore(std::map<Block*, bool>& lifeMap)
 {
     std::set<Block*> blocks;
@@ -568,11 +581,11 @@ float Board::calculateFinalScore(std::map<Block*, bool>& lifeMap)
             {
                 if(adjacent == BLACK)
                 {
-                    result -= (*itt)->getSize();
+                    result -= getCountableTerritory(*itt, BLACK);
                 }
                 else
                 {
-                    result += (*itt)->getSize();
+                    result += getCountableTerritory(*itt, WHITE);
                 }
             }
         }

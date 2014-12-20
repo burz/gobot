@@ -104,7 +104,7 @@ void Bootstrap::printBoard(
     }
 }
 
-void Bootstrap::manuallyLabelBoard(const char* boardFile) const
+bool Bootstrap::manuallyLabelBoard(const char* boardFile) const
 {
     Board board;
     std::map<Block*, BlockFinalFeatures> featureMap;
@@ -116,9 +116,7 @@ void Bootstrap::manuallyLabelBoard(const char* boardFile) const
     {
         printf("Couldn't read board file: %s\n", buffer);
 
-        remove(buffer);
-
-        return;
+        return false;
     }
 
     printf("\n$$$$$$$$$$$$$$$ MANUAL LABELING $$$$$$$$$$$$$$$\n\n");
@@ -133,9 +131,7 @@ void Bootstrap::manuallyLabelBoard(const char* boardFile) const
 
     if(response == 'y')
     {
-        remove(buffer);
-
-        return;
+        return false;
     }
 
     std::map<Block*, bool> lifeMap;
@@ -174,7 +170,7 @@ void Bootstrap::manuallyLabelBoard(const char* boardFile) const
     {
         printf("Could not write the life map to %s\n", buffer);
 
-        return;
+        return false;
     }
 
     float calculatedScore = board.calculateFinalScore(lifeMap);
@@ -186,14 +182,19 @@ void Bootstrap::manuallyLabelBoard(const char* boardFile) const
     printf("Calculated Score: %f -- Final Score: %f\n",
            calculatedScore, board.getFinalScore());
 
-    char destBuffer[100];
+    printf("\nIs this score correct (y/n)? ");
 
-    sprintf(buffer, "%s/%s", sourceDirectory, boardFile);
-    sprintf(destBuffer, "%s/%s", destinationDirectory, boardFile);
+    bool result = getchar();
 
-    if(!rename(buffer, destBuffer))
+    getchar();
+
+    if(result == 'y')
     {
-        printf("Could not rename %s to %s\n", buffer, destBuffer);
+        return true;
+    }
+    else
+    {
+        return manuallyLabelBoard(boardFile);
     }
 }
 
@@ -247,17 +248,45 @@ bool Bootstrap::automaticallyLabelBoard(const RProp& model, const char* boardFil
         return false;
     }
 
+    return true;
+}
+
+inline
+void handleTouchedFiles(
+        std::vector<const char*>& toMove,
+        std::vector<const char*>& toRemove,
+        const char* sourceDirectory,
+        const char* destinationDirectory)
+{
+    char buffer[100];
     char destBuffer[100];
 
-    sprintf(buffer, "%s/%s", sourceDirectory, boardFile);
-    sprintf(destBuffer, "%s/%s", destinationDirectory, boardFile);
+    std::vector<const char*>::iterator itt = toMove.begin();
+    std::vector<const char*>::iterator end = toMove.end();
 
-    if(!rename(buffer, destBuffer))
+    for( ; itt != end; ++itt)
     {
-        printf("Could not rename %s to %s\n", buffer, destBuffer);
+        sprintf(buffer, "%s/%s", sourceDirectory, *itt);
+        sprintf(destBuffer, "%s/%s", destinationDirectory, *itt);
+
+        if(!rename(buffer, destBuffer))
+        {
+            printf("Couldn't rename %s to %s\n", buffer, destBuffer);
+        }
     }
 
-    return true;
+    itt = toRemove.begin();
+    end = toRemove.end();
+
+    for( ; itt != end; ++itt)
+    {
+        sprintf(buffer, "%s/%s", sourceDirectory, *itt);
+
+        if(!remove(buffer))
+        {
+            printf("Couldn't remove file %s\n", buffer);
+        }
+    }
 }
 
 void Bootstrap::run(RProp& model) const
@@ -275,25 +304,45 @@ void Bootstrap::run(RProp& model) const
           STARTING_LABELS
         : numberOfBoards;
 
+    std::vector<const char*> toMove;
+    std::vector<const char*> toRemove;
+
     DirectoryIterator itt(sourceDirectory);
     DirectoryIterator end = DirectoryIterator::end();
 
     for(int i = 0; i < startingSize; ++i)
     {
-        manuallyLabelBoard(*itt);
+        if(manuallyLabelBoard(*itt))
+        {
+            toMove.push_back(*itt);
+        }
+        else
+        {
+            toRemove.push_back(*itt);
+        }
 
         ++itt;
     }
 
+    handleTouchedFiles(toMove, toRemove, sourceDirectory, destinationDirectory);
+
     while(numberOfFilesIn(sourceDirectory) > 0)
     {
-        DirectoryIterator sourceFiles(sourceDirectory);
-
         bool changed = false;
+
+        toMove.clear();
+        toRemove.clear();
+
+        DirectoryIterator sourceFiles(sourceDirectory);
 
         for( ; sourceFiles != end; ++sourceFiles)
         {
-            changed = automaticallyLabelBoard(model, *sourceFiles) || changed;
+            if(automaticallyLabelBoard(model, *sourceFiles))
+            {
+                toMove.push_back(*sourceFiles);
+
+                changed = true;
+            }
         }
 
         if(!changed)
@@ -308,10 +357,19 @@ void Bootstrap::run(RProp& model) const
 
             for(int i = 0; i < stepSize; ++i)
             {
-                manuallyLabelBoard(*boardFiles);
+                if(manuallyLabelBoard(*boardFiles))
+                {
+                    toMove.push_back(*boardFiles);
+                }
+                else
+                {
+                    toRemove.push_back(*boardFiles);
+                }
 
                 ++boardFiles;
             }
         }
+
+        handleTouchedFiles(toMove, toRemove, sourceDirectory, destinationDirectory);
     }
 }

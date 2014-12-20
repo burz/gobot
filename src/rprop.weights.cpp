@@ -32,7 +32,7 @@ Weights::~Weights(void)
             delete[] weights[i];
         }
 
-        delete weights;
+        delete[] weights;
     }
 }
 

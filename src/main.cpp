@@ -12,18 +12,14 @@
 #define HIDDEN_LAYER_SIZE 20
 
 const char usage[] = "Usage: gobot -generateBoards gameDirectory boardDirectory\n"
+                     "             -bootstrap boardDirectory labeledBoardDirectory "
+                     "labelDirectory\n"
                      "             -test modelFile boardDirectory\n"
                      "             -predict modelFile boardFile";
 //                     "-train modelOutputFile iterations gameDirectory [featureDirectory]"
 
 int main(int argc, char *argv[])
 {
-    Bootstrap boot("lol", "lolB", "lolL");
-
-    RProp m;
-
-    boot.run(m);
-
     if(argc < 4)
     {
         printf("%s\n", usage);
@@ -70,6 +66,14 @@ int main(int argc, char *argv[])
         }
 
         printf("\n");
+    }
+    else if(!strcmp(argv[1], "-bootstrap") && argc > 4)
+    {
+        Bootstrap bootstrap(argv[2], argv[3], argv[4]);
+
+        RProp model(NUMBER_OF_FEATURES, HIDDEN_LAYER_SIZE);
+
+        bootstrap.run(model);
     }
 //    else if(!strcmp(argv[1], "-train"))
 //    {
