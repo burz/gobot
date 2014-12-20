@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -c -g
+CFLAGS = -c -g -Wall
 
 SRCDIR = src
 

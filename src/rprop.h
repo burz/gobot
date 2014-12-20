@@ -16,13 +16,13 @@ class RProp : public Model
     HiddenLayer hiddenLayer;
     HiddenBias hiddenBias;
 
-    float calculateR(const float* features) const;
-
     float predict(Board& board,
                   const std::map<Block*, BlockFinalFeatures>& featureMap) const;
   public:
     RProp(void) {}
     RProp(const int& inputSize, const int& hiddenSize);
+
+    float calculateR(const float* features) const;
 
     virtual void train(DirectoryIterator& boardFiles, const char* lifeDirectory);
     virtual float predict(const char* boardFile) const;

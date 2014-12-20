@@ -197,6 +197,69 @@ void Bootstrap::manuallyLabelBoard(const char* boardFile) const
     }
 }
 
+bool Bootstrap::automaticallyLabelBoard(const RProp& model, const char* boardFile) const
+{
+    char buffer[100];
+
+    sprintf(buffer, "%s/%s", sourceDirectory, boardFile);
+
+    Board board;
+    std::map<Block*, BlockFinalFeatures> featureMap;
+
+    if(!board.readFromFile(buffer, featureMap))
+    {
+        printf("Couldn't read board from file %s\n", buffer);
+
+        return false;
+    }
+
+    std::map<Block*, bool> lifeMap;
+
+    std::map<Block*, BlockFinalFeatures>::iterator itt = featureMap.begin();
+    std::map<Block*, BlockFinalFeatures>::iterator end = featureMap.end();
+
+    for( ; itt != end; ++itt)
+    {
+        float* features = getFeatureVector(itt->second);
+
+        bool alive = model.calculateR(features) >= 0.0;
+
+        delete[] features;
+
+        std::pair<Block*, bool> mapping(itt->first, alive);
+
+        lifeMap.insert(mapping);
+    }
+
+    sprintf(buffer, "%s/%sl", labelDirectory, boardFile);
+
+    if(!writeLifeFile(lifeMap, buffer))
+    {
+        printf("Could not write the life map to %s\n", buffer);
+
+        return false;
+    }
+
+    float score = board.calculateFinalScore(lifeMap);
+
+    if(score != board.getFinalScore())
+    {
+        return false;
+    }
+
+    char destBuffer[100];
+
+    sprintf(buffer, "%s/%s", sourceDirectory, boardFile);
+    sprintf(destBuffer, "%s/%s", destinationDirectory, boardFile);
+
+    if(!rename(buffer, destBuffer))
+    {
+        printf("Could not rename %s to %s\n", buffer, destBuffer);
+    }
+
+    return true;
+}
+
 void Bootstrap::run(RProp& model) const
 {
     int numberOfBoards = numberOfFilesIn(sourceDirectory);
@@ -222,15 +285,33 @@ void Bootstrap::run(RProp& model) const
         ++itt;
     }
 
-    return;
-
     while(numberOfFilesIn(sourceDirectory) > 0)
     {
         DirectoryIterator sourceFiles(sourceDirectory);
 
+        bool changed = false;
+
         for( ; sourceFiles != end; ++sourceFiles)
         {
-// TODO
+            changed = automaticallyLabelBoard(model, *sourceFiles) || changed;
+        }
+
+        if(!changed)
+        {
+            numberOfBoards = numberOfFilesIn(sourceDirectory);
+
+            int stepSize = LABEL_STEP > numberOfBoards ?
+                  numberOfBoards
+                : LABEL_STEP;
+
+            DirectoryIterator boardFiles(sourceDirectory);
+
+            for(int i = 0; i < stepSize; ++i)
+            {
+                manuallyLabelBoard(*boardFiles);
+
+                ++boardFiles;
+            }
         }
     }
 }

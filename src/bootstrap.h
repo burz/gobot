@@ -12,6 +12,7 @@ class Bootstrap
     const char* labelDirectory;
 
     void manuallyLabelBoard(const char* boardFile) const;
+    bool automaticallyLabelBoard(const RProp& model, const char* boardFile) const;
   public:
     Bootstrap(const char* sourceDirectory,
               const char* destinationDirectory,

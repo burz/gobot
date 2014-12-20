@@ -474,7 +474,7 @@ void Board::print(void) const
     }
 }
 
-float Board::calculateFinalScore(std::map<Block*, bool> lifeMap)
+float Board::calculateFinalScore(std::map<Block*, bool>& lifeMap)
 {
     std::set<Block*> blocks;
     float result = getScore();

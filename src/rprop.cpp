@@ -114,7 +114,6 @@ float RProp::predict(
         const std::map<Block*, BlockFinalFeatures>& featureMap) const
 {
     std::set<Block*> blocks;
-    float result = board.getScore();
 
     board.getBlocks(blocks);
 
