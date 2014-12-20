@@ -1,9 +1,10 @@
 #include "bootstrap.h"
 #include "directoryLoader.h"
+#include "lifeFile.h"
 
 #include <cstdio>
 
-#define STARTING_LABELS 1
+#define STARTING_LABELS 10
 #define LABEL_STEP 5
 
 namespace {
@@ -113,7 +114,26 @@ void Bootstrap::manuallyLabelBoard(const char* boardFile) const
 
     if(!board.readFromFile(buffer, featureMap))
     {
-        printf("Couldn't read board file: %s\n", boardFile);
+        printf("Couldn't read board file: %s\n", buffer);
+
+        remove(buffer);
+
+        return;
+    }
+
+    printf("\n$$$$$$$$$$$$$$$ MANUAL LABELING $$$$$$$$$$$$$$$\n\n");
+
+    board.print();
+
+    printf("Is the board malformed (y/n)? ");
+
+    char response = getchar();
+
+    getchar();
+
+    if(response == 'y')
+    {
+        remove(buffer);
 
         return;
     }
@@ -133,7 +153,47 @@ void Bootstrap::manuallyLabelBoard(const char* boardFile) const
             printf("\n=====================================\n\n");
 
             printBoard(board, lifeMap, *itt);
+
+            printf("What is the state of the block (a/d)? ");
+
+            response = getchar();
+
+            getchar();
+
+            bool alive = response == 'a';
+
+            std::pair<Block*, bool> mapping(*itt, alive);
+
+            lifeMap.insert(mapping);
         }
+    }
+
+    sprintf(buffer, "%s/%sl", labelDirectory, boardFile);
+
+    if(!writeLifeFile(lifeMap, buffer))
+    {
+        printf("Could not write the life map to %s\n", buffer);
+
+        return;
+    }
+
+    float calculatedScore = board.calculateFinalScore(lifeMap);
+
+    printf("\n$$$$$$$$$$$$$$$ FINAL BOARD $$$$$$$$$$$$$$$\n\n");
+
+    board.print();
+
+    printf("Calculated Score: %f -- Final Score: %f\n",
+           calculatedScore, board.getFinalScore());
+
+    char destBuffer[100];
+
+    sprintf(buffer, "%s/%s", sourceDirectory, boardFile);
+    sprintf(destBuffer, "%s/%s", destinationDirectory, boardFile);
+
+    if(!rename(buffer, destBuffer))
+    {
+        printf("Could not rename %s to %s\n", buffer, destBuffer);
     }
 }
 

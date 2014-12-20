@@ -39,7 +39,7 @@ bool writeLifeFile(std::map<Block*, bool>& lifeMap, const char* filename)
 
     fclose(f);
 
-    return false;
+    return true;
 }
 
 bool readLifeFile(std::map<BoardLocation, bool>& lifeMap, const char* filename)
@@ -81,5 +81,5 @@ bool readLifeFile(std::map<BoardLocation, bool>& lifeMap, const char* filename)
 
     fclose(f);
 
-    return false;
+    return true;
 }

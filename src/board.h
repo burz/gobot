@@ -116,6 +116,8 @@ class Board
     BlockFinalFeatures generateFinalFeatures(Block* block);
     float* generateFinalFeatureVector(Block* block);
 
+    float calculateFinalScore(std::map<Block*, bool> lifeMap);
+
     bool writeToFile(const char* filename);
     bool readFromFile(const char* filename,
                       std::map<Block*, BlockFinalFeatures>& featureMap);

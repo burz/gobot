@@ -18,7 +18,7 @@ class RProp : public Model
 
     float calculateR(const float* features) const;
 
-    float predict(const Board& board,
+    float predict(Board& board,
                   const std::map<Block*, BlockFinalFeatures>& featureMap) const;
   public:
     RProp(void) {}

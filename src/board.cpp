@@ -474,6 +474,104 @@ void Board::print(void) const
     }
 }
 
+float Board::calculateFinalScore(std::map<Block*, bool> lifeMap)
+{
+    std::set<Block*> blocks;
+    float result = getScore();
+
+    getBlocks(blocks);
+
+    std::set<Block*>::iterator itt = blocks.begin();
+    std::set<Block*>::iterator end = blocks.end();
+
+    for( ; itt != end; ++itt)
+    {
+        if((*itt)->getState() != EMPTY)
+        {
+            if(!lifeMap.find(*itt)->second)
+            {
+                if((*itt)->getState() == BLACK)
+                {
+                    result += (*itt)->getSize();
+                }
+                else
+                {
+                    result -= (*itt)->getSize();
+                }
+
+                (*itt)->setState(EMPTY);
+            }
+        }
+    }
+
+    splitEmptyBlocks();
+
+    getBlocks(blocks);
+
+    itt = blocks.begin();
+    end = blocks.end();
+
+    for( ; itt != end; ++itt)
+    {
+        if((*itt)->getState() == EMPTY)
+        {
+            SpaceState adjacent = EMPTY;
+            bool disputed = false;
+
+            std::set<Block*> adjacentBlocks;
+
+            getAdjacentBlocks(adjacentBlocks, *itt);
+
+            std::set<Block*>::iterator blockItt = adjacentBlocks.begin();
+            std::set<Block*>::iterator blockEnd = adjacentBlocks.end();
+
+            for( ; blockItt != blockEnd; ++blockItt)
+            {
+                if((*blockItt)->getState() == BLACK)
+                {
+                    if(adjacent == WHITE)
+                    {
+                        disputed = true;
+
+                        break;
+                    }
+                    else
+                    {
+                        adjacent = BLACK;
+                    }
+                }
+            else
+                {
+                    if(adjacent == BLACK)
+                    {
+                        disputed = true;
+
+                        break;
+                    }
+                    else
+                    {
+                        adjacent = WHITE;
+                    }
+                }
+            }
+
+            if(!disputed)
+            {
+                if(adjacent == BLACK)
+                {
+                    result -= (*itt)->getSize();
+                }
+                else
+                {
+                    result += (*itt)->getSize();
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
 bool Board::writeToFile(const char* filename)
 {
     FILE *f = fopen(filename, "wb");
