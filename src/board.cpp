@@ -185,6 +185,15 @@ void Board::removeDeadGroup(Block* block)
         }
     }
 
+    if(block->getState() == BLACK)
+    {
+        score += block->getSize();
+    }
+    else
+    {
+        score -= block->getSize();
+    }
+
     block->setState(EMPTY);
 
     std::set<Block*>::iterator adjItt = adjacentBlocks.begin();
@@ -202,7 +211,7 @@ void Board::handlePossiblyDeadBlocks(
         Block* block3,
         Block* block4)
 {
-    if(block1)
+    if(block1 && block1->getState() != EMPTY)
     {
         recalculateLiberties(block1);
 
@@ -211,7 +220,7 @@ void Board::handlePossiblyDeadBlocks(
             removeDeadGroup(block1);
         }
     }
-    if(block2)
+    if(block2 && block2->getState() != EMPTY)
     {
         recalculateLiberties(block2);
 
@@ -220,7 +229,7 @@ void Board::handlePossiblyDeadBlocks(
             removeDeadGroup(block2);
         }
     }
-    if(block3)
+    if(block3 && block3->getState() != EMPTY)
     {
         recalculateLiberties(block3);
 
@@ -229,7 +238,7 @@ void Board::handlePossiblyDeadBlocks(
             removeDeadGroup(block3);
         }
     }
-    if(block4)
+    if(block4 && block4->getState() != EMPTY)
     {
         recalculateLiberties(block4);
 
