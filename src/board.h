@@ -41,7 +41,7 @@ class Board
                                   Block* block3,
                                   Block* block4);
 
-    bool isFalseEye(Block* block) const;
+    bool isFalseEyeFor(const BoardLocation& location, const SpaceState& state) const;
     void handleAdjacentTerritories(std::set<Block*>& chain,
                                    std::set<Block*>& adjacentTerritories,
                                    int& CETNumberOfTerritories,

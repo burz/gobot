@@ -105,33 +105,31 @@ int chooseSmallestDistances(
     }
 }
 
-bool Board::isFalseEye(Block* block) const
+bool Board::isFalseEyeFor(const BoardLocation& location, const SpaceState& state) const
 {
-    BoardLocation location = *block->locationsBegin();
-
-    int count = 0;
-
     Block* block1 = getBlock(location.x - 1, location.y - 1);
     Block* block2 = getBlock(location.x + 1, location.y - 1);
     Block* block3 = getBlock(location.x - 1, location.y + 1);
     Block* block4 = getBlock(location.x + 1, location.y + 1);
 
-    if(block1 && block1->getState() != block->getState() &&
+    int count = 0;
+
+    if(block1 && block1->getState() != state &&
        block1->getState() != EMPTY)
     {
         ++count;
     }
-    if(block2 && block2->getState() != block->getState() &&
+    if(block2 && block2->getState() != state &&
        block2->getState() != EMPTY)
     {
         ++count;
     }
-    if(block3 && block3->getState() != block->getState() &&
+    if(block3 && block3->getState() != state &&
        block3->getState() != EMPTY)
     {
         ++count;
     }
-    if(block4 && block4->getState() != block->getState() &&
+    if(block4 && block4->getState() != state &&
        block4->getState() != EMPTY)
     {
         ++count;
@@ -177,6 +175,8 @@ void Board::handleAdjacentTerritories(
 
     std::set<Block*>::const_iterator itt = adjacentTerritories.begin();
     std::set<Block*>::const_iterator end = adjacentTerritories.end();
+
+    SpaceState state = (*itt)->getState();
 
     for( ; itt != end; ++itt)
     {
@@ -255,7 +255,7 @@ void Board::handleAdjacentTerritories(
 
             if(size < 4)
             {
-                if(size != 1 || !isFalseEye(*itt))
+                if(size != 1 || !isFalseEyeFor(*(*itt)->locationsBegin(), state))
                 {
                     ++ENumberOfBlocks;
                     ESize += size;
