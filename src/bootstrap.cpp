@@ -184,7 +184,7 @@ bool Bootstrap::manuallyLabelBoard(const char* boardFile) const
 
     printf("\nIs this score correct (y/n)? ");
 
-    bool result = getchar();
+    char result = getchar();
 
     getchar();
 
