@@ -123,7 +123,7 @@ float sign(const float& x)
     }   
 }
 
-float Weights::updateElement(const int& i, const int& j)
+float Weights::updateElement(RProp& model, const int& i, const int& j)
 {
     float d = derivative[i][j] * lastDerivative[i][j]; 
 
@@ -162,19 +162,19 @@ void swapPointers(float**& x, float**& y)
     x = t;
 }
 
-void Weights::update(float* features, const bool& alive)
+void Weights::update(RProp& model, float* features, const bool& alive)
 {
     swapPointers(derivative, lastDerivative);
     swapPointers(delta, lastDelta);
     swapPointers(deltaW, lastDeltaW);
 
-    calculateDerivatives(features, alive);
+    calculateDerivatives(model, features, alive);
 
     for(int i = 0; i < height; ++i)
     {
         for(int j = 0; j < width; ++j)
         {
-            weights[i][j] = updateElement(i, j);
+            weights[i][j] = updateElement(model, i, j);
         }
     }
 

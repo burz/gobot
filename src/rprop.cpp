@@ -68,10 +68,10 @@ void RProp::train(DirectoryIterator& boardFiles, const char* lifeDirectory)
 
             bool alive = lifeMap.find(itt->first)->second;
 
-            inputLayer.update(features, alive);
-            inputBias.update(features, alive);
-            hiddenLayer.update(features, alive);
-            hiddenBias.update(features, alive);
+            inputLayer.update(*this, features, alive);
+            inputBias.update(*this, features, alive);
+            hiddenLayer.update(*this, features, alive);
+            hiddenBias.update(*this, features, alive);
 
             delete[] features;
         }

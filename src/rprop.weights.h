@@ -3,6 +3,8 @@
 
 #include <cstdio>
 
+class RProp;
+
 class Weights
 {
   protected:
@@ -21,9 +23,11 @@ class Weights
     float** lastDelta;
     float** lastDeltaW;
 
-    virtual void calculateDerivatives(float* features, const bool& alive) = 0;
+    virtual void calculateDerivatives(RProp& model,
+                                      float* features,
+                                      const bool& alive) = 0;
 
-    float updateElement(const int& i, const int& j);
+    float updateElement(RProp& model, const int& i, const int& j);
   public:
     Weights(const int& height, const int& width);
     ~Weights(void);
@@ -36,7 +40,7 @@ class Weights
     void initializeForTraining(void);
     void cleanUpAfterTraining(void);
 
-    void update(float* features, const bool& alive);
+    void update(RProp& model, float* features, const bool& alive);
 
     bool writeToFile(FILE* file) const;
     bool readFromFile(FILE* file);

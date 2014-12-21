@@ -30,6 +30,11 @@ class RProp : public Model
 
     virtual bool writeToFile(const char* filename) const;
     virtual bool readFromFile(const char* filename);
+
+    friend class InputLayer;
+    friend class InputBias;
+    friend class HiddenLayer;
+    friend class HiddenBias;
 };
 
 #endif
