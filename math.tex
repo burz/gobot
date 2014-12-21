@@ -1,0 +1,47 @@
+\documentclass{amsart}
+
+\usepackage{graphicx}
+\usepackage{verbatim}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usepackage[margin=1in]{geometry}
+
+\def\epsilon{\varepsilon}
+\def\prob#1{P\left[#1\right]}
+\def\expt#1{E\left[#1\right]}
+\def\var#1{\mbox{Var}\left[#1\right]}
+\def\cov#1{\mbox{Cov}\left(#1\right)}
+\def\bin#1#2{\begin{pmatrix} #1 \\ #2 \end{pmatrix}}
+\def\v#1{\mathbf{#1}}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\title{Math}
+
+\author{Anthony Burzillo\\aburzil1@jhu.edu}
+
+\begin{document}
+
+\maketitle
+
+\def\touches#1#2{\mbox{touches}_{#1}{\left(#2\right)}}
+\def\color#1{\mbox{color}{\left(#1\right)}}
+\def\colorp#1{\mbox{color}^*{\left(#1\right)}}
+\def\size#1{\mbox{size}{\left(#1\right)}}
+
+Suppose that we have a sequence of games $G_1, \ldots, G_N$. Suppose that our model takes in a feature vector of
+size $n$ and outputs a single value, an estimate of the life status of a group. Our model has 4 parameters, an
+$m \times n$ matrix $W$ of input layer weights, a $m$ element vector $\v{ h }$ of hidden layer weights, a $n$ element
+input bias vector $\v{ a }$, and a $m$ element hidden bias vector $\v{ b }$. We calculate an estimation for the life of
+each block $b_{ i, j }$ for game $G_i$ with features $f_{ i, j }$ as follows
+$$r_{ i, j } = \v{ h } [W(\v{ f }_{ i, j } + \v{ a }) + \v{ b }_{ i, j }]$$
+Then given a label $t_{ i, j }$ for each of the $M_i$ blocks in game $G_i$, our error function for the game is
+$$E(G_i) = \frac{ 1 }{ 2 } \sum_{ j = 1 }^{ M_i } (t_{ i, j } - r_{ i, j })^2
+  = \frac{ 1 }{ 2 } \sum_{ j = 1 }^{ M_i } (t_{ i, j } - \v{ h } [W(\v{ f }_{ i, j } + \v{ a }) + \v{ b }_{ i, j }])^2$$
+So therefore over all of games the error function is
+$$\mathcal{ E }(G_1, \ldots G_N) = \sum_{ i = 1 }^N E(G_i)
+  = \frac{ 1 }{ 2 } \sum_{ i = 1 }^N \sum_{ j = 1 }^{ M_i } (t_{ i, j } - \v{ h } [W(\v{ f }_{ i, j } + \v{ a }) + \v{ b }_{ i, j }])^2$$
+Then the derivatives with respect to the parameters are
+
+\end{document}
