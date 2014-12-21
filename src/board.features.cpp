@@ -171,6 +171,11 @@ void Board::handleAdjacentTerritories(
     DTLibertiesOfFriendlyBlocks = 0;
     DTLibertiesOfEnemyBlocks = 0;
 
+    if(adjacentTerritories.size() == 0)
+    {
+        return;
+    }
+
     int sum = 0;
 
     std::set<Block*>::const_iterator itt = adjacentTerritories.begin();

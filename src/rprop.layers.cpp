@@ -56,7 +56,7 @@ void HiddenLayer::calculateDerivatives(RProp& model, float* features, const bool
             sum += model.inputLayer.getWeight(i, j) * fa;
         }
 
-        derivative[i][0] = R * sum;
+        derivative[i][0] = -1.0 * R * sum;
     }
 }
 
@@ -68,6 +68,6 @@ void HiddenBias::calculateDerivatives(RProp& model, float* features, const bool&
 
     for(int i = 0; i < height; ++i)
     {
-        derivative[i][0] = R * model.hiddenLayer.getWeight(i);
+        derivative[i][0] = -1.0 * R * model.hiddenLayer.getWeight(i);
     }
 }
