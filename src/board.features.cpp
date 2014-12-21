@@ -105,7 +105,126 @@ int chooseSmallestDistances(
     }
 }
 
-bool Board::isFalseEyeFor(const BoardLocation& location, const SpaceState& state) const
+void Board::getAdjacentSafeTerritories(
+        std::set<Block*>& territories,
+        Block* block,
+        std::set<Block*>& skip) const
+{
+    std::set<Block*> blocks;
+
+    getAdjacentBlocks(blocks, block);
+
+    std::set<Block*>::iterator itt = blocks.begin();
+    std::set<Block*>::iterator end = blocks.end();
+
+    for( ; itt != end; ++itt)
+    {
+        if(skip.find(*itt) != skip.end() ||
+           (*itt)->getState() != EMPTY)
+        {
+            continue;
+        }
+
+        if((*itt)->getSize() == 1 &&
+           isFalseEyeFor(*(*itt)->locationsBegin(), block->getState(), skip))
+        {
+            continue;
+        }
+
+        std::set<Block*> adjacentToTerritory;
+
+        getAdjacentBlocks(adjacentToTerritory, *itt);
+
+        std::set<Block*>::iterator adjItt = adjacentToTerritory.begin();
+        std::set<Block*>::iterator adjEnd = adjacentToTerritory.end();
+
+        bool safe = true;
+
+        for( ; adjItt != adjEnd; ++adjItt)
+        {
+            if((*adjItt)->getState() != block->getState())
+            {
+                safe = false;
+
+                break;
+            }
+        }
+
+        if(safe)
+        {
+            territories.insert(*itt);
+        }
+    }
+}
+
+bool Board::isSafeFalseEyeFor(
+        const BoardLocation& location,
+        const SpaceState& state,
+        std::set<Block*> skip) const
+{
+    Block* block0 = getBlock(location.x, location.y);
+
+    skip.insert(block0);
+
+    Block* block1 = getBlock(location.x - 1, location.y);
+    Block* block2 = getBlock(location.x, location.y - 1);
+    Block* block3 = getBlock(location.x + 1, location.y);
+    Block* block4 = getBlock(location.x, location.y + 1);
+
+    bool safe = true;
+
+    if(block1)
+    {
+        std::set<Block*> safeTerritories;
+
+        getAdjacentSafeTerritories(safeTerritories, block1, skip);
+
+        if(safeTerritories.size() == 0)
+        {
+            safe = false;
+        }
+    }
+    if(block2)
+    {
+        std::set<Block*> safeTerritories;
+
+        getAdjacentSafeTerritories(safeTerritories, block2, skip);
+
+        if(safeTerritories.size() == 0)
+        {
+            safe = false;
+        }
+    }
+    if(block3)
+    {
+        std::set<Block*> safeTerritories;
+
+        getAdjacentSafeTerritories(safeTerritories, block3, skip);
+
+        if(safeTerritories.size() == 0)
+        {
+            safe = false;
+        }
+    }
+    if(block4)
+    {
+        std::set<Block*> safeTerritories;
+
+        getAdjacentSafeTerritories(safeTerritories, block4, skip);
+
+        if(safeTerritories.size() == 0)
+        {
+            safe = false;
+        }
+    }
+
+    return safe;
+}
+
+bool Board::isFalseEyeFor(
+        const BoardLocation& location,
+        const SpaceState& state,
+        std::set<Block*>& skip) const
 {
     Block* block1 = getBlock(location.x - 1, location.y - 1);
     Block* block2 = getBlock(location.x + 1, location.y - 1);
@@ -113,31 +232,52 @@ bool Board::isFalseEyeFor(const BoardLocation& location, const SpaceState& state
     Block* block4 = getBlock(location.x + 1, location.y + 1);
 
     int count = 0;
+    int corners = 0;
 
-    if(block1 && block1->getState() != state &&
-       block1->getState() != EMPTY)
+    if(block1)
     {
-        ++count;
+        if(block1->getState() != state && block1->getState() != EMPTY)
+        {
+            ++count;
+        }
+
+        ++corners;
     }
-    if(block2 && block2->getState() != state &&
-       block2->getState() != EMPTY)
+    if(block2)
     {
-        ++count;
+        if(block2->getState() != state && block2->getState() != EMPTY)
+        {
+            ++count;
+        }
+
+        ++corners;
     }
-    if(block3 && block3->getState() != state &&
-       block3->getState() != EMPTY)
+    if(block3)
     {
-        ++count;
+        if(block3->getState() != state && block3->getState() != EMPTY)
+        {
+            ++count;
+        }
+
+        ++corners;
     }
-    if(block4 && block4->getState() != state &&
-       block4->getState() != EMPTY)
+    if(block4)
     {
-        ++count;
+        if(block4->getState() != state && block4->getState() != EMPTY)
+        {
+            ++count;
+        }
+
+        ++corners;
     }
 
-    if(count > 1)
+    if(corners == 4 && count > 1)
     {
-        return true;
+        return !isSafeFalseEyeFor(location, state, skip);
+    }
+    else if(corners != 4 && count > 0)
+    {
+        return !isSafeFalseEyeFor(location, state, skip);
     }
     else
     {

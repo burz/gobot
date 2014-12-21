@@ -20,6 +20,7 @@ class Bootstrap
 
     void printBoard(const Board& board,
                     std::map<Block*, bool>& lifeMap,
+                    std::map<BoardLocation, bool>& territoryMap,
                     Block* selectedBlock = 0) const;
 
     void run(RProp& model) const;

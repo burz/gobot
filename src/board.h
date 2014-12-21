@@ -41,7 +41,24 @@ class Board
                                   Block* block3,
                                   Block* block4);
 
-    bool isFalseEyeFor(const BoardLocation& location, const SpaceState& state) const;
+    void getAdjacentSafeTerritories(std::set<Block*>& territories,
+                                    Block* block,
+                                    std::set<Block*>& skip) const;
+    bool isSafeFalseEyeFor(const BoardLocation& location,
+                           const SpaceState& state,
+                           std::set<Block*> skip) const;
+    bool isFalseEyeFor(const BoardLocation& location,
+                       const SpaceState& state,
+                       std::set<Block*>& skip) const;
+
+    inline
+    bool isFalseEyeFor(const BoardLocation& location, const SpaceState& state) const
+    {
+        std::set<Block*> skip;
+
+        return isFalseEyeFor(location, state, skip);
+    }
+
     void handleAdjacentTerritories(std::set<Block*>& chain,
                                    std::set<Block*>& adjacentTerritories,
                                    int& CETNumberOfTerritories,
@@ -116,8 +133,19 @@ class Board
     BlockFinalFeatures generateFinalFeatures(Block* block);
     float* generateFinalFeatureVector(Block* block);
 
-    int getCountableTerritory(Block* block, const SpaceState& state) const;
-    float calculateFinalScore(std::map<Block*, bool>& lifeMap);
+    int getCountableTerritory(Block* block,
+                              const SpaceState& state,
+                              std::map<BoardLocation, bool>& territoryMap) const;
+    float calculateFinalScore(std::map<Block*, bool>& lifeMap,
+                              std::map<BoardLocation, bool>& territoryMap);
+
+    inline
+    float calculateFinalScore(std::map<Block*, bool>& lifeMap)
+    {
+        std::map<BoardLocation, bool> territoryMap;
+
+        return calculateFinalScore(lifeMap, territoryMap);
+    }
 
     bool writeToFile(const char* filename);
     bool readFromFile(const char* filename,

@@ -17,6 +17,8 @@ const char blackDead[] = "\e[34mD\e[0m";
 const char whiteDead[] = "\e[93mD\e[0m";
 const char blackSelected[] = "\e[91mB\e[0m";
 const char whiteSelected[] = "\e[91mW\e[0m";
+const char blackTerritory[] = "\e[96mE\e[0m";
+const char whiteTerritory[] = "\e[92mE\e[0m";
 }
 
 Bootstrap::Bootstrap(
@@ -32,6 +34,7 @@ Bootstrap::Bootstrap(
 void Bootstrap::printBoard(
         const Board& board,
         std::map<Block*, bool>& lifeMap,
+        std::map<BoardLocation, bool>& territoryMap,
         Block* selectedBlock) const
 {
     int size = board.getSize();
@@ -96,6 +99,25 @@ void Bootstrap::printBoard(
                     }
                 }
             }
+            else
+            {
+                BoardLocation location(i, j);
+
+                std::map<BoardLocation, bool>::iterator itt =
+                    territoryMap.find(location);
+
+                if(itt != territoryMap.end())
+                {
+                    if(!itt->second)
+                    {
+                        string = blackTerritory;
+                    }
+                    else
+                    {
+                        string = whiteTerritory;
+                    }
+                }
+            }
 
             printf("%s, ", string);
         }
@@ -135,6 +157,7 @@ bool Bootstrap::manuallyLabelBoard(const char* boardFile) const
     }
 
     std::map<Block*, bool> lifeMap;
+    std::map<BoardLocation, bool> territoryMap;
     std::set<Block*> blocks;
 
     board.getBlocks(blocks);
@@ -148,7 +171,7 @@ bool Bootstrap::manuallyLabelBoard(const char* boardFile) const
         {
             printf("\n=====================================\n\n");
 
-            printBoard(board, lifeMap, *itt);
+            printBoard(board, lifeMap, territoryMap, *itt);
 
             printf("What is the state of the block (a/d)? ");
 
@@ -173,11 +196,11 @@ bool Bootstrap::manuallyLabelBoard(const char* boardFile) const
         return false;
     }
 
-    float calculatedScore = board.calculateFinalScore(lifeMap);
+    float calculatedScore = board.calculateFinalScore(lifeMap, territoryMap);
 
     printf("\n$$$$$$$$$$$$$$$ FINAL BOARD $$$$$$$$$$$$$$$\n\n");
 
-    board.print();
+    printBoard(board, lifeMap, territoryMap);
 
     printf("Calculated Score: %f -- Final Score: %f\n",
            calculatedScore, board.getFinalScore());

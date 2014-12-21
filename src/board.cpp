@@ -478,7 +478,10 @@ void Board::print(void) const
     }
 }
 
-int Board::getCountableTerritory(Block* block, const SpaceState& state) const
+int Board::getCountableTerritory(
+        Block* block,
+        const SpaceState& state,
+        std::map<BoardLocation, bool>& territoryMap) const
 {
     int count = 0;
 
@@ -489,6 +492,19 @@ int Board::getCountableTerritory(Block* block, const SpaceState& state) const
     {
         if(!isFalseEyeFor(*itt, state))
         {
+            if(state == BLACK)
+            {
+                std::pair<BoardLocation, bool> mapping(*itt, false);
+
+                territoryMap.insert(mapping);
+            }
+            else
+            {
+                std::pair<BoardLocation, bool> mapping(*itt, true);
+
+                territoryMap.insert(mapping);
+            }
+
             ++count;
         }
     }
@@ -496,7 +512,9 @@ int Board::getCountableTerritory(Block* block, const SpaceState& state) const
     return count;
 }
 
-float Board::calculateFinalScore(std::map<Block*, bool>& lifeMap)
+float Board::calculateFinalScore(
+        std::map<Block*, bool>& lifeMap,
+        std::map<BoardLocation, bool>& territoryMap)
 {
     std::set<Block*> blocks;
     float result = getScore();
@@ -581,11 +599,11 @@ float Board::calculateFinalScore(std::map<Block*, bool>& lifeMap)
             {
                 if(adjacent == BLACK)
                 {
-                    result -= getCountableTerritory(*itt, BLACK);
+                    result -= getCountableTerritory(*itt, BLACK, territoryMap);
                 }
                 else
                 {
-                    result += getCountableTerritory(*itt, WHITE);
+                    result += getCountableTerritory(*itt, WHITE, territoryMap);
                 }
             }
         }
