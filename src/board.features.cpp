@@ -119,7 +119,7 @@ void Board::getAdjacentSafeTerritories(
 
     for( ; itt != end; ++itt)
     {
-        if(skip.find(*itt) != skip.end() ||
+        if(skip.find(*itt) != skip.end() && block->numberOfTouches(*itt) < 2 ||
            (*itt)->getState() != EMPTY)
         {
             continue;
@@ -173,7 +173,7 @@ bool Board::isSafeFalseEyeFor(
 
     bool safe = true;
 
-    if(block1 && skip.find(block1) == skip.end())
+    if(block1 && block1->getState() != EMPTY && skip.find(block1) == skip.end())
     {
         skip.insert(block1);
 
@@ -186,7 +186,7 @@ bool Board::isSafeFalseEyeFor(
             safe = false;
         }
     }
-    if(block2 && skip.find(block2) == skip.end())
+    if(block2 && block2->getState() != EMPTY && skip.find(block2) == skip.end())
     {
         skip.insert(block2);
 
@@ -199,7 +199,7 @@ bool Board::isSafeFalseEyeFor(
             safe = false;
         }
     }
-    if(block3 && skip.find(block3) == skip.end())
+    if(block3 && block3->getState() != EMPTY && skip.find(block3) == skip.end())
     {
         skip.insert(block3);
 
@@ -212,7 +212,7 @@ bool Board::isSafeFalseEyeFor(
             safe = false;
         }
     }
-    if(block4 && skip.find(block4) == skip.end())
+    if(block4 && block4->getState() != EMPTY && skip.find(block4) == skip.end())
     {
         skip.insert(block4);
 

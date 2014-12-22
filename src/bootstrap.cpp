@@ -293,7 +293,7 @@ void handleTouchedFiles(
         sprintf(buffer, "%s/%s", sourceDirectory, *itt);
         sprintf(destBuffer, "%s/%s", destinationDirectory, *itt);
 
-        if(!rename(buffer, destBuffer))
+        if(rename(buffer, destBuffer))
         {
             printf("Couldn't rename %s to %s\n", buffer, destBuffer);
         }
@@ -306,7 +306,7 @@ void handleTouchedFiles(
     {
         sprintf(buffer, "%s/%s", sourceDirectory, *itt);
 
-        if(!remove(buffer))
+        if(remove(buffer))
         {
             printf("Couldn't remove file %s\n", buffer);
         }

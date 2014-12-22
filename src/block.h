@@ -32,6 +32,8 @@ class Block
 
     bool touches(const int x, const int y) const;
     bool touches(const BoardLocation& location) const;
+    int numberOfTouches(Block* block) const;
+
     bool contains(const BoardLocation& location) const;
 
     void removeLocation(const BoardLocation& location);

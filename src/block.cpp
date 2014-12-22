@@ -102,16 +102,39 @@ bool Block::touches(const BoardLocation& location) const
 
     for( ; itt != locations.end(); ++itt)
     {
-        BoardLocation blockMember = *itt;
-
-        if(std::abs(blockMember.x - location.x) +
-           std::abs(blockMember.y - location.y) == 1)
+        if(std::abs(itt->x - location.x) +
+           std::abs(itt->y - location.y) == 1)
         {
             return true;
         }
     }
 
     return false;
+}
+
+int Block::numberOfTouches(Block* block) const
+{
+    std::set<BoardLocation> touchLocations;
+
+    std::set<BoardLocation>::const_iterator itt = locations.begin();
+    std::set<BoardLocation>::const_iterator end = locations.end();
+
+    for( ; itt != end; ++itt)
+    {
+        std::set<BoardLocation>::iterator blockItt = block->locationsBegin();
+        std::set<BoardLocation>::iterator blockEnd = block->locationsEnd();
+
+        for( ; blockItt != blockEnd; ++blockItt)
+        {
+            if(std::abs(blockItt->x - itt->x) +
+               std::abs(blockItt->y - itt->y) == 1)
+            {
+                touchLocations.insert(*blockItt);
+            }
+        }
+    }
+
+    return touchLocations.size();
 }
 
 bool Block::contains(const BoardLocation& location) const
