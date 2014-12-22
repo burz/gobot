@@ -14,7 +14,7 @@ Weights::Weights(const int& _height, const int& _width)
 
     if(height)
     {
-        float** weights = new float*[height];
+        weights = new float*[height];
 
         for(int i = 0; i < height; ++i)
         {
