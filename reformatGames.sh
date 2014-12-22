@@ -17,7 +17,7 @@ I=0
 
 for FILE in $FILES
 do
-    ./reformat $FILE $2/output$I.sgfo &> /dev/null
+    ./reformat $FILE $2/$(basename $FILE)o &> /dev/null
 
     if [ $((I % 100)) == 0 ]
     then
