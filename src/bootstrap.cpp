@@ -141,7 +141,8 @@ bool Bootstrap::manuallyLabelBoard(const char* boardFile) const
         return false;
     }
 
-    printf("\n$$$$$$$$$$$$$$$ MANUAL LABELING $$$$$$$$$$$$$$$\n\n");
+    printf("\n$$$$$$$$$$$$$$$ MANUAL LABELING $$$$$$$$$$$$$$$\n");
+    printf("File: %s\n", buffer);
 
     board.print();
 

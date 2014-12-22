@@ -173,8 +173,10 @@ bool Board::isSafeFalseEyeFor(
 
     bool safe = true;
 
-    if(block1)
+    if(block1 && skip.find(block1) == skip.end())
     {
+        skip.insert(block1);
+
         std::set<Block*> safeTerritories;
 
         getAdjacentSafeTerritories(safeTerritories, block1, skip);
@@ -184,8 +186,10 @@ bool Board::isSafeFalseEyeFor(
             safe = false;
         }
     }
-    if(block2)
+    if(block2 && skip.find(block2) == skip.end())
     {
+        skip.insert(block2);
+
         std::set<Block*> safeTerritories;
 
         getAdjacentSafeTerritories(safeTerritories, block2, skip);
@@ -195,8 +199,10 @@ bool Board::isSafeFalseEyeFor(
             safe = false;
         }
     }
-    if(block3)
+    if(block3 && skip.find(block3) == skip.end())
     {
+        skip.insert(block3);
+
         std::set<Block*> safeTerritories;
 
         getAdjacentSafeTerritories(safeTerritories, block3, skip);
@@ -206,8 +212,10 @@ bool Board::isSafeFalseEyeFor(
             safe = false;
         }
     }
-    if(block4)
+    if(block4 && skip.find(block4) == skip.end())
     {
+        skip.insert(block4);
+
         std::set<Block*> safeTerritories;
 
         getAdjacentSafeTerritories(safeTerritories, block4, skip);
@@ -271,11 +279,8 @@ bool Board::isFalseEyeFor(
         ++corners;
     }
 
-    if(corners == 4 && count > 1)
-    {
-        return !isSafeFalseEyeFor(location, state, skip);
-    }
-    else if(corners != 4 && count > 0)
+    if(corners == 4 && count > 1 ||
+       corners != 4 && count > 0)
     {
         return !isSafeFalseEyeFor(location, state, skip);
     }
