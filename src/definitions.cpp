@@ -71,7 +71,7 @@ BoardLocation::BoardLocation(const int _x, const int _y)
 
 bool operator<(const BoardLocation& left, const BoardLocation& right)
 {
-    if(left.x < right.x || left.x == right.x && left.y < right.y)
+    if(left.x < right.x || (left.x == right.x && left.y < right.y))
     {
         return true;
     }

@@ -86,8 +86,8 @@ bool Block::touches(const int x, const int y) const
     {
         BoardLocation blockMember = *itt;
 
-        if(std::abs(blockMember.x - x) +
-           std::abs(blockMember.y - y) == 1)
+        if(std::abs((float) blockMember.x - x) +
+           std::abs((float) blockMember.y - y) == 1.0)
         {
             return true;
         }
@@ -102,8 +102,8 @@ bool Block::touches(const BoardLocation& location) const
 
     for( ; itt != locations.end(); ++itt)
     {
-        if(std::abs(itt->x - location.x) +
-           std::abs(itt->y - location.y) == 1)
+        if(std::abs((float) itt->x - location.x) +
+           std::abs((float) itt->y - location.y) == 1.0)
         {
             return true;
         }
@@ -126,8 +126,8 @@ int Block::numberOfTouches(Block* block) const
 
         for( ; blockItt != blockEnd; ++blockItt)
         {
-            if(std::abs(blockItt->x - itt->x) +
-               std::abs(blockItt->y - itt->y) == 1)
+            if(std::abs((float) blockItt->x - itt->x) +
+               std::abs((float) blockItt->y - itt->y) == 1)
             {
                 touchLocations.insert(*blockItt);
             }

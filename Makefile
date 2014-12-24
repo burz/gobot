@@ -1,5 +1,6 @@
-CC = g++
-CFLAGS = -c -g -Wall
+CC = clang++
+CPPFLAGS = -std=c++11 -stdlib=libc++
+CFLAGS = $(CPPFLAGS) -c -g -Wall
 
 SRCDIR = src
 
@@ -21,7 +22,7 @@ FILES = \
     bootstrap.o
 
 gobot: main.o $(FILES)
-	$(CC) -o gobot $^
+	$(CC) $(CPPFLAGS) -o gobot $^
 
 all: gobot reformat
 

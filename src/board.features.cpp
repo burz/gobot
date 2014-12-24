@@ -119,7 +119,7 @@ void Board::getAdjacentSafeTerritories(
 
     for( ; itt != end; ++itt)
     {
-        if(skip.find(*itt) != skip.end() && block->numberOfTouches(*itt) < 2 ||
+        if((skip.find(*itt) != skip.end() && block->numberOfTouches(*itt) < 2) ||
            (*itt)->getState() != EMPTY)
         {
             continue;
@@ -279,8 +279,8 @@ bool Board::isFalseEyeFor(
         ++corners;
     }
 
-    if(corners == 4 && count > 1 ||
-       corners != 4 && count > 0)
+    if((corners == 4 && count > 1) ||
+       (corners != 4 && count > 0))
     {
         return !isSafeFalseEyeFor(location, state, skip);
     }
@@ -441,7 +441,7 @@ void updateCountAndPerimeter(
         int& count,
         int& perimeter)
 {
-    if(block->getState() == EMPTY && block0->touches(x, y) ||
+    if((block->getState() == EMPTY && block0->touches(x, y)) ||
        block->getState() != block0->getState())
     {
         ++count;
