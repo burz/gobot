@@ -13,15 +13,16 @@ entire game to reach the final board position. Note that a stone can be placed w
 captured and removed from the board.
 
 After I had submitted the project, I set out to up the learning algorithm by saving the boards to files rather than
-running through the games each time.  Furthermore, I reverted back to the
+running through the games each time. Furthermore, I reverted back to the
 [original paper's algorithm](http://erikvanderwerf.tengen.nl/pubdown/learning_to_score_extended.pdf)
-that I had based my project upon.
+that I had based my project upon, and implemented my proposed bootstrapping method to generate good labels for
+thousands of games (I was using datasets of 20,000+ games for my finalProject version of the algorithm).
 
 ### Current results
 
-At the time, I was getting bad results, I had found that for many of the games in my dataset, the reported score
-in the `.sgf` was incorrect. Usually it was off by 1 or 2 points from what the actual board should have been
-scored in that state.
+At the time, I was getting bad results, while using the bootstrap I had found that for many of the games in my dataset,
+the reported score in the `.sgf` was incorrect. Usually it was off by 1 or 2 points from what the actual board should have
+been scored in that state.
 
 After further reasearch I discovered that most of these records assumed end game moves of varying complexity
 would be played out, but the `.sgf`'s did not reflect these intuitions.
